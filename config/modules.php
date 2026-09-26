@@ -37,11 +37,11 @@ return [
         'homepage'     => ['label' => 'होमपेज बिल्डर', 'icon' => 'fa-table-cells-large', 'group' => 'website', 'phase' => 2, 'route' => 'admin.homepage', 'actions' => ['view', 'edit', 'manage']],
 
         // ---------- Phase 3 ----------
-        'categories'   => ['label' => 'श्रेणियाँ', 'icon' => 'fa-folder-tree', 'group' => 'content', 'phase' => 3, 'actions' => [...$crud]],
-        'topics'       => ['label' => 'टॉपिक', 'icon' => 'fa-hashtag', 'group' => 'content', 'phase' => 3, 'actions' => [...$crud]],
-        'tags'         => ['label' => 'टैग', 'icon' => 'fa-tags', 'group' => 'content', 'phase' => 3, 'actions' => [...$crud]],
-        'locations'    => ['label' => 'लोकेशन', 'icon' => 'fa-map-location-dot', 'group' => 'content', 'phase' => 3, 'actions' => [...$crud]],
-        'media'        => ['label' => 'मीडिया लाइब्रेरी', 'icon' => 'fa-photo-film', 'group' => 'content', 'phase' => 3, 'actions' => [...$crud, 'manage']],
+        'categories'   => ['label' => 'श्रेणियाँ', 'icon' => 'fa-folder-tree', 'group' => 'content', 'phase' => 3, 'route' => 'admin.categories.index', 'actions' => [...$crud]],
+        'topics'       => ['label' => 'टॉपिक', 'icon' => 'fa-hashtag', 'group' => 'content', 'phase' => 3, 'route' => 'admin.topics.index', 'actions' => [...$crud]],
+        'tags'         => ['label' => 'टैग', 'icon' => 'fa-tags', 'group' => 'content', 'phase' => 3, 'route' => 'admin.tags.index', 'actions' => [...$crud]],
+        'locations'    => ['label' => 'लोकेशन', 'icon' => 'fa-map-location-dot', 'group' => 'content', 'phase' => 3, 'route' => 'admin.locations.index', 'actions' => [...$crud]],
+        'media'        => ['label' => 'मीडिया लाइब्रेरी', 'icon' => 'fa-photo-film', 'group' => 'content', 'phase' => 3, 'route' => 'admin.media.index', 'actions' => [...$crud, 'manage']],
 
         // ---------- Phase 4 ----------
         'news'         => ['label' => 'ख़बरें', 'icon' => 'fa-newspaper', 'group' => 'newsroom', 'phase' => 4, 'actions' => [...$crud, 'approve', 'publish', 'export', 'manage']],

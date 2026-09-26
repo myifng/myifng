@@ -93,6 +93,20 @@ return [
             'epaper_enabled' => ['label' => 'ई-पेपर दिखाएँ', 'type' => 'switch', 'default' => '1'],
         ],
     ],
+    'images' => [
+        'label' => 'इमेज और वॉटरमार्क', 'icon' => 'fa-image', 'permission' => 'edit',
+        'fields' => [
+            'media_large_width' => ['label' => 'बड़ी इमेज की चौड़ाई (px)', 'type' => 'number', 'default' => '1600', 'rules' => 'required|integer|min:800|max:4000', 'width' => 4, 'help' => 'लेख में दिखने वाली सबसे बड़ी इमेज'],
+            'media_quality' => ['label' => 'इमेज क्वालिटी (50-95)', 'type' => 'number', 'default' => '82', 'rules' => 'required|integer|min:50|max:95', 'width' => 4, 'help' => 'कम = हल्की फ़ाइल, तेज़ वेबसाइट'],
+            'media_webp' => ['label' => 'WebP भी बनाएँ (तेज़ लोडिंग; सर्वर पर उपलब्ध हो तो)', 'type' => 'switch', 'default' => '1'],
+            'watermark_enabled' => ['label' => 'नई इमेज पर वॉटरमार्क लगाएँ (मूल फ़ाइल पर नहीं, सिर्फ़ बड़ी/मध्यम कॉपी पर)', 'type' => 'switch', 'default' => '0'],
+            'watermark_type' => ['label' => 'वॉटरमार्क का प्रकार', 'type' => 'select', 'options' => ['image' => 'लोगो (PNG)', 'text' => 'टेक्स्ट'], 'default' => 'image', 'rules' => 'required|in:image,text', 'width' => 4],
+            'watermark_position' => ['label' => 'जगह', 'type' => 'select', 'options' => ['bottom-right' => 'नीचे दाएँ', 'bottom-left' => 'नीचे बाएँ', 'top-right' => 'ऊपर दाएँ', 'top-left' => 'ऊपर बाएँ', 'center' => 'बीच में'], 'default' => 'bottom-right', 'rules' => 'required|in:bottom-right,bottom-left,top-right,top-left,center', 'width' => 4],
+            'watermark_opacity' => ['label' => 'दिखने की तीव्रता (10-100%)', 'type' => 'number', 'default' => '60', 'rules' => 'required|integer|min:10|max:100', 'width' => 4],
+            'watermark_image' => ['label' => 'वॉटरमार्क लोगो', 'type' => 'image', 'help' => 'पारदर्शी PNG सबसे अच्छा', 'width' => 6],
+            'watermark_text' => ['label' => 'वॉटरमार्क टेक्स्ट', 'type' => 'text', 'rules' => 'nullable|max:60|regex:/^[\x20-\x7E]*$/', 'placeholder' => 'www.example.com', 'help' => 'सिर्फ़ अंग्रेज़ी अक्षर/अंक (हिंदी के लिए लोगो वाला वॉटरमार्क चुनें)', 'width' => 6],
+        ],
+    ],
     'analytics' => [
         'label' => 'एनालिटिक्स और कोड', 'icon' => 'fa-code', 'permission' => 'manage',
         'fields' => [

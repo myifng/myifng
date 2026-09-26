@@ -176,3 +176,30 @@ function block_field(int $sid, string $name, array $f, mixed $value, array $cate
             return '<div class="col-md-8">' . $label . '<input class="form-control form-control-sm" id="' . $id . '" name="' . $n . '" value="' . e($value) . '" maxlength="300"></div>';
     }
 }
+
+/**
+ * मीडिया लाइब्रेरी से इमेज चुनने वाला खाना (hidden input में path)
+ *   <?= media_field('image', 'श्रेणी की इमेज', $cat['image'] ?? '') ?>
+ */
+function media_field(string $name, string $label, ?string $value, array $o = []): string
+{
+    $id = 'mf_' . preg_replace('/[^a-z0-9_]/i', '_', $name);
+    $val = (string) old($name, $value ?? '');
+    $err = error($name);
+    $prev = $val !== '' ? '<img src="' . e(media_url($val, 'thumb')) . '" alt="">' : '<i class="fa-regular fa-image"></i>';
+    $canPick = can('media.view');
+    $html = '<div class="' . e($o['wrap'] ?? 'mb-3') . '"><span class="form-label d-block">' . e($label) . '</span>'
+        . '<div class="media-field' . ($val !== '' ? ' has-value' : '') . '" data-media-field>'
+        . '<input type="hidden" name="' . e($name) . '" id="' . $id . '" value="' . e($val) . '">'
+        . '<div class="mf-preview' . ($err ? ' is-invalid' : '') . '" data-mf-preview>' . $prev . '</div>'
+        . '<div class="mf-actions">'
+        . ($canPick ? '<button type="button" class="btn btn-sm btn-outline-secondary" data-media-pick="#' . $id . '" data-kind="image"><i class="fa-solid fa-photo-film me-1"></i>लाइब्रेरी से चुनें</button>' : '<span class="small text-body-secondary">इमेज चुनने के लिए मीडिया लाइब्रेरी की अनुमति चाहिए।</span>')
+        . '<button type="button" class="btn btn-sm btn-link text-danger" data-mf-clear' . ($val === '' ? ' hidden' : '') . '>हटाएँ</button>'
+        . '</div></div>';
+    if ($err) {
+        $html .= '<div class="invalid-feedback d-block">' . e($err) . '</div>';
+    } elseif (!empty($o['help'])) {
+        $html .= '<div class="form-text">' . e($o['help']) . '</div>';
+    }
+    return $html . '</div>';
+}

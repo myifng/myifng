@@ -388,7 +388,7 @@ body.soon-page { margin: 0; min-height: 100vh; display: grid; place-items: cente
 .mb-tree { list-style: none; margin: 0; padding: 12px; }
 .mb-item { --depth: 0; margin-left: calc(var(--depth) * 32px); margin-bottom: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-bg); position: relative; }
 .mb-item.is-missing { border-color: var(--bs-warning); }
-.mb-item.is-missing .mb-type::after { content: " · जुड़ा पेज उपलब्ध नहीं"; color: var(--bs-warning-text-emphasis); }
+.mb-item.is-missing .mb-type::after { content: " · अभी वेबसाइट पर नहीं दिखेगा (पेज बंद है या उसका मॉड्यूल अभी तैयार नहीं)"; color: var(--bs-warning-text-emphasis); }
 .mb-item.dragging { opacity: .45; }
 .mb-item.drop-before { box-shadow: 0 -3px 0 var(--brand); }
 .mb-item.drop-after { box-shadow: 0 3px 0 var(--brand); }
@@ -451,3 +451,83 @@ body.soon-page { margin: 0; min-height: 100vh; display: grid; place-items: cente
   .mb-actions .btn { width: 28px; height: 28px; }
   .rte-bar { top: 57px; }
 }
+
+/* ==========================================================
+   Phase 3: श्रेणी, टॉपिक, टैग, लोकेशन, मीडिया लाइब्रेरी
+   ========================================================== */
+.cat-dot { --c: #9aa0a6; width: 32px; height: 32px; border-radius: 8px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--c); font-size: 14px; }
+.cat-dot.lg { width: 44px; height: 44px; font-size: 20px; border-radius: 10px; }
+.tree-table .tree-child td:first-child { padding-left: 22px; }
+.tree-elbow { width: 14px; height: 18px; border-left: 2px solid var(--line); border-bottom: 2px solid var(--line); border-bottom-left-radius: 6px; margin-top: -12px; flex: 0 0 auto; }
+.tree-parent td { background: color-mix(in srgb, var(--page-bg) 45%, transparent); }
+tr.is-off td > *:not(.text-end) { opacity: .6; }
+.chip-sm { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--page-bg); border: 1px solid var(--line); color: var(--muted); margin-right: 2px; white-space: nowrap; }
+.thumb-sm { width: 48px; height: 32px; object-fit: cover; border-radius: 6px; flex: 0 0 auto; }
+.danger-zone { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 14px 16px; border: 1px solid color-mix(in srgb, #dc3545 35%, var(--line)); border-radius: var(--radius); background: color-mix(in srgb, #dc3545 5%, var(--panel-bg)); }
+.code-sample { background: var(--page-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 12.5px; white-space: pre-wrap; }
+
+/* इमेज खाना (लाइब्रेरी से चुनें) */
+.media-field { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.mf-preview { width: 128px; height: 72px; border: 1px dashed var(--line); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--muted); font-size: 22px; background: var(--page-bg); }
+.mf-preview img { width: 100%; height: 100%; object-fit: cover; }
+.mf-preview.is-invalid { border-color: #dc3545; }
+.media-field.has-value .mf-preview { border-style: solid; }
+.mf-actions { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+
+/* अपलोड क्षेत्र */
+.dropzone { border: 2px dashed var(--line); border-radius: var(--radius); padding: 26px 16px; text-align: center; transition: .15s; }
+.dropzone > i { font-size: 34px; color: var(--muted); display: block; margin-bottom: 6px; }
+.dropzone.over { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 6%, transparent); }
+.upload-queue { list-style: none; padding: 0; margin: 12px auto 0; max-width: 720px; text-align: left; display: grid; gap: 6px; }
+.upload-queue:empty { display: none; }
+.upload-queue li { display: grid; grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.uq-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.uq-bar { height: 6px; border-radius: 3px; background: var(--page-bg); overflow: hidden; }
+.uq-bar i { display: block; height: 100%; width: 0; background: var(--brand); transition: width .2s; }
+.upload-queue li.ok .uq-bar i { background: #198754; }
+.upload-queue li.err { border-color: color-mix(in srgb, #dc3545 45%, var(--line)); }
+.upload-queue li.err .uq-msg { color: #dc3545; }
+
+/* फ़ोल्डर सूची */
+.folder-list { display: grid; padding: 6px; }
+.folder-list a { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; color: var(--ink); }
+.folder-list a:hover { background: var(--page-bg); }
+.folder-list a.active { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand); font-weight: 600; }
+.folder-list a span { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+/* मीडिया ग्रिड */
+.media-grid { list-style: none; margin: 0; padding: 14px 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.media-card { position: relative; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel-bg); outline-offset: 2px; }
+.media-card .media-check { position: absolute; top: 8px; left: 8px; z-index: 2; width: 18px; height: 18px; box-shadow: 0 0 0 2px rgba(255,255,255,.8); }
+.media-thumb { display: flex; align-items: center; justify-content: center; flex-direction: column; aspect-ratio: 16 / 9; background: repeating-conic-gradient(var(--page-bg) 0 25%, transparent 0 50%) 0 0 / 14px 14px; color: var(--muted); position: relative; }
+.media-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.media-thumb > i { font-size: 30px; }
+.media-thumb > span { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.media-flag { position: absolute; right: 6px; bottom: 6px; font-size: 11px; background: #ffc107; color: #000; border-radius: 4px; padding: 0 5px; font-weight: 600; }
+.media-meta { padding: 6px 8px; font-size: 12.5px; line-height: 1.35; }
+.media-meta b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.media-meta span { color: var(--muted); font-size: 11.5px; }
+.media-card:has(.media-check:checked), .media-card.selected { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand); }
+.media-preview { background: repeating-conic-gradient(var(--page-bg) 0 25%, transparent 0 50%) 0 0 / 18px 18px; display: flex; align-items: center; justify-content: center; min-height: 240px; border-radius: var(--radius) var(--radius) 0 0; overflow: hidden; }
+.media-preview img, .media-preview video { max-width: 100%; max-height: 520px; display: block; }
+.media-preview audio { width: 90%; }
+
+/* पिकर */
+.mp-search { min-width: 220px; }
+.mp-body { display: flex; min-height: 60vh; }
+.mp-main { flex: 1; min-width: 0; }
+.mp-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+.mp-grid .media-card { cursor: pointer; }
+.mp-side { width: 280px; flex: 0 0 auto; border-left: 1px solid var(--line); padding: 16px; background: var(--page-bg); }
+.mp-side img { width: 100%; border-radius: 8px; aspect-ratio: 16 / 9; object-fit: cover; background: var(--panel-bg); }
+@media (max-width: 767.98px) {
+  .mp-body { flex-direction: column; }
+  .mp-side { width: auto; border-left: 0; border-top: 1px solid var(--line); }
+  .media-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; padding: 10px; }
+  .upload-queue li { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* लोकेशन खोज-चयन */
+.loc-picker { position: relative; }
+.loc-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20; max-height: 320px; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
+.loc-results .list-group-item { cursor: pointer; }

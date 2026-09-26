@@ -38,6 +38,21 @@ $renderMenu = function (array $items, int $depth = 0) use (&$renderMenu): string
         <?php endif; ?>
       </a>
       <?php if (setting('tagline')): ?><span class="tagline"><?= e(setting('tagline')) ?></span><?php endif; ?>
+      <?php if (app('router')->has('api.my_city')): $city = my_city(); ?>
+      <div class="mycity" data-mycity data-search="<?= e(route('api.locations')) ?>" data-save="<?= e(route('api.my_city')) ?>">
+        <button type="button" class="mycity-btn" aria-expanded="false" aria-controls="mycityPanel" data-mycity-toggle>
+          <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+          <span><small>मेरा शहर</small><b data-mycity-name><?= $city ? e($city['name']) : 'चुनें' ?></b></span>
+        </button>
+        <div class="mycity-panel" id="mycityPanel" role="dialog" aria-label="अपना शहर चुनें" hidden>
+          <label class="mycity-label" for="mycityInput">अपना शहर या ज़िला खोजें</label>
+          <input type="search" id="mycityInput" autocomplete="off" placeholder="जैसे: गोरखपुर, Lucknow" data-mycity-input>
+          <p class="mycity-hint" data-mycity-hint>लोकप्रिय शहर</p>
+          <ul class="mycity-list" data-mycity-list role="listbox" aria-label="शहर"></ul>
+          <button type="button" class="mycity-clear" data-mycity-clear<?= $city ? '' : ' hidden' ?>>शहर हटाएँ</button>
+        </div>
+      </div>
+      <?php endif; ?>
     </div>
   </div>
   <nav class="mainnav" aria-label="मुख्य मेनू">

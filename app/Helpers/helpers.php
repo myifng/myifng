@@ -246,4 +246,55 @@ function is_route(string $prefix): bool
     $target = '/' . trim(substr($target, strlen($base)), '/');
     return $path === $target || ($target !== '/' . trim((string) config('app.admin_path', 'admin'), '/') && str_starts_with($path, $target . '/'));
 }
+/**
+ * मीडिया का URL किसी आकार में: media_url('media/2026/09/abc.jpg', 'medium') → .../abc-medium.jpg (हो तो), वरना मूल
+ * $media: path (string) या media टेबल की पंक्ति (array)
+ */
+function media_url(array|string|null $media, string $size = 'medium', bool $webp = false): string
+{
+    if (is_array($media)) {
+        return \App\Services\MediaService::url($media, $size, $webp);
+    }
+    if (!$media) {
+        return '';
+    }
+    $v = media_variant($media, $size, $webp);
+    return upload_url($v ?? $media);
+}
+
+/** path से वेरिएंट का path (फ़ाइल मौजूद हो तो), वरना null */
+function media_variant(string $path, string $size, bool $webp = false): ?string
+{
+    static $seen = [];
+    if ($size === 'original' || !preg_match('~^(media/.+)\.(jpg|png|webp)$~', $path, $m)) {
+        return null;
+    }
+    $v = $m[1] . '-' . $size . '.' . ($webp ? 'webp' : $m[2]);
+    return $seen[$v] ??= is_file(BASE_PATH . '/public/uploads/' . $v) ? $v : null;
+}
+
+/** <picture> (WebP + मूल प्रारूप), lazy loading के साथ */
+function media_img(array|string|null $media, string $size = 'medium', string $alt = '', array $attrs = []): string
+{
+    if (!$media) {
+        return '';
+    }
+    $src = media_url($media, $size);
+    $webp = media_url($media, $size, true);
+    $alt = $alt !== '' ? $alt : (is_array($media) ? (string) ($media['alt'] ?: $media['title']) : '');
+    $attrs += ['loading' => 'lazy', 'decoding' => 'async'];
+    $a = '';
+    foreach ($attrs as $k => $val) {
+        $a .= ' ' . e($k) . '="' . e($val) . '"';
+    }
+    $img = '<img src="' . e($src) . '" alt="' . e($alt) . '"' . $a . '>';
+    return $webp !== $src && str_ends_with($webp, '.webp') ? '<picture><source type="image/webp" srcset="' . e($webp) . '">' . $img . '</picture>' : $img;
+}
+
+/** पाठक का चुना हुआ शहर (कुकी) */
+function my_city(): ?array
+{
+    return \App\Services\LocationService::myCity();
+}
+
 require_once __DIR__ . '/form.php';

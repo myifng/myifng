@@ -21,8 +21,10 @@ final class HomepageController extends Controller
         return $this->view('admin/homepage/index', [
             'sections' => HomepageService::sections(),
             'blocks' => HomepageService::blocks(),
-            'categories' => in_array('categories', $tables, true) ? db()->all('SELECT id, name FROM {p}categories ORDER BY name') : [],
-            'locations' => in_array('locations', $tables, true) ? db()->all('SELECT id, name FROM {p}locations ORDER BY name LIMIT 500') : [],
+            'categories' => in_array('categories', $tables, true) ? array_map(static fn($id, $name) => ['id' => $id, 'name' => $name], array_keys($o = \App\Models\Category::options()), $o) : [],
+            // होमपेज पर राज्य/ज़िला/शहर के सेक्शन ("उत्तर प्रदेश", "गोरखपुर")
+            'locations' => in_array('locations', $tables, true) ? db()->all("SELECT l.id, CONCAT(l.name, ' (', CASE l.type WHEN 'state' THEN 'राज्य' WHEN 'district' THEN 'ज़िला' ELSE 'शहर' END, ')') AS name
+                FROM {p}locations l WHERE l.status = 'active' AND l.type IN ('state','district','city') ORDER BY FIELD(l.type, 'state','district','city'), l.is_popular DESC, l.name LIMIT 1000") : [],
         ]);
     }
 

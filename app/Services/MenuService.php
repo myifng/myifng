@@ -85,7 +85,12 @@ final class MenuService
             if (!in_array($t['table'], $existing, true)) {
                 continue;
             }
-            $extra = $t['table'] === 'pages' ? ", status, deleted_at" : '';
+            $extra = match ($t['table']) {
+                'pages' => ', status, deleted_at',
+                'locations' => ', status, path',
+                'categories', 'topics' => ', status',
+                default => '',
+            };
             foreach (db()->all("SELECT id, slug, `{$t['title_col']}` AS title$extra FROM {p}{$t['table']} WHERE id IN (" . Database::in($ids) . ')', $ids) as $r) {
                 $out[$type][(int) $r['id']] = $r;
             }
@@ -100,9 +105,10 @@ final class MenuService
         return match ($it['type']) {
             'home' => url(),
             'page' => ($ref && $ref['status'] === 'published' && $ref['deleted_at'] === null) ? url('page/' . $ref['slug']) : null,
-            'category' => $ref ? url('category/' . $ref['slug']) : null,
-            'location' => $ref ? url($ref['slug']) : null,
-            'topic' => $ref ? url('topic/' . $ref['slug']) : null,
+            // बंद (inactive) श्रेणी/लोकेशन/टॉपिक का लिंक नहीं दिखता; इनके पेज (Phase 5) बनने तक भी छिपे रहते हैं ताकि 404 न हो
+            'category' => ($ref && $ref['status'] === 'active' && app('router')->has('category')) ? url('category/' . $ref['slug']) : null,
+            'location' => ($ref && $ref['status'] === 'active' && $ref['path'] && app('router')->has('location')) ? url($ref['path']) : null,
+            'topic' => ($ref && $ref['status'] === 'active' && app('router')->has('topic')) ? url('topic/' . $ref['slug']) : null,
             // अपने मॉड्यूल (Phase 7-8) का पेज बनने तक: ई-पेपर छिपा, लाइव टीवी सेटिंग वाले लिंक पर
             'epaper' => app('router')->has('epaper') ? route('epaper') : null,
             'live_tv' => app('router')->has('live_tv') ? route('live_tv') : (setting('live_tv_url') ?: null),

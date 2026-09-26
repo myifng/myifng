@@ -54,6 +54,8 @@ $theme = in_array($_COOKIE['admin_theme'] ?? '', ['light', 'dark'], true) ? $_CO
   </div>
 </div>
 
+<?php if (can('media.view') && app('router')->has('admin.media.browse')): ?><?= $this->insert('partials/admin/media-picker') ?><?php endif; ?>
+
 <script src="<?= asset('vendor/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
 <?= $this->section('vendor_scripts') ?>
 <script src="<?= asset('js/admin.js') ?>"></script>

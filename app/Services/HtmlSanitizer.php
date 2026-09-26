@@ -14,7 +14,7 @@ final class HtmlSanitizer
         'h2' => ['id'], 'h3' => ['id'], 'h4' => ['id'], 'blockquote' => [], 'ul' => [], 'ol' => [], 'li' => [],
         'a' => ['href', 'title', 'target', 'class'], 'img' => ['src', 'alt', 'width', 'height'], 'figure' => ['class', 'data-youtube'], 'figcaption' => [],
         'hr' => [], 'table' => ['class'], 'thead' => [], 'tbody' => [], 'tr' => [], 'th' => ['colspan', 'rowspan'], 'td' => ['colspan', 'rowspan'],
-        'code' => [], 'pre' => [], 'mark' => [], 'div' => ['class'],
+        'code' => [], 'pre' => [], 'mark' => [], 'small' => [], 'div' => ['class'],
     ];
     /** class में सिर्फ़ ये नाम चलते हैं (बटन, सूचना बॉक्स, एम्बेड) */
     private const CLASSES = ['btn-cta', 'callout', 'callout-info', 'callout-warning', 'callout-success', 'callout-danger', 'embed', 'table', 'table-bordered', 'gallery'];

@@ -47,6 +47,24 @@ final class DashboardService
         return ['value' => (int) $r['active'], 'sub' => 'चालू · कुल ' . num($r['total'])];
     }
 
+    private static function media(): array
+    {
+        $r = db()->first("SELECT COUNT(*) total, SUM(kind = 'image') images, COALESCE(SUM(size), 0) bytes FROM {p}media WHERE deleted_at IS NULL");
+        return ['value' => (int) $r['total'], 'sub' => 'इमेज: ' . num($r['images']) . ' · ' . MediaService::humanSize((int) $r['bytes'])];
+    }
+
+    private static function categories(): array
+    {
+        $r = db()->first("SELECT SUM(parent_id IS NULL) main, SUM(parent_id IS NOT NULL) sub FROM {p}categories WHERE status = 'active'");
+        return ['value' => (int) $r['main'], 'sub' => 'मुख्य · उप-श्रेणियाँ: ' . num($r['sub'])];
+    }
+
+    private static function locations(): array
+    {
+        $r = db()->first("SELECT SUM(type = 'state') states, SUM(type = 'district') districts, COUNT(*) total FROM {p}locations");
+        return ['value' => (int) $r['districts'], 'sub' => 'ज़िले · राज्य: ' . num($r['states']) . ' · कुल ' . num($r['total'])];
+    }
+
     private static function loginsToday(): array
     {
         return ['value' => (int) db()->value("SELECT COUNT(*) FROM {p}login_history WHERE status = 'success' AND created_at >= CURDATE()"), 'sub' => 'सफल लॉगिन'];

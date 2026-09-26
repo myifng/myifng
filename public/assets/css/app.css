@@ -155,3 +155,25 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .prose { font-size: 17px; }
 }
 @media (prefers-reduced-motion: reduce) { .live i { animation: none; } }
+
+/* ---------- मेरा शहर (Phase 3) ---------- */
+.mycity { position: relative; margin-left: auto; }
+.mycity-btn { display: flex; align-items: center; gap: 8px; background: var(--chip); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 10px; color: var(--ink); cursor: pointer; font-family: var(--head); text-align: left; }
+.mycity-btn > i { color: var(--brand); font-size: 18px; }
+.mycity-btn span { display: flex; flex-direction: column; line-height: 1.15; }
+.mycity-btn small { font-size: 11.5px; color: var(--muted); }
+.mycity-btn b { font-size: 15px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mycity-panel { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: min(340px, calc(100vw - 32px)); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 40px rgba(0,0,0,.16); padding: 14px; font-family: var(--head); }
+.mycity-label { display: block; font-weight: 700; margin-bottom: 6px; }
+.mycity-panel input { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 8px; padding: 9px 12px; font: inherit; background: var(--bg); color: var(--ink); }
+.mycity-hint { font-size: 12.5px; color: var(--muted); margin: 10px 0 4px; }
+.mycity-list { list-style: none; margin: 0; padding: 0; max-height: 280px; overflow: auto; }
+.mycity-list button { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: none; border: 0; border-radius: 8px; padding: 8px 10px; font: inherit; color: var(--ink); cursor: pointer; text-align: left; }
+.mycity-list button:hover, .mycity-list button:focus-visible { background: var(--chip); }
+.mycity-list small { color: var(--muted); font-size: 12px; flex: 0 0 auto; }
+.mycity-clear { margin-top: 8px; background: none; border: 0; color: var(--brand); font: inherit; font-size: 13px; cursor: pointer; padding: 4px 0; }
+@media (max-width: 600px) {
+  .mycity-btn { padding: 5px 10px 5px 8px; }
+  .mycity-btn small { display: none; }
+  .mycity-btn b { max-width: 90px; font-size: 14px; }
+}

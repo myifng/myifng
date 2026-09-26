@@ -6,13 +6,18 @@
  */
 use App\Controllers\Admin\AuditLogController;
 use App\Controllers\Admin\AuthController;
+use App\Controllers\Admin\CategoryController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
 use App\Controllers\Admin\HomepageController;
+use App\Controllers\Admin\LocationController;
+use App\Controllers\Admin\MediaController;
 use App\Controllers\Admin\MenuController;
 use App\Controllers\Admin\PageController;
 use App\Controllers\Admin\SettingsController;
 use App\Controllers\Admin\SystemController;
+use App\Controllers\Admin\TagController;
+use App\Controllers\Admin\TopicController;
 use App\Controllers\Admin\ProfileController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\UserController;
@@ -99,6 +104,64 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
 
         // रिच एडिटर में इमेज
         $r->post('/editor/upload', [EditorController::class, 'upload'])->name('editor.upload')->middleware('can:pages.create,pages.edit,news.create,news.edit', 'throttle:60,5');
+
+        // ---------- Phase 3 ----------
+        // श्रेणियाँ
+        $r->get('/categories', [CategoryController::class, 'index'])->name('categories.index')->middleware('can:categories.view');
+        $r->get('/categories/create', [CategoryController::class, 'create'])->name('categories.create')->middleware('can:categories.create');
+        $r->post('/categories', [CategoryController::class, 'store'])->name('categories.store')->middleware('can:categories.create');
+        $r->get('/categories/{id:\d+}/edit', [CategoryController::class, 'edit'])->name('categories.edit')->middleware('can:categories.edit');
+        $r->put('/categories/{id:\d+}', [CategoryController::class, 'update'])->name('categories.update')->middleware('can:categories.edit');
+        $r->post('/categories/{id:\d+}/move', [CategoryController::class, 'move'])->name('categories.move')->middleware('can:categories.edit');
+        $r->delete('/categories/{id:\d+}', [CategoryController::class, 'destroy'])->name('categories.destroy')->middleware('can:categories.delete');
+
+        // टॉपिक और विशेष सेक्शन
+        $r->get('/topics', [TopicController::class, 'index'])->name('topics.index')->middleware('can:topics.view');
+        $r->get('/topics/create', [TopicController::class, 'create'])->name('topics.create')->middleware('can:topics.create');
+        $r->post('/topics', [TopicController::class, 'store'])->name('topics.store')->middleware('can:topics.create');
+        $r->get('/topics/{id:\d+}/edit', [TopicController::class, 'edit'])->name('topics.edit')->middleware('can:topics.edit');
+        $r->put('/topics/{id:\d+}', [TopicController::class, 'update'])->name('topics.update')->middleware('can:topics.edit');
+        $r->post('/topics/{id:\d+}/feature', [TopicController::class, 'feature'])->name('topics.feature')->middleware('can:topics.edit');
+        $r->delete('/topics/{id:\d+}', [TopicController::class, 'destroy'])->name('topics.destroy')->middleware('can:topics.delete');
+
+        // टैग
+        $r->get('/tags', [TagController::class, 'index'])->name('tags.index')->middleware('can:tags.view');
+        $r->get('/tags/search', [TagController::class, 'search'])->name('tags.search')->middleware('can:tags.view');
+        $r->post('/tags', [TagController::class, 'store'])->name('tags.store')->middleware('can:tags.create');
+        $r->post('/tags/bulk', [TagController::class, 'bulk'])->name('tags.bulk')->middleware('can:tags.delete');
+        $r->get('/tags/{id:\d+}/edit', [TagController::class, 'edit'])->name('tags.edit')->middleware('can:tags.edit');
+        $r->put('/tags/{id:\d+}', [TagController::class, 'update'])->name('tags.update')->middleware('can:tags.edit');
+        $r->delete('/tags/{id:\d+}', [TagController::class, 'destroy'])->name('tags.destroy')->middleware('can:tags.delete');
+
+        // लोकेशन
+        $r->get('/locations', [LocationController::class, 'index'])->name('locations.index')->middleware('can:locations.view');
+        $r->get('/locations/search', [LocationController::class, 'search'])->name('locations.search')->middleware('can:locations.view');
+        $r->get('/locations/create', [LocationController::class, 'create'])->name('locations.create')->middleware('can:locations.create');
+        $r->post('/locations', [LocationController::class, 'store'])->name('locations.store')->middleware('can:locations.create');
+        $r->get('/locations/import', [LocationController::class, 'importForm'])->name('locations.import')->middleware('can:locations.create');
+        $r->post('/locations/import', [LocationController::class, 'import'])->name('locations.import.run')->middleware('can:locations.create', 'throttle:10,10');
+        $r->get('/locations/export', [LocationController::class, 'export'])->name('locations.export')->middleware('can:locations.view');
+        $r->get('/locations/{id:\d+}/edit', [LocationController::class, 'edit'])->name('locations.edit')->middleware('can:locations.edit');
+        $r->put('/locations/{id:\d+}', [LocationController::class, 'update'])->name('locations.update')->middleware('can:locations.edit');
+        $r->post('/locations/{id:\d+}/move', [LocationController::class, 'move'])->name('locations.move')->middleware('can:locations.edit');
+        $r->post('/locations/{id:\d+}/popular', [LocationController::class, 'popular'])->name('locations.popular')->middleware('can:locations.edit');
+        $r->delete('/locations/{id:\d+}', [LocationController::class, 'destroy'])->name('locations.destroy')->middleware('can:locations.delete');
+
+        // मीडिया लाइब्रेरी
+        $r->get('/media', [MediaController::class, 'index'])->name('media.index')->middleware('can:media.view');
+        $r->get('/media/browse', [MediaController::class, 'browse'])->name('media.browse')->middleware('can:media.view');
+        $r->post('/media', [MediaController::class, 'store'])->name('media.store')->middleware('can:media.create', 'throttle:120,10');
+        $r->post('/media/bulk', [MediaController::class, 'bulk'])->name('media.bulk')->middleware('can:media.edit,media.delete,media.manage');
+        $r->get('/media/{id:\d+}', [MediaController::class, 'edit'])->name('media.edit')->middleware('can:media.view');
+        $r->put('/media/{id:\d+}', [MediaController::class, 'update'])->name('media.update')->middleware('can:media.edit');
+        $r->post('/media/{id:\d+}/replace', [MediaController::class, 'replace'])->name('media.replace')->middleware('can:media.edit', 'throttle:30,10');
+        $r->post('/media/{id:\d+}/regenerate', [MediaController::class, 'regenerate'])->name('media.regenerate')->middleware('can:media.edit');
+        $r->post('/media/{id:\d+}/trash', [MediaController::class, 'trash'])->name('media.trash')->middleware('can:media.delete');
+        $r->post('/media/{id:\d+}/restore', [MediaController::class, 'restore'])->name('media.restore')->middleware('can:media.delete');
+        $r->delete('/media/{id:\d+}', [MediaController::class, 'destroy'])->name('media.destroy')->middleware('can:media.manage');
+        $r->post('/media/folders', [MediaController::class, 'folderStore'])->name('media.folders.store')->middleware('can:media.manage');
+        $r->put('/media/folders/{id:\d+}', [MediaController::class, 'folderUpdate'])->name('media.folders.update')->middleware('can:media.manage');
+        $r->delete('/media/folders/{id:\d+}', [MediaController::class, 'folderDestroy'])->name('media.folders.destroy')->middleware('can:media.manage');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

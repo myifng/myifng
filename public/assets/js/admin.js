@@ -246,12 +246,26 @@
       bar.hidden = n === 0; count.textContent = n + ' चुने गए';
       if (all) { all.checked = n > 0 && n === boxes().length; all.indeterminate = n > 0 && n < boxes().length; }
     };
+    var noun = f.dataset.bulkNoun || 'पेज', merge = $('[data-merge-target]', f);
+    var syncExtra = function () {
+      $$('[data-show-for]', f).forEach(function (x) { x.hidden = !action || action.value !== x.dataset.showFor; });
+      if (!merge) return;
+      merge.hidden = !action || action.value !== 'merge';
+      var keep = merge.value;
+      merge.innerHTML = '<option value="">किस टैग में मिलाएँ?</option>';
+      boxes().filter(function (b) { return b.checked; }).forEach(function (b) {
+        var o = document.createElement('option'); o.value = b.value; o.textContent = b.dataset.name || b.value; merge.appendChild(o);
+      });
+      merge.value = keep; merge.required = !merge.hidden;
+    };
     f.addEventListener('change', function (e) {
       if (e.target === all) boxes().forEach(function (b) { b.checked = all.checked; });
       if (e.target === action) {
-        if (action.value === 'delete' || action.value === 'trash') f.dataset.confirm = action.value === 'delete' ? 'चुने गए पेज हमेशा के लिए हट जाएँगे।' : 'चुने गए पेज ट्रैश में जाएँगे।';
+        if (action.value === 'delete' || action.value === 'trash') f.dataset.confirm = action.value === 'delete' ? 'चुने गए ' + noun + ' हमेशा के लिए हट जाएँगे।' : 'चुने गए ' + noun + ' ट्रैश में जाएँगे।';
+        else if (action.value === 'merge') f.dataset.confirm = 'चुने गए टैग एक टैग में मिल जाएँगे और बाकी हट जाएँगे।';
         else delete f.dataset.confirm;
       }
+      if (e.target !== merge) syncExtra();
       upd();
     });
   });
@@ -263,7 +277,7 @@
   var TOOLS = [
     ['block'], '|', ['bold', 'fa-bold', 'बोल्ड (Ctrl+B)'], ['italic', 'fa-italic', 'इटैलिक (Ctrl+I)'], ['underline', 'fa-underline', 'अंडरलाइन'], ['strikeThrough', 'fa-strikethrough', 'काटें'],
     '|', ['insertUnorderedList', 'fa-list-ul', 'बुलेट सूची'], ['insertOrderedList', 'fa-list-ol', 'नंबर सूची'], ['quote', 'fa-quote-left', 'उद्धरण'],
-    '|', ['link', 'fa-link', 'लिंक'], ['unlink', 'fa-link-slash', 'लिंक हटाएँ'], ['image', 'fa-image', 'इमेज अपलोड'], ['youtube', 'fa-youtube', 'YouTube वीडियो', 'fa-brands'],
+    '|', ['link', 'fa-link', 'लिंक'], ['unlink', 'fa-link-slash', 'लिंक हटाएँ'], ['image', 'fa-image', 'इमेज अपलोड'], ['library', 'fa-photo-film', 'मीडिया लाइब्रेरी से इमेज'], ['youtube', 'fa-youtube', 'YouTube वीडियो', 'fa-brands'],
     ['table', 'fa-table', 'टेबल'], ['button', 'fa-hand-pointer', 'बटन'], ['callout', 'fa-circle-info', 'सूचना बॉक्स'], ['insertHorizontalRule', 'fa-minus', 'लाइन'],
     '|', ['removeFormat', 'fa-eraser', 'फ़ॉर्मैटिंग हटाएँ'], ['undo', 'fa-rotate-left', 'पहले जैसा'], ['redo', 'fa-rotate-right', 'फिर से'], ['source', 'fa-code', 'HTML देखें']
   ];
@@ -277,6 +291,7 @@
     var file = document.createElement('input'); file.type = 'file'; file.accept = 'image/*'; file.hidden = true;
 
     TOOLS.forEach(function (t) {
+      if (t[0] === 'library' && !document.getElementById('mediaPicker')) return;
       if (t === '|') { bar.insertAdjacentHTML('beforeend', '<span class="rte-sep"></span>'); return; }
       if (t[0] === 'block') {
         var sel = document.createElement('select'); sel.className = 'form-select form-select-sm rte-block'; sel.setAttribute('aria-label', 'पैराग्राफ़ का प्रकार');
@@ -321,6 +336,15 @@
         case 'quote': document.execCommand('formatBlock', false, 'blockquote'); break;
         case 'link': var u = prompt('लिंक का पता (https://… या /page/…):', 'https://'); if (u && /^(https?:\/\/|\/|mailto:|tel:)/i.test(u)) document.execCommand('createLink', false, u); else if (u) toast('लिंक https://, / , mailto: या tel: से शुरू हो', 'err'); break;
         case 'image': file.click(); break;
+        case 'library':
+          var sel = window.getSelection(), range = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+          window.MediaPicker.open({ kind: 'image', onChoose: function (it, alt, cap) {
+            area.focus();
+            if (range) { sel.removeAllRanges(); sel.addRange(range); }
+            var credit = it.credit ? ' <small>(' + esc(it.credit) + ')</small>' : '';
+            insert('<figure><img src="' + esc(it.large) + '" alt="' + esc(alt) + '"' + (it.width ? ' width="' + it.width + '" height="' + it.height + '"' : '') + '><figcaption>' + esc(cap || alt || 'कैप्शन यहाँ लिखें') + credit + '</figcaption></figure><p><br></p>');
+          } });
+          break;
         case 'youtube': var y = youtubeId(prompt('YouTube वीडियो का लिंक:', '') || ''); if (y) insert('<figure class="embed" data-youtube="' + y + '">▶ YouTube वीडियो: ' + y + '</figure><p><br></p>'); else toast('YouTube लिंक सही नहीं है', 'err'); break;
         case 'table':
           var rc = (prompt('कितनी पंक्तियाँ × कॉलम? (जैसे 3x3)', '3x3') || '').match(/(\d+)\s*[x×*]\s*(\d+)/i); if (!rc) break;
@@ -548,4 +572,222 @@
     }
     drawWire();
   }
+})();
+
+/* ==========================================================
+   Phase 3: मीडिया अपलोड, मीडिया पिकर, लोकेशन खोज, छोटे काम
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var csrf = ($('meta[name="csrf-token"]') || {}).content || '';
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+  /** XHR अपलोड (प्रगति के साथ) */
+  function uploadFile(url, file, extra, onProgress) {
+    return new Promise(function (resolve) {
+      var fd = new FormData(); fd.append('file', file);
+      Object.keys(extra || {}).forEach(function (k) { fd.append(k, extra[k]); });
+      var x = new XMLHttpRequest();
+      x.open('POST', url);
+      x.setRequestHeader('X-CSRF-Token', csrf); x.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); x.setRequestHeader('Accept', 'application/json');
+      x.upload.onprogress = function (e) { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded * 100 / e.total)); };
+      x.onload = function () {
+        var r; try { r = JSON.parse(x.responseText); } catch (e) { r = { ok: false, message: x.status === 413 ? 'फ़ाइल सर्वर की सीमा से बड़ी है।' : x.status === 429 ? 'बहुत ज़्यादा अपलोड; थोड़ी देर बाद कोशिश करें।' : 'सर्वर से सही जवाब नहीं मिला (' + x.status + ')' }; }
+        resolve(r);
+      };
+      x.onerror = function () { resolve({ ok: false, message: 'नेटवर्क में दिक्कत है।' }); };
+      x.send(fd);
+    });
+  }
+
+  /* ---------- मीडिया पेज: ड्रैग-ड्रॉप अपलोड (एक-एक करके) ---------- */
+  $$('[data-uploader]').forEach(function (zone) {
+    var input = $('[data-uploader-input]', zone), queue = $('[data-uploader-queue]', zone), done = 0, running = false, list = [];
+    function add(files) {
+      Array.prototype.forEach.call(files, function (f) {
+        var li = document.createElement('li');
+        li.innerHTML = '<span class="uq-name"></span><span class="uq-bar"><i></i></span><span class="uq-msg">प्रतीक्षा…</span>';
+        $('.uq-name', li).textContent = f.name;
+        queue.appendChild(li); list.push([f, li]);
+      });
+      if (!running) next();
+    }
+    function next() {
+      var item = list.shift();
+      if (!item) { running = false; if (done) { $('.uq-done', zone) || queue.insertAdjacentHTML('afterend', '<p class="uq-done small mt-2 mb-0">' + done + ' फ़ाइलें अपलोड हुईं। <a href="">सूची ताज़ा करें</a></p>'); } return; }
+      running = true;
+      var li = item[1], bar = $('.uq-bar i', li), msg = $('.uq-msg', li);
+      msg.textContent = 'अपलोड…';
+      uploadFile(zone.dataset.url, item[0], { folder_id: zone.dataset.folder || 0 }, function (p) { bar.style.width = p + '%'; }).then(function (r) {
+        li.classList.add(r.ok ? 'ok' : 'err');
+        if (r.ok) { done++; bar.style.width = '100%'; msg.innerHTML = r.warning ? esc(r.warning) : '<a href="' + esc(r.edit) + '">विवरण भरें</a>'; }
+        else msg.textContent = r.message || 'अपलोड नहीं हुआ';
+        next();
+      });
+    }
+    input.addEventListener('change', function () { add(input.files); input.value = ''; });
+    ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('over'); }); });
+    zone.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files.length) add(e.dataTransfer.files); });
+  });
+
+  /* ---------- मीडिया पिकर (modal) ---------- */
+  var mp = $('#mediaPicker');
+  if (mp && window.bootstrap) {
+    var modal = new bootstrap.Modal(mp), grid = $('[data-mp-grid]', mp), more = $('[data-mp-more]', mp), moreWrap = $('[data-mp-more-wrap]', mp);
+    var empty = $('[data-mp-empty]', mp), search = $('[data-mp-search]', mp), side = $('[data-mp-side]', mp), choose = $('[data-mp-choose]', mp), status = $('[data-mp-status]', mp);
+    var state = { page: 1, q: '', kind: 'image', items: {}, selected: null, onChoose: null, timer: null };
+
+    function card(it, prepend) {
+      state.items[it.id] = it;
+      var li = document.createElement('li');
+      li.className = 'media-card' + (it.kind !== 'image' ? ' is-file' : '');
+      li.dataset.id = it.id; li.tabIndex = 0; li.setAttribute('role', 'option'); li.setAttribute('aria-selected', 'false');
+      li.innerHTML = '<span class="media-thumb">' + (it.thumb ? '<img src="' + esc(it.thumb) + '" alt="" loading="lazy">' : '<i class="fa-solid fa-file"></i>') + '</span><div class="media-meta"><b></b><span></span></div>';
+      $('.media-meta b', li).textContent = it.title || it.name;
+      $('.media-meta span', li).textContent = (it.width ? it.width + '×' + it.height + ' · ' : '') + it.size;
+      if (prepend) grid.insertBefore(li, grid.firstChild); else grid.appendChild(li);
+      return li;
+    }
+    function load(reset) {
+      if (reset) { state.page = 1; grid.innerHTML = ''; state.items = {}; select(null); }
+      status.textContent = 'लोड हो रहा है…';
+      var u = mp.dataset.browse + '?kind=' + encodeURIComponent(state.kind) + '&q=' + encodeURIComponent(state.q) + '&page=' + state.page;
+      fetch(u, { credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          r.items.forEach(function (it) { card(it); });
+          moreWrap.hidden = !r.has_more; empty.hidden = grid.children.length > 0; status.textContent = '';
+        })
+        .catch(function () { status.textContent = 'लाइब्रेरी लोड नहीं हुई।'; });
+    }
+    function select(id) {
+      state.selected = id ? state.items[id] : null;
+      $$('.media-card', grid).forEach(function (c) { var on = +c.dataset.id === +id; c.classList.toggle('selected', on); c.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      choose.disabled = !state.selected; side.hidden = !state.selected;
+      if (state.selected) {
+        var it = state.selected;
+        $('[data-mp-prev]', side).src = it.thumb || '';
+        $('[data-mp-name]', side).textContent = it.title || it.name;
+        $('[data-mp-info]', side).textContent = (it.width ? it.width + '×' + it.height + ' · ' : '') + it.size + (it.credit ? ' · ' + it.credit : '');
+        $('[data-mp-alt]', side).value = it.alt || '';
+        $('[data-mp-caption]', side).value = it.caption || '';
+      }
+    }
+    grid.addEventListener('click', function (e) { var c = e.target.closest('.media-card'); if (c) select(c.dataset.id); });
+    grid.addEventListener('dblclick', function (e) { var c = e.target.closest('.media-card'); if (c) { select(c.dataset.id); choose.click(); } });
+    grid.addEventListener('keydown', function (e) {
+      var c = e.target.closest('.media-card'); if (!c) return;
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (state.selected && +state.selected.id === +c.dataset.id) choose.click(); else select(c.dataset.id); }
+      if (e.key === 'ArrowRight' && c.nextElementSibling) c.nextElementSibling.focus();
+      if (e.key === 'ArrowLeft' && c.previousElementSibling) c.previousElementSibling.focus();
+    });
+    more.addEventListener('click', function () { state.page++; load(false); });
+    search.addEventListener('input', function () { clearTimeout(state.timer); state.timer = setTimeout(function () { state.q = search.value.trim(); load(true); }, 300); });
+    // चुनाव modal बंद होने के बाद लागू हो (खुले modal में focus बाहर नहीं जा सकता, जैसे एडिटर में)
+    var pending = null;
+    choose.addEventListener('click', function () {
+      if (!state.selected || !state.onChoose) return;
+      pending = [state.onChoose, state.selected, $('[data-mp-alt]', side).value.trim(), $('[data-mp-caption]', side).value.trim()];
+      modal.hide();
+    });
+    mp.addEventListener('hidden.bs.modal', function () {
+      if (!pending) return;
+      var run = pending; pending = null;
+      run[0](run[1], run[2], run[3]);
+    });
+    var up = $('[data-mp-upload]', mp);
+    if (up) up.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(up.files); up.value = '';
+      var run = function () {
+        var f = files.shift(); if (!f) return;
+        status.textContent = f.name + ' अपलोड हो रही है…';
+        uploadFile(mp.dataset.upload, f, { only: state.kind }, function (p) { status.textContent = f.name + ': ' + p + '%'; }).then(function (r) {
+          if (r.ok) { card(r.item, true); empty.hidden = true; select(r.item.id); status.textContent = r.warning || 'अपलोड हो गई। Alt टेक्स्ट भरें।'; $('[data-mp-alt]', side).focus(); }
+          else status.textContent = r.message || 'अपलोड नहीं हुई';
+          run();
+        });
+      };
+      run();
+    });
+
+    window.MediaPicker = {
+      open: function (opts) {
+        state.onChoose = opts.onChoose; state.kind = opts.kind || 'image';
+        search.value = ''; state.q = '';
+        load(true); modal.show();
+      }
+    };
+    mp.addEventListener('shown.bs.modal', function () { search.focus(); });
+  }
+
+  /* ---------- इमेज खाना (media_field) ---------- */
+  $$('[data-media-field]').forEach(function (box) {
+    var input = $('input[type="hidden"]', box), prev = $('[data-mf-preview]', box), clear = $('[data-mf-clear]', box), pick = $('[data-media-pick]', box);
+    var changed = function () { box.classList.toggle('has-value', !!input.value); clear.hidden = !input.value; input.dispatchEvent(new Event('input', { bubbles: true })); };
+    if (pick && window.MediaPicker) pick.addEventListener('click', function () {
+      window.MediaPicker.open({ kind: pick.dataset.kind || 'image', onChoose: function (it) {
+        input.value = it.file; prev.innerHTML = '<img src="' + esc(it.thumb || it.url) + '" alt="">'; changed(); pick.focus();
+      } });
+    });
+    clear.addEventListener('click', function () { input.value = ''; prev.innerHTML = '<i class="fa-regular fa-image"></i>'; changed(); });
+  });
+
+  /* ---------- लोकेशन खोज-चयन (ऊपर वाली लोकेशन आदि) ---------- */
+  $$('[data-location-picker]').forEach(function (box) {
+    var hidden = $('input[type="hidden"]', box), text = $('input[type="search"]', box), list = $('.loc-results', box), timer = null, active = -1, rows = [];
+    function render() {
+      list.innerHTML = '';
+      rows.forEach(function (r, i) {
+        var li = document.createElement('li');
+        li.className = 'list-group-item list-group-item-action' + (i === active ? ' active' : '');
+        li.id = 'locopt-' + r.id; li.setAttribute('role', 'option');
+        li.innerHTML = '<b></b> <span class="badge text-bg-light"></span><span class="d-block small text-body-secondary font-monospace"></span>';
+        $('b', li).textContent = r.label; $('.badge', li).textContent = r.type_label; $('.small', li).textContent = r.path ? '/' + r.path + '/' : '';
+        li.addEventListener('mousedown', function (e) { e.preventDefault(); pickRow(r); });
+        list.appendChild(li);
+      });
+      if (!rows.length) list.innerHTML = '<li class="list-group-item small text-body-secondary">कुछ नहीं मिला</li>';
+      list.hidden = false; text.setAttribute('aria-expanded', 'true');
+    }
+    function pickRow(r) { hidden.value = r.id; text.value = r.name + ' (' + r.type_label + ')'; list.hidden = true; text.setAttribute('aria-expanded', 'false'); hidden.dispatchEvent(new Event('input', { bubbles: true })); }
+    text.addEventListener('input', function () {
+      clearTimeout(timer);
+      if (!text.value.trim()) { hidden.value = ''; list.hidden = true; return; }
+      timer = setTimeout(function () {
+        fetch(box.dataset.search + '?q=' + encodeURIComponent(text.value.trim()), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); }).then(function (r) { rows = r.items; active = 0; render(); });
+      }, 250);
+    });
+    text.addEventListener('keydown', function (e) {
+      if (list.hidden) return;
+      if (e.key === 'ArrowDown') { active = Math.min(active + 1, rows.length - 1); render(); e.preventDefault(); }
+      if (e.key === 'ArrowUp') { active = Math.max(active - 1, 0); render(); e.preventDefault(); }
+      if (e.key === 'Enter' && rows[active]) { e.preventDefault(); pickRow(rows[active]); }
+      if (e.key === 'Escape') { list.hidden = true; }
+    });
+    text.addEventListener('blur', function () { setTimeout(function () { list.hidden = true; text.setAttribute('aria-expanded', 'false'); }, 150); });
+  });
+
+  /* ---------- आइकन/रंग प्रीव्यू ---------- */
+  $$('[data-icon-preview]').forEach(function (inp) {
+    var box = $(inp.dataset.iconPreview); if (!box) return;
+    var color = $('#f_color');
+    inp.addEventListener('input', function () {
+      var cls = inp.value.trim().replace(/^fa-(solid|regular|brands)\s+/, '');
+      if (/^fa-[a-z0-9-]+$/.test(cls)) box.innerHTML = '<i class="fa-solid ' + cls + '"></i>';
+    });
+    if (color) color.addEventListener('input', function () { box.style.setProperty('--c', color.value); });
+  });
+
+  /* ---------- कॉपी बटन ---------- */
+  $$('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var i = $(b.dataset.copy); if (!i) return;
+      i.select();
+      (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.resolve(document.execCommand('copy'))).then(function () { var t = b.textContent; b.textContent = 'कॉपी हो गया'; setTimeout(function () { b.textContent = t; }, 1500); });
+    });
+  });
 })();

@@ -7,9 +7,9 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\AuditService;
-use App\Services\UploadService;
+use App\Services\MediaService;
 
-/** रिच एडिटर: लेख के बीच इमेज अपलोड (AJAX)। Phase 3 में यह मीडिया लाइब्रेरी से जुड़ेगा। */
+/** रिच एडिटर: लेख के बीच इमेज अपलोड (AJAX)। इमेज सीधे मीडिया लाइब्रेरी में जाती है (वेरिएंट, WebP, वॉटरमार्क के साथ)। */
 final class EditorController extends Controller
 {
     public function upload(Request $request): Response
@@ -18,11 +18,13 @@ final class EditorController extends Controller
         if (!$file) {
             return $this->json(['ok' => false, 'message' => 'कोई इमेज नहीं चुनी गई।'], 422);
         }
-        $r = UploadService::store($file, 'image', 'content', BASE_PATH . '/public/uploads', 1600);
+        $r = MediaService::upload($file, null, [], 'image');
         if (!$r['ok']) {
             return $this->json(['ok' => false, 'message' => $r['error']], 422);
         }
-        AuditService::log('upload', 'editor', null, 'एडिटर में इमेज अपलोड: ' . $r['path']);
-        return $this->json(['ok' => true, 'url' => upload_url($r['path']), 'width' => $r['width'], 'height' => $r['height']]);
+        $m = $r['media'];
+        AuditService::log('upload', 'media', $m['id'], 'एडिटर से इमेज अपलोड: ' . $m['original_name']);
+        $item = MediaService::toJson($m);
+        return $this->json(['ok' => true, 'url' => $item['large'], 'width' => $item['width'], 'height' => $item['height'], 'item' => $item]);
     }
 }

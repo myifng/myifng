@@ -20,6 +20,13 @@ return new class {
                 $db->insert('languages', ['code' => $code, 'name' => $name, 'native_name' => $native, 'is_default' => $default, 'sort_order' => $order]);
             }
         }
+        // नए इंस्टॉल में migration पहले चलती हैं, भाषाएँ बाद में बनती हैं: डिफ़ॉल्ट डेटा को भाषा से जोड़ें
+        $lang = $db->value("SELECT id FROM {p}languages WHERE code = ?", [($ctx['language'] ?? 'hi') === 'en' ? 'en' : 'hi']);
+        foreach (['pages', 'categories'] as $t) {
+            if ($lang && $db->first('SHOW TABLES LIKE ' . $db->pdo()->quote($db->table($t)))) {
+                $db->query("UPDATE {p}$t SET language_id = ? WHERE language_id IS NULL", [$lang]);
+            }
+        }
 
         // अनुमतियाँ रजिस्ट्री से
         PermissionService::sync($db, $registry['modules']);

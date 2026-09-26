@@ -42,8 +42,9 @@ final class MenuController extends Controller
         $options = [];
         foreach ($types as $key => $t) {
             if (!empty($t['table'])) {
-                $extra = $t['table'] === 'pages' ? ' WHERE deleted_at IS NULL' : '';
-                $options[$key] = db()->all("SELECT id, `{$t['title_col']}` AS title FROM {p}{$t['table']}$extra ORDER BY `{$t['title_col']}` LIMIT 500");
+                $where = $t['table'] === 'pages' ? ' WHERE deleted_at IS NULL' : (!empty($t['where']) ? ' WHERE ' . $t['where'] : '');
+                $order = $t['order'] ?? "`{$t['title_col']}`";
+                $options[$key] = db()->all("SELECT id, `{$t['title_col']}` AS title FROM {p}{$t['table']}$where ORDER BY $order LIMIT 1000");
             }
         }
         return $this->view('admin/menus/edit', [
