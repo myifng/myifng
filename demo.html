@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>समाचार भारती</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Mukta:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6fa; --surface:#ffffff; --ink:#141a33; --muted:#5a6078; --line:#e1e4ee;
+  --accent:#c8102e; --accent-ink:#ffffff; --marigold:#f2a33a; --up:#1f8a4c; --down:#c8102e;
+  --chip:#eef0f7; --shadow:0 1px 2px rgba(20,26,51,.06),0 6px 20px rgba(20,26,51,.06);
+  --f-display:"Tiro Devanagari Hindi","Noto Serif Devanagari",Georgia,serif;
+  --f-body:"Noto Sans Devanagari","Mukta",system-ui,sans-serif;
+  --f-ui:"Mukta","Noto Sans Devanagari",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0e1120; --surface:#171b2e; --ink:#e9ebf5; --muted:#9aa0bb; --line:#262b45;
+    --accent:#ff4d64; --accent-ink:#14060a; --marigold:#f5b458; --up:#4cc98a; --down:#ff6b7d;
+    --chip:#20253d; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0e1120; --surface:#171b2e; --ink:#e9ebf5; --muted:#9aa0bb; --line:#262b45;
+  --accent:#ff4d64; --accent-ink:#14060a; --marigold:#f5b458; --up:#4cc98a; --down:#ff6b7d;
+  --chip:#20253d; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px}
+
+/* top strip */
+.strip{background:var(--ink);color:var(--bg);font-family:var(--f-ui);font-size:13px}
+.strip .wrap{display:flex;gap:16px;align-items:center;justify-content:space-between;padding-block:6px;flex-wrap:wrap}
+.markets{display:flex;gap:16px;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.markets b{font-weight:700;margin-right:4px}
+.markets .up{color:#6fe0a3}.markets .down{color:#ff8a98}
+:root[data-theme="dark"] .markets .up{color:#1f8a4c} :root[data-theme="dark"] .markets .down{color:#c8102e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .markets .up{color:#1f8a4c}:root:not([data-theme="light"]) .markets .down{color:#c8102e}}
+
+/* header */
+header.site{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.head-row{display:flex;align-items:center;gap:16px;padding-block:12px}
+.logo{font-family:var(--f-ui);font-weight:800;font-size:28px;letter-spacing:-.5px;line-height:1;display:flex;align-items:baseline;gap:2px;white-space:nowrap}
+.logo .dot{display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:50%;margin-inline:4px 2px;transform:translateY(-2px)}
+.logo em{font-style:normal;color:var(--accent)}
+.search{flex:1;display:flex;max-width:420px;margin-left:auto;border:1px solid var(--line);border-radius:999px;background:var(--bg);overflow:hidden}
+.search input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:15px;padding:8px 14px}
+.search input:focus{outline:none}
+.search:focus-within{border-color:var(--accent)}
+.search button{border:0;background:transparent;color:var(--muted);padding:0 14px}
+.icon-btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none}
+.icon-btn svg{width:18px;height:18px}
+@media (max-width:560px){.head-row{flex-wrap:wrap}.search{order:3;flex-basis:100%;max-width:none}#themeBtn{margin-left:auto}}
+nav.cats{border-top:1px solid var(--line)}
+nav.cats ul{list-style:none;margin:0;padding:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+nav.cats ul::-webkit-scrollbar{display:none}
+nav.cats button{border:0;background:none;color:var(--muted);font-family:var(--f-ui);font-weight:700;font-size:15px;padding:10px 12px;white-space:nowrap;border-bottom:3px solid transparent}
+nav.cats button:hover{color:var(--ink)}
+nav.cats button[aria-current="true"]{color:var(--ink);border-bottom-color:var(--c,var(--accent))}
+
+/* ticker */
+.ticker{background:var(--surface);border-bottom:1px solid var(--line)}
+.ticker .wrap{display:flex;align-items:center;gap:12px;padding-block:8px;overflow:hidden}
+.ticker-label{flex:none;background:var(--accent);color:var(--accent-ink);font-family:var(--f-ui);font-weight:800;font-size:13px;padding:3px 10px;border-radius:4px;display:flex;align-items:center;gap:6px}
+.ticker-label i{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.ticker-track{flex:1;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.ticker-run{display:inline-flex;gap:40px;white-space:nowrap;animation:run 40s linear infinite;padding-left:100%}
+.ticker-run:hover{animation-play-state:paused}
+.ticker-run button{border:0;background:none;color:var(--ink);font-size:14.5px;font-weight:500;padding:0}
+.ticker-run button:hover{color:var(--accent)}
+@keyframes run{to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){.ticker-run{animation:none;padding-left:0}.ticker-label i{animation:none}}
+
+/* thumbs (no external images: category artwork) */
+.thumb{position:relative;aspect-ratio:16/9;max-width:100%;border-radius:10px;overflow:hidden;background:
+  radial-gradient(120% 90% at 85% 10%,color-mix(in srgb,var(--c) 55%,#fff) 0,transparent 55%),
+  linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 45%,#0b0e1c));}
+.thumb .glyph{position:absolute;right:6%;bottom:-8%;font-family:var(--f-display);font-size:clamp(64px,11vw,150px);line-height:1;color:rgba(255,255,255,.22)}
+.thumb .lines{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.07) 0 2px,transparent 2px 22px)}
+.thumb.sm .glyph{font-size:54px}
+
+.tag{display:inline-block;font-family:var(--f-ui);font-weight:700;font-size:12.5px;letter-spacing:.3px;color:var(--c);}
+.meta{font-family:var(--f-ui);font-size:13px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.meta .sep{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.6}
+.h{font-family:var(--f-display);font-weight:400;line-height:1.3;text-wrap:balance;margin:0}
+.card{display:flex;flex-direction:column;gap:8px;text-align:left;border:0;background:none;color:inherit;padding:0}
+.card:hover .h{color:var(--accent)}
+
+main{padding-block:24px 48px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px}
+@media (max-width:960px){.layout{grid-template-columns:1fr}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:24px}
+.lead .h{font-size:clamp(24px,3.2vw,36px)}
+.lead p{margin:0;color:var(--muted);font-size:17px}
+.side-list{display:grid;gap:18px;align-content:start}
+.side-list .card{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;align-items:start}
+.side-list .h{font-size:17.5px}
+@media (max-width:720px){.hero{grid-template-columns:1fr}}
+
+.section{margin-top:40px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--line);position:relative}
+.sec-head::after{content:"";position:absolute;left:0;bottom:-2px;width:64px;height:2px;background:var(--c)}
+.sec-head h2{font-family:var(--f-ui);font-weight:800;font-size:22px;margin:0}
+.more{border:0;background:none;color:var(--c);font-family:var(--f-ui);font-weight:700;font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:24px}
+.grid3 .h{font-size:18.5px}
+@media (max-width:720px){.grid3{grid-template-columns:1fr}}
+
+/* sidebar */
+aside{display:grid;gap:24px;align-content:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel h3{font-family:var(--f-ui);font-weight:800;font-size:18px;margin:0 0 12px}
+.trend{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.trend li{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start}
+.trend .rank{font-family:var(--f-ui);font-weight:800;font-size:26px;line-height:1;color:var(--line);-webkit-text-stroke:1px var(--muted);font-variant-numeric:tabular-nums}
+.trend button{border:0;background:none;color:var(--ink);text-align:left;padding:0;font-size:15px;font-weight:500;line-height:1.45}
+.trend button:hover{color:var(--accent)}
+.weather{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;font-family:var(--f-ui)}
+.weather div{background:var(--chip);border-radius:8px;padding:10px 12px}
+.weather b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.weather span{font-size:13px;color:var(--muted)}
+.newsletter{display:grid;gap:8px}
+.newsletter input{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;padding:9px 12px;border-radius:8px}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);font-family:var(--f-ui);font-weight:700;font-size:15px;padding:9px 14px;border-radius:8px}
+.small{font-size:13px;color:var(--muted);margin:6px 0 0}
+
+/* article view */
+.article{max-width:720px}
+.crumb{font-family:var(--f-ui);font-size:14px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.crumb button{border:0;background:none;color:var(--muted);padding:0;font:inherit}
+.crumb button:hover{color:var(--accent)}
+.article .h{font-size:clamp(26px,3.6vw,40px);margin-bottom:12px}
+.article .dek{font-size:18px;color:var(--muted);margin:0 0 16px}
+.byline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:12px;border-block:1px solid var(--line);margin-bottom:20px}
+.author{display:flex;gap:10px;align-items:center;font-family:var(--f-ui)}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--chip);font-weight:800;color:var(--accent)}
+.share{display:flex;gap:6px;flex-wrap:wrap}
+.share a,.share button{border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--f-ui);font-weight:600;font-size:13.5px;padding:5px 12px;border-radius:999px}
+.body p{font-size:18px;line-height:1.85;margin:0 0 18px}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tags button{border:0;background:var(--chip);color:var(--ink);font-family:var(--f-ui);font-size:13.5px;padding:4px 12px;border-radius:999px}
+.tags button:hover{background:var(--accent);color:var(--accent-ink)}
+
+.empty{padding:40px 0;color:var(--muted);font-size:17px}
+.page-title{font-family:var(--f-ui);font-weight:800;font-size:28px;margin:0 0 20px;display:flex;align-items:center;gap:10px}
+.page-title .sw{width:12px;height:28px;border-radius:3px;background:var(--c)}
+.list{display:grid;gap:20px}
+.list .card{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}
+.list .h{font-size:21px}
+.list p{margin:0;color:var(--muted)}
+@media (max-width:560px){.list .card{grid-template-columns:1fr}}
+
+footer{background:var(--ink);color:var(--bg);padding-block:32px 20px;font-family:var(--f-ui)}
+footer .cols{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:24px}
+footer .logo em{color:#ff6b7d}
+footer p{opacity:.75;margin:10px 0 0;font-family:var(--f-body);font-size:14px}
+footer h4{margin:0 0 8px;font-size:15px}
+footer ul{list-style:none;padding:0;margin:0;display:grid;gap:4px;font-size:14px;opacity:.8}
+footer button{border:0;background:none;color:inherit;padding:0;font:inherit}
+footer .copy{margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,.15);font-size:13px;opacity:.65}
+@media (max-width:720px){footer .cols{grid-template-columns:1fr 1fr}footer .cols>div:first-child{grid-column:1/-1}}
+.demo-note{background:var(--marigold);color:#1b1305;font-family:var(--f-ui);font-size:13px;text-align:center;padding:4px 16px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;font-family:var(--f-ui);font-size:14px;z-index:50}
+</style>
+
+<div class="demo-note">यह डेमो है: सभी ख़बरें, बाज़ार भाव और मौसम नमूना (sample) डेटा हैं।</div>
+
+<div class="strip">
+  <div class="wrap">
+    <span id="today"></span>
+    <div class="markets" aria-label="बाज़ार">
+      <span><b>सेंसेक्स</b>84,612 <span class="up">▲ 0.74%</span></span>
+      <span><b>निफ्टी</b>25,918 <span class="up">▲ 0.81%</span></span>
+      <span><b>सोना</b>₹74,350/10ग्रा <span class="down">▼ 1.06%</span></span>
+    </div>
+  </div>
+</div>
+
+<header class="site">
+  <div class="wrap head-row">
+    <button class="logo" id="home" style="border:0;background:none;color:inherit;padding:0">समाचार<span class="dot"></span><em>भारती</em></button>
+    <form class="search" id="searchForm" role="search">
+      <input id="q" type="search" placeholder="ख़बरें खोजें, जैसे क्रिकेट" aria-label="ख़बरें खोजें">
+      <button type="submit" aria-label="खोजें"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    </form>
+    <button class="icon-btn" id="themeBtn" aria-label="डार्क/लाइट मोड बदलें" title="डार्क/लाइट मोड">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+  <nav class="cats" aria-label="श्रेणियाँ"><div class="wrap"><ul id="nav"></ul></div></nav>
+</header>
+
+<div class="ticker">
+  <div class="wrap">
+    <span class="ticker-label"><i></i>ब्रेकिंग</span>
+    <div class="ticker-track"><div class="ticker-run" id="ticker"></div></div>
+  </div>
+</div>
+
+<main class="wrap" id="app"></main>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div><span class="logo">समाचार<span class="dot"></span><em>भारती</em></span>
+        <p>देश, दुनिया, खेल, व्यापार और मनोरंजन की ताज़ा ख़बरें आपकी अपनी भाषा में।</p></div>
+      <div><h4>श्रेणियाँ</h4><ul id="fcats"></ul></div>
+      <div><h4>हमारे बारे में</h4><ul><li>संपादकीय नीति</li><li>विज्ञापन दें</li><li>संपर्क करें</li><li>गोपनीयता नीति</li></ul></div>
+    </div>
+    <div class="copy">© 2026 समाचार भारती। सर्वाधिकार सुरक्षित।</div>
+  </div>
+</footer>
+
+<script>
+const CATS=[
+  {slug:"desh",name:"देश",color:"#c8102e",g:"भा"},
+  {slug:"duniya",name:"दुनिया",color:"#1f5fbf",g:"वि"},
+  {slug:"khel",name:"खेल",color:"#1f8a4c",g:"खे"},
+  {slug:"vyapar",name:"व्यापार",color:"#d9730d",g:"₹"},
+  {slug:"manoranjan",name:"मनोरंजन",color:"#b0306f",g:"म"},
+  {slug:"tech",name:"टेक्नोलॉजी",color:"#6a3fc4",g:"AI"},
+  {slug:"swasthya",name:"स्वास्थ्य",color:"#0f8a94",g:"स्व"}
+];
+const NEWS=[
+ {id:1,cat:"desh",breaking:1,views:98,title:"देश के कई राज्यों से मानसून की विदाई, मौसम विभाग ने जारी किया नया पूर्वानुमान",sum:"अगले सप्ताह तक उत्तर भारत से मानसून पूरी तरह लौट जाएगा, तापमान में हल्की गिरावट की संभावना।",author:"रवि शर्मा",date:"2026-09-26T08:30:00",read:4,tags:["मौसम","मानसून","IMD"],body:["भारत मौसम विज्ञान विभाग (IMD) ने शुक्रवार को बताया कि दक्षिण-पश्चिम मानसून उत्तर-पश्चिम भारत के अधिकांश हिस्सों से लौट चुका है।","विभाग के मुताबिक अगले सात दिनों में दिल्ली, पंजाब, हरियाणा और राजस्थान के बाकी हिस्सों से भी मानसून की विदाई हो जाएगी। इस दौरान सुबह और रात के तापमान में दो से तीन डिग्री की गिरावट दर्ज की जा सकती है।","इस साल देश में औसत से करीब 6 प्रतिशत अधिक बारिश दर्ज की गई, जिससे खरीफ फसलों की बुवाई पर सकारात्मक असर पड़ा है। कृषि विशेषज्ञों का मानना है कि रबी की फसल के लिए भी मिट्टी में पर्याप्त नमी बनी रहेगी।"]},
+ {id:2,cat:"khel",breaking:1,views:120,title:"टीम इंडिया ने रोमांचक मुकाबले में ऑस्ट्रेलिया को 4 विकेट से हराया",sum:"आख़िरी ओवर तक चले मैच में भारतीय बल्लेबाज़ों ने धैर्य दिखाया और सीरीज़ में 1-0 की बढ़त बनाई।",author:"अमित वर्मा",date:"2026-09-25T22:10:00",read:5,tags:["क्रिकेट","वनडे","टीम इंडिया"],body:["भारत ने गुरुवार को खेले गए पहले वनडे मुकाबले में ऑस्ट्रेलिया को चार विकेट से हराकर तीन मैचों की सीरीज़ में 1-0 की बढ़त बना ली।","289 रनों के लक्ष्य का पीछा करते हुए भारत की शुरुआत धीमी रही, लेकिन मध्यक्रम ने शानदार साझेदारी कर टीम को जीत की ओर बढ़ाया। आख़िरी ओवर में 9 रनों की ज़रूरत थी, जिसे निचले क्रम के बल्लेबाज़ ने दो चौकों के साथ पूरा किया।","कप्तान ने मैच के बाद कहा, “दबाव में खिलाड़ियों ने जिस तरह खेल दिखाया, वह काबिले-तारीफ़ है।”"]},
+ {id:3,cat:"vyapar",views:87,title:"सेंसेक्स ने छुआ नया रिकॉर्ड स्तर, निवेशकों की संपत्ति में भारी उछाल",sum:"विदेशी निवेशकों की ख़रीदारी और मज़बूत तिमाही नतीजों की उम्मीद से बाज़ार में तेज़ी।",author:"नेहा अग्रवाल",date:"2026-09-26T10:05:00",read:3,tags:["शेयर बाज़ार","सेंसेक्स","निफ्टी"],body:["शुक्रवार को शुरुआती कारोबार में बीएसई सेंसेक्स 600 से अधिक अंकों की तेज़ी के साथ नए सर्वकालिक उच्च स्तर पर पहुँच गया। निफ्टी भी करीब 0.8 प्रतिशत चढ़ा।","बैंकिंग, आईटी और ऑटो शेयरों में सबसे ज़्यादा ख़रीदारी देखी गई। बाज़ार विशेषज्ञों का कहना है कि वैश्विक संकेत सकारात्मक रहने और घरेलू मांग मज़बूत होने से निवेशकों का भरोसा बढ़ा है।","विश्लेषकों ने छोटे निवेशकों को ऊँचे स्तरों पर मुनाफ़ावसूली की संभावना ध्यान में रखकर निवेश करने की सलाह दी है।"]},
+ {id:4,cat:"tech",views:76,title:"भारत में लॉन्च हुआ स्वदेशी AI चैटबॉट, 22 भारतीय भाषाओं को करेगा सपोर्ट",sum:"यह प्लेटफ़ॉर्म किसानों, छात्रों और छोटे व्यापारियों के लिए मुफ़्त उपलब्ध होगा।",author:"सौरभ जैन",date:"2026-09-25T15:40:00",read:6,tags:["AI","स्टार्टअप","डिजिटल इंडिया"],body:["देश में विकसित एक नया AI चैटबॉट गुरुवार को लॉन्च किया गया, जो संविधान की आठवीं अनुसूची में शामिल सभी 22 भाषाओं में बातचीत कर सकता है।","शुरुआती चरण में यह खेती, सरकारी योजनाओं, स्वास्थ्य और शिक्षा से जुड़े सवालों के जवाब देगा।","टेक विशेषज्ञों का मानना है कि स्थानीय भाषाओं में AI की उपलब्धता से डिजिटल खाई कम करने में मदद मिलेगी।"]},
+ {id:5,cat:"duniya",breaking:1,views:64,title:"संयुक्त राष्ट्र में जलवायु परिवर्तन पर बड़ा समझौता, 150 देशों ने किए हस्ताक्षर",sum:"2035 तक कार्बन उत्सर्जन में 50 प्रतिशत कटौती का लक्ष्य, विकासशील देशों को मिलेगी वित्तीय मदद।",author:"प्रिया सिंह",date:"2026-09-25T19:20:00",read:5,tags:["संयुक्त राष्ट्र","जलवायु"],body:["न्यूयॉर्क में चल रही संयुक्त राष्ट्र महासभा के दौरान 150 से अधिक देशों ने जलवायु परिवर्तन से निपटने के एक नए समझौते पर हस्ताक्षर किए।","समझौते के तहत विकसित देश एक साझा कोष बनाएँगे, जिससे विकासशील देशों को स्वच्छ ऊर्जा अपनाने में मदद मिलेगी।","पर्यावरण कार्यकर्ताओं ने इसका स्वागत किया है, लेकिन कहा है कि असली परीक्षा इसके क्रियान्वयन में होगी।"]},
+ {id:6,cat:"manoranjan",views:58,title:"दिवाली पर रिलीज़ होंगी तीन बड़ी फ़िल्में, बॉक्स ऑफ़िस पर होगा महामुकाबला",sum:"ट्रेड विश्लेषकों को इस त्योहारी सीज़न में रिकॉर्ड कमाई की उम्मीद।",author:"कविता मेहरा",date:"2026-09-24T18:00:00",read:3,tags:["बॉलीवुड","बॉक्स ऑफ़िस"],body:["इस साल दिवाली पर तीन बड़े बजट की फ़िल्में एक साथ सिनेमाघरों में दस्तक देंगी।","ट्रेड विश्लेषकों के अनुसार त्योहारी छुट्टियों के चलते तीनों फ़िल्मों को अच्छी ओपनिंग मिल सकती है, हालाँकि स्क्रीन बँटवारे को लेकर खींचतान जारी है।"]},
+ {id:7,cat:"swasthya",views:71,title:"बदलते मौसम में बढ़े वायरल बुखार के मामले, डॉक्टरों ने दी ये सलाह",sum:"पर्याप्त पानी पीने, हल्का भोजन करने और ख़ुद से दवा न लेने की अपील।",author:"डॉ. सुनीता राव",date:"2026-09-26T07:15:00",read:4,tags:["वायरल बुखार","डेंगू"],body:["मौसम बदलने के साथ अस्पतालों में वायरल बुखार, सर्दी-ज़ुकाम और गले के संक्रमण के मरीज़ बढ़ गए हैं।","डॉक्टरों का कहना है कि तेज़ बुखार तीन दिन से ज़्यादा रहे तो डेंगू और मलेरिया की जाँच ज़रूर करानी चाहिए।","घर के आसपास पानी जमा न होने दें और मच्छरदानी का इस्तेमाल करें।"]},
+ {id:8,cat:"desh",views:52,title:"नई शिक्षा नीति के तहत अब कक्षा 6 से ही मिलेगी कोडिंग की पढ़ाई",sum:"अगले शैक्षणिक सत्र से देशभर के सरकारी स्कूलों में लागू होगा नया पाठ्यक्रम।",author:"रवि शर्मा",date:"2026-09-24T12:30:00",read:4,tags:["शिक्षा","कोडिंग"],body:["शिक्षा मंत्रालय ने घोषणा की है कि अगले सत्र से कक्षा 6 से ही छात्रों को कोडिंग की बुनियादी शिक्षा दी जाएगी।","ग्रामीण स्कूलों में कंप्यूटर लैब के लिए अलग बजट का प्रावधान किया गया है।"]},
+ {id:9,cat:"khel",views:49,title:"एशियन चैंपियनशिप में भारतीय पहलवानों ने जीते 3 स्वर्ण पदक",sum:"भारत पदक तालिका में तीसरे स्थान पर पहुँचा।",author:"अमित वर्मा",date:"2026-09-24T20:45:00",read:3,tags:["कुश्ती"],body:["एशियन कुश्ती चैंपियनशिप के तीसरे दिन भारतीय पहलवानों ने तीन स्वर्ण पदक अपने नाम किए।","खेल मंत्री ने विजेताओं को बधाई दी।"]},
+ {id:10,cat:"vyapar",views:61,title:"त्योहारी सीज़न से पहले सोना सस्ता, ख़रीदारों के लिए अच्छा मौका",sum:"10 ग्राम सोना करीब 800 रुपये सस्ता हुआ, चाँदी में भी नरमी।",author:"नेहा अग्रवाल",date:"2026-09-25T11:00:00",read:2,tags:["सोना","सर्राफ़ा"],body:["डॉलर की मज़बूती के चलते घरेलू सर्राफ़ा बाज़ार में सोने के भाव में गिरावट दर्ज की गई।","ज्वैलर्स का कहना है कि दाम घटने से त्योहारी मांग में तेज़ी आ सकती है।"]},
+ {id:11,cat:"tech",views:44,title:"5G के बाद अब 6G की तैयारी, भारत ने शुरू किया परीक्षण",sum:"IIT और टेलीकॉम कंपनियों के साथ मिलकर तैयार हो रहा है अगली पीढ़ी का नेटवर्क।",author:"सौरभ जैन",date:"2026-09-23T14:20:00",read:5,tags:["6G","टेलीकॉम"],body:["दूरसंचार विभाग ने 6G तकनीक के शुरुआती फ़ील्ड परीक्षण चार शहरों में शुरू किए हैं।","विशेषज्ञों के अनुसार 6G नेटवर्क 5G से कई गुना तेज़ हो सकता है।"]},
+ {id:12,cat:"duniya",views:39,title:"जापान में नई बुलेट ट्रेन का ट्रायल सफल, 500 किमी/घंटा की रफ़्तार",sum:"मैग्लेव तकनीक वाली ट्रेन 2030 तक यात्रियों के लिए शुरू होने की उम्मीद।",author:"प्रिया सिंह",date:"2026-09-23T09:10:00",read:3,tags:["जापान","बुलेट ट्रेन"],body:["जापान ने मैग्लेव तकनीक वाली बुलेट ट्रेन का सफल परीक्षण किया, जिसमें ट्रेन ने 500 किमी प्रति घंटे से अधिक की रफ़्तार हासिल की।","यह ट्रेन टोक्यो और नागोया के बीच का सफ़र करीब 40 मिनट में पूरा करेगी।"]},
+ {id:13,cat:"manoranjan",views:55,title:"लोकप्रिय वेब सीरीज़ के नए सीज़न का ट्रेलर रिलीज़, 24 घंटे में 2 करोड़ व्यूज़",sum:"सीरीज़ अगले महीने स्ट्रीमिंग प्लेटफ़ॉर्म पर आएगी।",author:"कविता मेहरा",date:"2026-09-22T17:30:00",read:2,tags:["वेब सीरीज़","OTT"],body:["एक चर्चित वेब सीरीज़ के नए सीज़न का ट्रेलर जारी होते ही सोशल मीडिया पर छा गया।","सीरीज़ अगले महीने स्ट्रीमिंग प्लेटफ़ॉर्म पर रिलीज़ होगी।"]},
+ {id:14,cat:"swasthya",views:47,title:"रोज़ 30 मिनट की सैर से कम होता है दिल की बीमारी का ख़तरा: नया अध्ययन",sum:"10 साल चले शोध में 50 हज़ार लोगों को शामिल किया गया।",author:"डॉ. सुनीता राव",date:"2026-09-22T08:00:00",read:3,tags:["फिटनेस","हृदय"],body:["एक अंतरराष्ट्रीय अध्ययन के अनुसार रोज़ाना 30 मिनट तेज़ चलने वालों में हृदय रोग का ख़तरा करीब 35 प्रतिशत कम पाया गया।","शोधकर्ताओं ने संतुलित आहार और पर्याप्त नींद को भी ज़रूरी बताया।"]}
+];
+
+const $=s=>document.querySelector(s);
+const app=$("#app");
+const NOW=new Date("2026-09-26T12:00:00");
+const cat=s=>CATS.find(c=>c.slug===s);
+const byDate=(a,b)=>new Date(b.date)-new Date(a.date);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function formatDate(iso){return new Date(iso).toLocaleDateString("hi-IN",{day:"numeric",month:"long",year:"numeric"})}
+function timeAgo(iso){
+  const m=Math.max(1,Math.round((NOW-new Date(iso))/60000));
+  if(m<60)return m+" मिनट पहले";
+  const h=Math.round(m/60); if(h<24)return h+" घंटे पहले";
+  return Math.round(h/24)+" दिन पहले";
+}
+function thumb(a,sm){const c=cat(a.cat);return `<div class="thumb${sm?" sm":""}" style="--c:${c.color}"><div class="lines"></div><span class="glyph">${c.g}</span></div>`}
+function meta(a){return `<div class="meta"><span>${esc(a.author)}</span><span class="sep"></span><span>${timeAgo(a.date)}</span><span class="sep"></span><span>${a.read} मिनट</span></div>`}
+
+function card(a,size){
+  const c=cat(a.cat);
+  if(size==="lead")return `<button class="card lead" data-id="${a.id}" style="--c:${c.color}">${thumb(a)}<span class="tag">${c.name}</span><h2 class="h">${esc(a.title)}</h2><p>${esc(a.sum)}</p>${meta(a)}</button>`;
+  if(size==="side")return `<button class="card" data-id="${a.id}" style="--c:${c.color}">${thumb(a,1)}<div style="display:grid;gap:4px"><span class="tag">${c.name}</span><h3 class="h">${esc(a.title)}</h3><div class="meta">${timeAgo(a.date)}</div></div></button>`;
+  if(size==="list")return `<button class="card" data-id="${a.id}" style="--c:${c.color}">${thumb(a)}<div style="display:grid;gap:6px;align-content:start"><span class="tag">${c.name}</span><h3 class="h">${esc(a.title)}</h3><p>${esc(a.sum)}</p>${meta(a)}</div></button>`;
+  return `<button class="card" data-id="${a.id}" style="--c:${c.color}">${thumb(a)}<span class="tag">${c.name}</span><h3 class="h">${esc(a.title)}</h3>${meta(a)}</button>`;
+}
+
+function sidebar(){
+  const trend=[...NEWS].sort((a,b)=>b.views-a.views).slice(0,5);
+  return `<aside>
+    <div class="panel"><h3>सबसे ज़्यादा पढ़ी गईं</h3><ol class="trend">${trend.map((a,i)=>`<li><span class="rank">${i+1}</span><button data-id="${a.id}">${esc(a.title)}</button></li>`).join("")}</ol></div>
+    <div class="panel"><h3>मौसम</h3><div class="weather">
+      <div><b>31°</b><span>नई दिल्ली · धूप</span></div><div><b>29°</b><span>मुंबई · बादल</span></div>
+      <div><b>33°</b><span>जयपुर · साफ़</span></div><div><b>30°</b><span>कोलकाता · उमस</span></div></div></div>
+    <div class="panel"><h3>न्यूज़लेटर</h3><form class="newsletter" id="nl"><input id="nlEmail" type="email" required placeholder="आपका ईमेल" aria-label="ईमेल"><button class="btn" type="submit">सब्सक्राइब करें</button></form><p class="small" id="nlMsg">हर सुबह 7 बजे दिन की 10 बड़ी ख़बरें।</p></div>
+  </aside>`;
+}
+
+let state={view:"home"};
+function go(s){state=s;render();window.scrollTo({top:0,behavior:"instant"in window?"instant":"auto"})}
+
+function renderHome(){
+  const sorted=[...NEWS].sort(byDate);
+  const lead=sorted[0], side=sorted.slice(1,4);
+  const secs=CATS.map(c=>{
+    const items=NEWS.filter(a=>a.cat===c.slug).sort(byDate).slice(0,3);
+    if(!items.length)return "";
+    return `<section class="section" style="--c:${c.color}"><div class="sec-head"><h2>${c.name}</h2><button class="more" data-cat="${c.slug}">सभी देखें →</button></div><div class="grid3" style="--n:${items.length}">${items.map(a=>card(a)).join("")}</div></section>`;
+  }).join("");
+  return `<div class="layout"><div><div class="hero">${card(lead,"lead")}<div class="side-list">${side.map(a=>card(a,"side")).join("")}</div></div>${secs}</div>${sidebar()}</div>`;
+}
+function renderCategory(slug){
+  const c=cat(slug), items=NEWS.filter(a=>a.cat===slug).sort(byDate);
+  return `<div class="layout"><div><h1 class="page-title" style="--c:${c.color}"><span class="sw"></span>${c.name}</h1><div class="list">${items.map(a=>card(a,"list")).join("")}</div></div>${sidebar()}</div>`;
+}
+function renderArticle(id){
+  const a=NEWS.find(x=>x.id===id), c=cat(a.cat);
+  const related=NEWS.filter(x=>x.cat===a.cat&&x.id!==a.id).concat(NEWS.filter(x=>x.cat!==a.cat)).slice(0,3);
+  return `<div class="layout"><div><article class="article" style="--c:${c.color}">
+    <div class="crumb"><button data-home>होम</button>›<button data-cat="${c.slug}">${c.name}</button></div>
+    <h1 class="h">${esc(a.title)}</h1><p class="dek">${esc(a.sum)}</p>
+    <div class="byline"><div class="author"><span class="avatar">${esc(a.author.replace("डॉ. ","")[0])}</span><div><b>${esc(a.author)}</b><div class="meta">${formatDate(a.date)} · ${a.read} मिनट में पढ़ें</div></div></div>
+      <div class="share"><a href="https://wa.me/?text=${encodeURIComponent(a.title)}" target="_blank" rel="noopener">WhatsApp</a><a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(a.title)}" target="_blank" rel="noopener">X</a><button data-copy>लिंक कॉपी करें</button></div></div>
+    ${thumb(a)}
+    <div class="body" style="margin-top:20px">${a.body.map(p=>`<p>${esc(p)}</p>`).join("")}</div>
+    <div class="tags">${a.tags.map(t=>`<button data-tag="${esc(t)}">#${esc(t)}</button>`).join("")}</div>
+  </article>
+  <section class="section" style="--c:${c.color}"><div class="sec-head"><h2>संबंधित ख़बरें</h2></div><div class="grid3">${related.map(x=>card(x)).join("")}</div></section></div>${sidebar()}</div>`;
+}
+function renderSearch(q){
+  const t=q.trim().toLowerCase();
+  const items=NEWS.filter(a=>(a.title+" "+a.sum+" "+a.tags.join(" ")).toLowerCase().includes(t)).sort(byDate);
+  return `<div class="layout"><div><h1 class="page-title">“${esc(q)}” के नतीजे <span class="meta">(${items.length})</span></h1>${items.length?`<div class="list">${items.map(a=>card(a,"list")).join("")}</div>`:`<p class="empty">इस शब्द से कोई ख़बर नहीं मिली। कोई दूसरा शब्द आज़माएँ, जैसे “क्रिकेट” या “सोना”।</p>`}</div>${sidebar()}</div>`;
+}
+
+function render(){
+  app.innerHTML=state.view==="cat"?renderCategory(state.slug):state.view==="article"?renderArticle(state.id):state.view==="search"?renderSearch(state.q):renderHome();
+  const active=state.view==="cat"?state.slug:state.view==="article"?NEWS.find(a=>a.id===state.id).cat:state.view==="home"?"home":"";
+  document.querySelectorAll("#nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.cat===active||(b.dataset.home!==undefined&&active==="home")));
+}
+
+function buildNav(){
+  $("#nav").innerHTML=`<li><button data-home>होम</button></li>`+CATS.map(c=>`<li><button data-cat="${c.slug}" style="--c:${c.color}">${c.name}</button></li>`).join("");
+  $("#fcats").innerHTML=CATS.map(c=>`<li><button data-cat="${c.slug}">${c.name}</button></li>`).join("");
+}
+function buildTicker(){
+  const items=NEWS.filter(a=>a.breaking).sort(byDate).map(a=>`<button data-id="${a.id}">● ${esc(a.title)}</button>`).join("");
+  $("#ticker").innerHTML=items;
+}
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.append(t);setTimeout(()=>t.remove(),2000)}
+
+document.addEventListener("click",e=>{
+  const el=e.target.closest("[data-id],[data-cat],[data-home],[data-tag],[data-copy]");
+  if(!el)return;
+  if(el.dataset.id)return go({view:"article",id:+el.dataset.id});
+  if(el.dataset.cat)return go({view:"cat",slug:el.dataset.cat});
+  if(el.dataset.tag)return go({view:"search",q:el.dataset.tag});
+  if(el.hasAttribute("data-home"))return go({view:"home"});
+  if(el.hasAttribute("data-copy")){
+    const text=location.href;
+    (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject()).then(()=>toast("लिंक कॉपी हो गया")).catch(()=>toast("लिंक कॉपी नहीं हो सका"));
+  }
+});
+$("#home").addEventListener("click",()=>go({view:"home"}));
+$("#searchForm").addEventListener("submit",e=>{e.preventDefault();const q=$("#q").value.trim();if(q)go({view:"search",q})});
+document.addEventListener("submit",e=>{if(e.target.id==="nl"){e.preventDefault();$("#nlMsg").textContent="धन्यवाद! डेमो में ईमेल कहीं भेजा नहीं जाता।";e.target.reset()}});
+$("#themeBtn").addEventListener("click",()=>{
+  const r=document.documentElement;
+  const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme=dark?"light":"dark";
+});
+$("#today").textContent=NOW.toLocaleDateString("hi-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})+" · नई दिल्ली";
+
+buildNav();buildTicker();render();
+</script>
+</html>
