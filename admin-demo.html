@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>समाचार भारती एडमिन</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f3f3; --surface:#ffffff; --surface-2:#f8f7f7; --ink:#1c1b1d; --muted:#6b6770; --faint:#9b97a0; --line:#e6e3e4;
+  --red:#d71920; --red-soft:#fdecec; --red-ink:#b3141b; --on-red:#ffffff;
+  --side:#17161a; --side-ink:#d9d6dc; --side-muted:#8d8893; --side-hover:#25232a;
+  --good:#1e7d45; --good-soft:#e6f4ec; --warn:#a4640b; --warn-soft:#fbf1e1; --info:#2360a5; --info-soft:#e7eff9; --bad:#b3141b; --bad-soft:#fdecec;
+  --shadow:0 1px 2px rgba(23,22,26,.05),0 8px 24px rgba(23,22,26,.07);
+  --f-ui:"Mukta","Noto Sans Devanagari",system-ui,sans-serif;
+  --f-body:"Noto Sans Devanagari","Mukta",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#111013; --surface:#1b1a1e; --surface-2:#222126; --ink:#ecebee; --muted:#a7a2ad; --faint:#77727d; --line:#2e2c33;
+    --red:#ef3a41; --red-soft:#3a1719; --red-ink:#ff7076; --on-red:#ffffff;
+    --side:#0b0a0d; --side-ink:#d9d6dc; --side-muted:#8d8893; --side-hover:#1d1b21;
+    --good:#4cc47f; --good-soft:#15291e; --warn:#e5a54b; --warn-soft:#2e2211; --info:#6aa6ec; --info-soft:#15233a; --bad:#ff7076; --bad-soft:#3a1719;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#111013; --surface:#1b1a1e; --surface-2:#222126; --ink:#ecebee; --muted:#a7a2ad; --faint:#77727d; --line:#2e2c33;
+  --red:#ef3a41; --red-soft:#3a1719; --red-ink:#ff7076; --on-red:#ffffff;
+  --side:#0b0a0d; --side-ink:#d9d6dc; --side-muted:#8d8893; --side-hover:#1d1b21;
+  --good:#4cc47f; --good-soft:#15291e; --warn:#e5a54b; --warn-soft:#2e2211; --info:#6aa6ec; --info-soft:#15233a; --bad:#ff7076; --bad-soft:#3a1719;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.5}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+/* shell */
+.shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%}
+.side{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;padding-top:env(safe-area-inset-top,0px)}
+.brand{display:flex;align-items:center;gap:0;padding:18px 18px 14px;font-weight:800;font-size:20px;line-height:1}
+.brand .a{background:var(--red);color:#fff;padding:6px 8px 4px;border-radius:3px 0 0 3px}
+.brand .b{border:2px solid var(--red);border-left:0;color:#fff;padding:4px 8px 2px;border-radius:0 3px 3px 0}
+.brand small{display:block;font-size:11px;font-weight:600;letter-spacing:1.4px;color:var(--side-muted);margin-left:10px;text-transform:uppercase}
+.navgroup{padding:10px 10px 4px}
+.navgroup h6{margin:6px 10px 6px;font-size:11px;letter-spacing:1.2px;color:var(--side-muted);text-transform:uppercase;font-weight:700}
+.navitem{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--side-ink);padding:8px 10px;border-radius:6px;text-align:left;font-size:15px;font-weight:500}
+.navitem:hover{background:var(--side-hover)}
+.navitem[aria-current="page"]{background:var(--red);color:#fff}
+.navitem .count{margin-left:auto;background:#ffffff1f;color:#fff;font-size:12px;font-weight:700;border-radius:999px;padding:0 7px;font-variant-numeric:tabular-nums}
+.navitem[aria-current="page"] .count{background:#ffffff33}
+.side-foot{margin-top:auto;padding:14px 18px 18px;font-size:12.5px;color:var(--side-muted);border-top:1px solid #ffffff12}
+.side-foot button{border:0;background:none;color:var(--side-ink);padding:0;text-decoration:underline;text-underline-offset:3px}
+
+.topbar{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:10px 24px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+.icon-btn.menu-btn{display:none}
+.gsearch{flex:1;max-width:460px;display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:0 10px}
+.gsearch input{border:0;background:transparent;flex:1;min-width:0;padding:8px 0;outline:none}
+.gsearch:focus-within{border-color:var(--red)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{position:relative;border:1px solid var(--line);background:var(--surface);width:38px;height:38px;border-radius:8px;display:grid;place-items:center;color:var(--ink)}
+.icon-btn:hover{border-color:var(--faint)}
+.dot{position:absolute;top:-5px;right:-5px;background:var(--red);color:#fff;font-size:11px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+.me{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px 3px 3px}
+.avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;flex:none}
+.me b{display:block;font-size:14px;line-height:1.2}.me span{font-size:12px;color:var(--muted)}
+.content{padding:22px 24px 48px;min-width:0}
+
+/* generic */
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-head h1{margin:0;font-size:26px;font-weight:800;line-height:1.2}
+.page-head p{margin:2px 0 0;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:7px;font-weight:600;font-size:14.5px;white-space:nowrap}
+.btn:hover{border-color:var(--faint)}
+.btn.primary{background:var(--red);border-color:var(--red);color:var(--on-red)}
+.btn.primary:hover{background:var(--red-ink);border-color:var(--red-ink)}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 35%,var(--line))}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:3px 10px;font-size:13.5px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.card-h h2{margin:0;font-size:17px;font-weight:700}
+.card-b{padding:16px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;border-radius:999px;padding:1px 9px;white-space:nowrap}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-published,.p-approved,.p-active{background:var(--good-soft);color:var(--good)}
+.p-draft,.p-pending{background:var(--warn-soft);color:var(--warn)}
+.p-scheduled{background:var(--info-soft);color:var(--info)}
+.p-spam,.p-inactive,.p-expired{background:var(--bad-soft);color:var(--bad)}
+.flag{font-size:11.5px;font-weight:800;padding:0 6px;border-radius:3px;letter-spacing:.3px}
+.flag.brk{background:var(--red);color:#fff}.flag.feat{background:var(--ink);color:var(--surface)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.stat{padding:14px 16px;display:grid;gap:2px}
+.stat .lbl{font-size:13.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:6px}
+.stat .num{font-size:30px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+.stat .sub{font-size:12.5px;color:var(--muted)}
+.stat .sub b{color:var(--good)}
+.dash{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px}
+.dash .span{grid-column:1/-1}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.dash{grid-template-columns:1fr}}
+
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .axis{fill:var(--muted);font-size:12px;font-family:var(--f-ui)}
+.chart .bar{fill:var(--red)}
+.chart .bar.today{fill:var(--red-ink)}
+.chart .hit{fill:transparent}
+.chart .hit:hover+.bar,.chart .bar:hover{opacity:.85}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:13px;padding:5px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);font-variant-numeric:tabular-nums}
+.hbars{display:grid;gap:10px}
+.hbar{display:grid;grid-template-columns:92px minmax(0,1fr) 34px;gap:10px;align-items:center;font-size:14px}
+.hbar .track{height:10px;background:var(--surface-2);border-radius:5px;overflow:hidden}
+.hbar .fill{height:100%;background:var(--red);border-radius:5px}
+.hbar .v{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.mini-list{list-style:none;margin:0;padding:0}
+.mini-list li{display:flex;gap:10px;align-items:flex-start;padding:10px 16px;border-top:1px solid var(--line)}
+.mini-list li:first-child{border-top:0}
+.mini-list .t{flex:1;min-width:0}
+.mini-list .t b{display:block;font-weight:600;font-family:var(--f-body);font-size:14px;line-height:1.45}
+.linkish{border:0;background:none;padding:0;text-align:left;font-weight:600;font-family:var(--f-body);font-size:14px;line-height:1.45;color:var(--ink)}
+.linkish:hover{color:var(--red)}
+.log li{font-size:13.5px}
+.log time{color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* toolbar + table */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.field-inline{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:0 10px}
+.field-inline input{border:0;outline:0;background:transparent;padding:6px 0;min-width:0;width:200px}
+.field-inline:focus-within{border-color:var(--red)}
+select.sel{border:1px solid var(--line);border-radius:7px;background:var(--surface);padding:6px 8px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:var(--surface);padding:4px 12px;border-radius:999px;font-size:13.5px;font-weight:600}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.bulk{display:flex;gap:6px;align-items:center;margin-left:auto;font-size:13.5px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.3px;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+th.num{text-align:right}
+.tcell{display:flex;gap:10px;align-items:center;min-width:280px}
+.thumb{width:64px;height:40px;border-radius:5px;flex:none;object-fit:cover;display:grid;place-items:center;color:#fff;font-weight:800;font-size:13px;background:var(--c,#888)}
+.ttl{font-family:var(--f-body);font-weight:600;font-size:14px;line-height:1.45}
+.ttl-meta{display:flex;gap:6px;align-items:center;margin-top:2px;font-size:12px;color:var(--muted)}
+.row-acts{display:flex;gap:2px;justify-content:flex-end}
+.row-acts button{border:0;background:none;width:30px;height:30px;border-radius:6px;display:grid;place-items:center;color:var(--muted)}
+.row-acts button:hover{background:var(--surface-2);color:var(--ink)}
+.row-acts button.del:hover{color:var(--bad);background:var(--bad-soft)}
+.swatch{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted);flex-wrap:wrap}
+.pager .pg{display:flex;gap:4px}
+.pager .pg button{border:1px solid var(--line);background:var(--surface);min-width:32px;height:30px;border-radius:6px;font-weight:600;font-variant-numeric:tabular-nums}
+.pager .pg button[aria-current="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.empty{padding:36px 16px;text-align:center;color:var(--muted)}
+input[type=checkbox]{width:16px;height:16px;accent-color:var(--red)}
+
+/* forms */
+.form-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:1100px){.form-grid{grid-template-columns:1fr}}
+.fld{display:grid;gap:5px}
+.fld>label,.lbl2{font-size:13.5px;font-weight:700}
+.fld .hint{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.hint .over{color:var(--bad);font-weight:700}
+.inp{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:7px;padding:8px 10px;outline:none}
+.inp:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+textarea.inp{resize:vertical;min-height:70px;font-family:var(--f-body)}
+.inp.title{font-family:var(--f-body);font-size:22px;font-weight:700;padding:10px 12px}
+.err{color:var(--bad);font-size:12.5px;font-weight:600}
+.inp.bad{border-color:var(--bad)}
+.stack{display:grid;gap:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+.editor{border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden}
+.editor:focus-within{border-color:var(--red)}
+.etools{display:flex;gap:2px;flex-wrap:wrap;padding:6px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.etools button{border:0;background:none;min-width:32px;height:30px;border-radius:5px;font-weight:700;padding:0 8px;font-size:14px}
+.etools button:hover{background:var(--surface)}
+.etools .sep{width:1px;background:var(--line);margin:4px 4px}
+.earea{min-height:260px;padding:14px 16px;outline:none;font-family:var(--f-body);font-size:16.5px;line-height:1.85}
+.earea:empty::before{content:attr(data-ph);color:var(--faint)}
+.earea h2{font-size:20px;margin:10px 0 6px}
+.earea blockquote{border-left:3px solid var(--red);margin:10px 0;padding:2px 12px;color:var(--muted)}
+.wc{padding:6px 12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}
+.toggle span{font-size:14px;font-weight:600}
+.toggle small{display:block;color:var(--muted);font-weight:400;font-size:12.5px}
+.sw{position:relative;width:40px;height:22px;flex:none}
+.sw input{opacity:0;position:absolute;inset:0;margin:0;cursor:pointer;width:100%;height:100%}
+.sw i{position:absolute;inset:0;background:var(--line);border-radius:11px;transition:.15s;pointer-events:none}
+.sw i::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px #0003}
+.sw input:checked+i{background:var(--good)}
+.sw input:checked+i::after{transform:translateX(18px)}
+.sw input:focus-visible+i{outline:2px solid var(--red);outline-offset:2px}
+.radios{display:grid;gap:6px}
+.radio{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:7px;padding:7px 10px;cursor:pointer}
+.radio:has(input:checked){border-color:var(--red);background:var(--red-soft)}
+.radio input{accent-color:var(--red)}
+.drop{border:1.5px dashed var(--line);border-radius:8px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;display:grid;gap:4px;place-items:center;background:var(--surface-2);position:relative}
+.drop:hover,.drop.over{border-color:var(--red);color:var(--ink)}
+.drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.preview-img{position:relative;border-radius:8px;overflow:hidden}
+.preview-img img{display:block;width:100%;max-width:100%;aspect-ratio:16/9;object-fit:cover}
+.preview-img button{position:absolute;top:8px;right:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;border:1px solid var(--line);border-radius:7px;padding:5px 6px;background:var(--surface)}
+.chips:focus-within{border-color:var(--red)}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:1px 4px 1px 10px;font-size:13.5px}
+.chip button{border:0;background:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:var(--muted);padding:0}
+.chips input{border:0;outline:0;background:transparent;flex:1;min-width:120px;padding:3px 4px}
+.sticky-actions{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));margin-top:16px;border-radius:0 0 10px 10px}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.media{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--surface-2)}
+.media img{display:block;width:100%;max-width:100%;aspect-ratio:4/3;object-fit:cover}
+.media .cap{padding:6px 8px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:6px;align-items:center}
+.imgs-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px}
+.imgs-mini div{position:relative}
+.imgs-mini img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px;display:block}
+.imgs-mini button{position:absolute;top:2px;right:2px;border:0;background:#000a;color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:1;padding:0}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(10,9,12,.5);z-index:50;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border-radius:12px;width:min(620px,100%);max-height:calc(100% - 32px);display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.modal.wide{width:min(860px,100%)}
+.modal-h{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.modal-h h3{margin:0;font-size:18px}
+.modal-b{padding:18px;overflow-y:auto}
+.modal-f{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--line)}
+.toast-wrap{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:8px;z-index:70}
+.toast{background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:8px;font-size:14px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;max-width:340px}
+.toast.bad{background:var(--bad);color:#fff}
+.demo-note{background:var(--warn-soft);color:var(--warn);font-size:13px;padding:6px 12px;border-radius:8px;margin-bottom:16px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.demo-note button{border:0;background:none;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:0}
+
+/* article preview */
+.apv h1{font-family:var(--f-body);font-size:26px;line-height:1.35;margin:6px 0 8px}
+.apv .dek{color:var(--muted);border-left:3px solid var(--red);padding-left:10px;font-family:var(--f-body)}
+.apv .body{font-family:var(--f-body);font-size:16.5px;line-height:1.85}
+.apv img{width:100%;max-width:100%;border-radius:8px;aspect-ratio:16/9;object-fit:cover}
+
+/* login */
+.login{min-height:100%;display:grid;place-items:center;padding:24px 16px;background:
+  linear-gradient(135deg,color-mix(in srgb,var(--red) 10%,var(--bg)),var(--bg) 60%)}
+.login .card{width:min(400px,100%);padding:26px}
+.login h1{margin:14px 0 4px;font-size:24px}
+.login .brand{padding:0;color:var(--ink)}.login .brand .b{color:var(--red)}
+.creds{background:var(--surface-2);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--muted);margin-top:14px}
+.creds b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;left:0;top:0;bottom:0;width:260px;z-index:60;transform:translateX(-100%);transition:transform .2s}
+  .side.open{transform:none;box-shadow:var(--shadow)}
+  .icon-btn.menu-btn{display:grid}
+  .topbar{padding-inline:16px}
+  .content{padding-inline:16px}
+  .me div{display:none}.me{padding:3px}
+  .field-inline input{width:140px}
+}
+@media (max-width:560px){.gsearch{display:none}.stats{grid-template-columns:1fr 1fr}.stat .num{font-size:24px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="root"></div>
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ============ आइकन ============ */
+const IC={
+  dash:'<path d="M3 13h8V3H3zM13 21h8V11h-8zM3 21h8v-6H3zM13 3v6h8V3z"/>',
+  news:'<path d="M4 4h13v16H6a2 2 0 0 1-2-2zM17 8h3v10a2 2 0 0 1-2 2"/><path d="M8 8h5M8 12h5M8 16h3"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  cat:'<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
+  city:'<path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  video:'<rect x="3" y="5" width="13" height="14" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>',
+  photo:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
+  ad:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 15l2.5-6L12 15M8 13h3M15 9v6h1.5a2 2 0 0 0 0-6z"/>',
+  media:'<path d="M4 7h16v12H4z"/><path d="M8 4h8"/><circle cx="12" cy="13" r="3"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/>',
+  eye:'<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  up:'<path d="m18 15-6-6-6 6"/>', down:'<path d="m6 9 6 6 6-6"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>', ban:'<circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  site:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'
+};
+const ic=(n,cls="")=>`<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+
+/* ============ सहायक ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf=n=>Number(n||0).toLocaleString("hi-IN");
+const pad=n=>String(n).padStart(2,"0");
+const toLocalInput=d=>{d=new Date(d);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const fmtDate=d=>new Date(d).toLocaleString("hi-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+const fmtDay=d=>new Date(d).toLocaleDateString("hi-IN",{day:"numeric",month:"short",year:"numeric"});
+function ago(d){const m=Math.round((Date.now()-new Date(d))/6e4);if(m<1)return "अभी";if(m<60)return m+" मिनट पहले";const h=Math.round(m/60);if(h<24)return h+" घंटे पहले";return Math.round(h/24)+" दिन पहले"}
+const slugify=s=>String(s).trim().toLowerCase().replace(/[^\p{L}\p{M}\p{N}]+/gu,"-").replace(/^-+|-+$/g,"").slice(0,80);
+const stripHtml=h=>{const d=document.createElement("div");d.innerHTML=h;return d.textContent||""};
+const initials=n=>String(n||"?").replace(/^डॉ\.\s*/,"").trim().charAt(0);
+const hue=n=>{let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return `hsl(${h} 45% 42%)`};
+
+/* ============ डेटा (नमूना) ============ */
+const now=Date.now(), H=36e5;
+function seed(){
+  const cats=[["उत्तर प्रदेश","up","#c0392b"],["देश","desh","#b3261e"],["दुनिया","duniya","#1d5fa8"],["राजनीति","rajniti","#7a3e12"],["क्राइम","crime","#3a3a3a"],["खेल","khel","#1f7a45"],["व्यापार","vyapar","#c46a0a"],["मनोरंजन","manoranjan","#a3246a"],["टेक","tech","#5b3db8"]]
+    .map(([name,slug,color],i)=>({id:i+1,name,slug,color,order:i+1,menu:true}));
+  const cities=["लखनऊ","गोरखपुर","महराजगंज","वाराणसी","प्रयागराज"].map((name,i)=>({id:i+1,name,state:"उत्तर प्रदेश",order:i+1,tab:true}));
+  const users=[
+    {id:1,name:"संपादक मंडल",email:"admin@samacharbharti.in",role:"admin",city:"",active:true,password:"admin123"},
+    {id:2,name:"रवि शर्मा",email:"ravi@samacharbharti.in",role:"editor",city:"",active:true,password:"editor123"},
+    {id:3,name:"अमित वर्मा",email:"amit@samacharbharti.in",role:"reporter",city:"",active:true,password:"reporter123"},
+    {id:4,name:"नेहा अग्रवाल",email:"neha@samacharbharti.in",role:"reporter",city:"",active:true,password:"reporter123"},
+    {id:5,name:"संवाददाता गोरखपुर",email:"gkp@samacharbharti.in",role:"reporter",city:"गोरखपुर",active:true,password:"reporter123"},
+    {id:6,name:"संवाददाता महराजगंज",email:"mrj@samacharbharti.in",role:"reporter",city:"महराजगंज",active:false,password:"reporter123"}
+  ];
+  const A=[
+    ["गोरखपुर में नया फ्लाईओवर जनता के लिए खुला, शहर को जाम से मिलेगी राहत","up","गोरखपुर",5,"published",2,4820,1,1],
+    ["टीम इंडिया ने रोमांचक मुकाबले में ऑस्ट्रेलिया को 4 विकेट से हराया","khel","",3,"published",14,9310,1,1],
+    ["देश के कई राज्यों से मानसून की विदाई, मौसम विभाग ने जारी किया पूर्वानुमान","desh","",2,"published",4,3650,1,0],
+    ["महराजगंज: नेपाल सीमा पर सुरक्षा बढ़ी, त्योहारों को देखते हुए SSB अलर्ट","up","महराजगंज",6,"published",1,2140,0,0],
+    ["लखनऊ में नवरात्रि की तैयारियाँ तेज़, पंडालों के लिए नई गाइडलाइन जारी","up","लखनऊ",2,"published",3,1870,0,0],
+    ["सेंसेक्स ने छुआ नया रिकॉर्ड स्तर, निवेशकों की संपत्ति में भारी उछाल","vyapar","",4,"published",2,5230,0,1],
+    ["साइबर ठगी गिरोह का भंडाफोड़, 7 आरोपी गिरफ़्तार","crime","",2,"published",2,6120,1,0],
+    ["विधानसभा का शीतकालीन सत्र 5 दिसंबर से, विपक्ष ने की घेराबंदी की तैयारी","rajniti","",2,"published",4,2980,0,0],
+    ["संयुक्त राष्ट्र में जलवायु पर बड़ा समझौता, 150 देशों ने किए हस्ताक्षर","duniya","",1,"published",17,1420,1,0],
+    ["स्वदेशी AI चैटबॉट लॉन्च, 22 भारतीय भाषाओं में करेगा बात","tech","",4,"published",20,3310,0,0],
+    ["दिवाली पर रिलीज़ होंगी तीन बड़ी फ़िल्में, बॉक्स ऑफ़िस पर महामुकाबला","manoranjan","",2,"published",42,2760,0,0],
+    ["वाराणसी: गंगा का जलस्तर घटा, घाटों पर फिर शुरू हुई नौका सेवा","up","वाराणसी",2,"published",18,1210,0,0],
+    ["लखनऊ मेट्रो के दूसरे चरण को मंज़ूरी, चारबाग से वसंतकुंज तक चलेगी ट्रेन","up","लखनऊ",2,"published",40,3890,0,0],
+    ["यूपी टी20 लीग: गोरखपुर लायंस ने लखनऊ फाल्कन्स को 6 विकेट से हराया","khel","गोरखपुर",3,"published",60,1560,0,0],
+    ["त्योहारों से पहले सोना सस्ता, 10 ग्राम पर करीब 800 रुपये की गिरावट","vyapar","",4,"published",25,2470,0,0],
+    ["प्रयागराज में माघ मेले की तैयारी को लेकर अफ़सरों की बैठक","up","प्रयागराज",2,"published",20,640,0,0],
+    ["उपचुनाव: सभी दलों ने उतारे उम्मीदवार, त्रिकोणीय मुकाबले के आसार","rajniti","",2,"published",23,2210,0,0],
+    ["वंदे भारत स्लीपर ट्रेन का ट्रायल सफल, दिल्ली-पटना रूट पर जल्द शुरुआत","desh","",1,"published",40,4100,0,0],
+    ["महराजगंज के किसानों को मिलेंगे मुफ़्त गेहूँ बीज, पंजीकरण शुरू","up","महराजगंज",6,"draft",5,0,0,0],
+    ["गोरखपुर विश्वविद्यालय का दीक्षांत समारोह 10 अक्टूबर को","up","गोरखपुर",5,"draft",8,0,0,0],
+    ["नवरात्रि विशेष: शहर के प्रमुख देवी मंदिरों में उमड़ी भीड़","up","लखनऊ",2,"scheduled",-6,0,0,0],
+    ["आज का राशिफल: जानिए कैसा रहेगा आपका दिन","manoranjan","",2,"scheduled",-18,0,0,0]
+  ];
+  const articles=A.map(([title,category,city,authorId,status,hrs,views,breaking,featured],i)=>({
+    id:i+1,title,slug:slugify(title),category,city,authorId,status,
+    date:new Date(now-hrs*H).toISOString(),views,breaking:!!breaking,featured:!!featured,comments:true,
+    summary:"इस ख़बर का संक्षिप्त सार यहाँ लिखा जाता है, जो होम पेज और सोशल मीडिया पर दिखता है।",
+    content:`<p>${esc(title)}। यह नमूना ख़बर है। असली वेबसाइट पर यहाँ संवाददाता की पूरी रिपोर्ट होगी।</p><p>स्थानीय लोगों और अधिकारियों से बातचीत के आधार पर यह रिपोर्ट तैयार की गई है। आगे की जानकारी मिलते ही ख़बर अपडेट की जाएगी।</p>`,
+    tags:[city,cats.find(c=>c.slug===category).name].filter(Boolean),image:"",caption:"",video:"",seoTitle:"",seoDesc:""}));
+  const breaking=[
+    {id:1,text:"गोरखपुर में नया फ्लाईओवर जनता के लिए खुला",articleId:1,active:true,expires:new Date(now+10*H).toISOString(),order:1},
+    {id:2,text:"साइबर ठगी गिरोह का भंडाफोड़, 7 आरोपी गिरफ़्तार",articleId:7,active:true,expires:new Date(now+20*H).toISOString(),order:2},
+    {id:3,text:"टीम इंडिया ने ऑस्ट्रेलिया को 4 विकेट से हराया",articleId:2,active:true,expires:new Date(now+4*H).toISOString(),order:3},
+    {id:4,text:"भारी बारिश का अलर्ट: 12 ज़िलों में स्कूल बंद",articleId:0,active:false,expires:new Date(now-3*H).toISOString(),order:4}
+  ];
+  const videos=[
+    {id:1,title:"ग्राउंड रिपोर्ट: नए फ्लाईओवर से कितना बदला गोरखपुर का ट्रैफ़िक",url:"https://youtube.com/watch?v=demo1",duration:"4:12",category:"up",featured:true,date:new Date(now-4*H).toISOString(),views:12400},
+    {id:2,title:"साइबर ठगों से कैसे बचें? पुलिस अधिकारी से ख़ास बातचीत",url:"https://youtube.com/watch?v=demo2",duration:"7:45",category:"crime",featured:false,date:new Date(now-7*H).toISOString(),views:8300},
+    {id:3,title:"आख़िरी ओवर का रोमांच: मैच के सबसे बड़े पल",url:"https://youtube.com/watch?v=demo3",duration:"2:58",category:"khel",featured:false,date:new Date(now-11*H).toISOString(),views:21500},
+    {id:4,title:"सोनौली बॉर्डर से लाइव: त्योहारों पर कैसी है सुरक्षा",url:"https://youtube.com/watch?v=demo4",duration:"5:30",category:"up",featured:false,date:new Date(now-14*H).toISOString(),views:5100}
+  ];
+  const galleries=[
+    {id:1,title:"तस्वीरों में: लखनऊ के पंडालों की भव्य सजावट",category:"up",images:[],date:new Date(now-10*H).toISOString()},
+    {id:2,title:"देखिए: वाराणसी के घाटों की शाम",category:"up",images:[],date:new Date(now-15*H).toISOString()}
+  ];
+  const ads=[
+    {id:1,name:"हेडर बैनर: त्योहारी सेल",slot:"header",image:"",link:"https://example.com/sale",start:toLocalInput(now-48*H).slice(0,10),end:toLocalInput(now+240*H).slice(0,10),active:true,impressions:184200,clicks:1930},
+    {id:2,name:"साइडबार: कोचिंग संस्थान",slot:"sidebar",image:"",link:"https://example.com/coaching",start:toLocalInput(now-120*H).slice(0,10),end:toLocalInput(now+120*H).slice(0,10),active:true,impressions:96500,clicks:870},
+    {id:3,name:"बीच का बैनर: रियल एस्टेट",slot:"middle",image:"",link:"https://example.com/homes",start:toLocalInput(now-400*H).slice(0,10),end:toLocalInput(now-24*H).slice(0,10),active:false,impressions:40300,clicks:212}
+  ];
+  const comments=[
+    {id:1,name:"राजेश कुमार",email:"rajesh@example.com",articleId:1,text:"बहुत अच्छी ख़बर, अब ऑफ़िस पहुँचने में आधा समय लगेगा।",status:"pending",date:new Date(now-.5*H).toISOString()},
+    {id:2,name:"सुनीता देवी",email:"sunita@example.com",articleId:5,text:"पंडालों में पार्किंग की व्यवस्था पर भी ध्यान देना चाहिए।",status:"pending",date:new Date(now-1.5*H).toISOString()},
+    {id:3,name:"FreeOffers",email:"win@spam.example",articleId:2,text:"जीतें 10 लाख! अभी क्लिक करें www.fake-link.example",status:"pending",date:new Date(now-2*H).toISOString()},
+    {id:4,name:"अंकित",email:"ankit@example.com",articleId:2,text:"शानदार जीत! टीम को बधाई।",status:"approved",date:new Date(now-9*H).toISOString()},
+    {id:5,name:"मोहन लाल",email:"mohan@example.com",articleId:4,text:"सीमा पर सख़्ती ज़रूरी है।",status:"approved",date:new Date(now-12*H).toISOString()}
+  ];
+  const views7=[31200,28900,34100,30500,38700,41200,36800];
+  return {cats,cities,users,articles,breaking,videos,galleries,ads,comments,media:[],views7,
+    settings:{siteName:"समाचार भारती",tagline:"सच के साथ, सबसे पहले",email:"news@samacharbharti.in",phone:"+91 98xxx xxxxx",address:"हज़रतगंज, लखनऊ, उत्तर प्रदेश",facebook:"https://facebook.com/",x:"https://x.com/",youtube:"https://youtube.com/",instagram:"https://instagram.com/",color:"#d71920",perPage:10,tickerSpeed:"medium",comments:true,moderate:true,logo:""},
+    log:[{t:new Date(now-.3*H).toISOString(),text:"“गोरखपुर में नया फ्लाईओवर…” ख़बर अपडेट की",user:"संवाददाता गोरखपुर"},{t:new Date(now-1*H).toISOString(),text:"“महराजगंज: नेपाल सीमा…” ख़बर प्रकाशित की",user:"संपादक मंडल"},{t:new Date(now-2*H).toISOString(),text:"ब्रेकिंग न्यूज़ जोड़ी: “साइबर ठगी गिरोह…”",user:"रवि शर्मा"}]};
+}
+const KEY="samachar_admin_demo_v1";
+let db, storageOk=true;
+function load(){try{const s=localStorage.getItem(KEY);db=s?JSON.parse(s):seed()}catch(e){db=seed()}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db));storageOk=true}catch(e){if(storageOk)toast("ब्राउज़र की स्टोरेज भर गई है या बंद है। बदलाव सिर्फ़ इस टैब में रहेंगे।","bad");storageOk=false}}
+const nextId=col=>col.reduce((m,x)=>Math.max(m,x.id),0)+1;
+function logAct(text){db.log.unshift({t:new Date().toISOString(),text,user:me().name});db.log=db.log.slice(0,40)}
+const cat=slug=>db.cats.find(c=>c.slug===slug)||{name:"—",color:"#888",slug};
+const user=id=>db.users.find(u=>u.id===id)||{name:"—"};
+const art=id=>db.articles.find(a=>a.id===id);
+const short=(s,n=48)=>s.length>n?s.slice(0,n)+"…":s;
+
+/* ============ लॉगिन / रोल ============ */
+const ROLES={admin:"एडमिन",editor:"संपादक",reporter:"रिपोर्टर"};
+let session={userId:1};
+try{const s=sessionStorage.getItem(KEY+"_s");if(s)session=JSON.parse(s)}catch(e){}
+const me=()=>db.users.find(u=>u.id===session.userId)||db.users[0];
+function setSession(s){session=s;try{sessionStorage.setItem(KEY+"_s",JSON.stringify(s))}catch(e){}}
+const can=page=>{const r=me().role;if(r==="admin")return true;if(r==="editor")return !["users","settings"].includes(page);return ["dashboard","articles","editor","media"].includes(page)};
+
+/* ============ UI: टोस्ट, मोडल, कन्फ़र्म ============ */
+function toast(msg,kind){const t=document.createElement("div");t.className="toast"+(kind?" "+kind:"");t.innerHTML=(kind==="bad"?ic("ban"):ic("check"))+`<span>${esc(msg)}</span>`;$("#toasts").append(t);setTimeout(()=>t.remove(),3000)}
+function modal({title,body,foot,wide,onMount}){
+  closeModal();
+  const o=document.createElement("div");o.className="overlay";o.id="overlay";
+  o.innerHTML=`<div class="modal${wide?" wide":""}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="modal-h"><h3>${esc(title)}</h3><button class="btn ghost sm" data-close aria-label="बंद करें">${ic("x")}</button></div><div class="modal-b">${body}</div>${foot?`<div class="modal-f">${foot}</div>`:""}</div>`;
+  o.addEventListener("click",e=>{if(e.target===o||e.target.closest("[data-close]"))closeModal()});
+  document.body.append(o);onMount&&onMount(o);
+  const f=o.querySelector("input,select,textarea,button.primary");f&&f.focus();
+}
+function closeModal(){const o=$("#overlay");o&&o.remove()}
+function confirmBox(msg,onYes,yesLabel="हाँ, हटाएँ"){
+  modal({title:"पक्का करें",body:`<p style="margin:0">${msg}</p>`,foot:`<button class="btn" data-close>रद्द करें</button><button class="btn primary" id="yesBtn">${yesLabel}</button>`,
+    onMount:o=>o.querySelector("#yesBtn").onclick=()=>{closeModal();onYes()}});
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+
+/* इमेज: छोटा करके data URL */
+function readImage(file,max=1000){
+  return new Promise((res,rej)=>{
+    if(!file||!file.type.startsWith("image/"))return rej(new Error("सिर्फ़ इमेज फ़ाइल (JPG, PNG, WebP) चुनें।"));
+    const fr=new FileReader();fr.onerror=()=>rej(new Error("फ़ाइल पढ़ी नहीं जा सकी।"));
+    fr.onload=()=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.78))};img.onerror=()=>rej(new Error("इमेज खुल नहीं सकी।"));img.src=fr.result};
+    fr.readAsDataURL(file);
+  });
+}
+function addMedia(src,name){db.media.unshift({id:nextId(db.media),src,name:name||"image.jpg",date:new Date().toISOString()})}
+const thumbHtml=(a)=>a.image?`<img class="thumb" src="${a.image}" alt="">`:`<span class="thumb" style="--c:${cat(a.category).color}">${esc(cat(a.category).name.slice(0,3))}</span>`;
+
+/* ============ नेविगेशन ============ */
+const NAV=[
+  ["मुख्य",[["dashboard","डैशबोर्ड","dash"]]],
+  ["कंटेंट",[["articles","सभी ख़बरें","news"],["editor","नई ख़बर लिखें","plus"],["breaking","ब्रेकिंग न्यूज़","bolt"],["videos","वीडियो","video"],["galleries","फ़ोटो गैलरी","photo"],["media","मीडिया लाइब्रेरी","media"]]],
+  ["व्यवस्था",[["cats","श्रेणियाँ","cat"],["cities","शहर / ज़िले","city"],["comments","टिप्पणियाँ","chat"],["ads","विज्ञापन","ad"]]],
+  ["सेटिंग",[["users","यूज़र / रिपोर्टर","users"],["settings","साइट सेटिंग","gear"]]]
+];
+let S={page:"dashboard",editId:null,q:"",fcat:"",fstatus:"",sort:"new",pg:1,sel:new Set(),cstatus:"pending",eq:""};
+function go(page,extra={}){
+  if(!can(page)){toast("आपके रोल ("+ROLES[me().role]+") को यह पेज खोलने की अनुमति नहीं है।","bad");return}
+  S={...S,page,...extra};if(page!=="articles")S.sel=new Set();
+  try{if(location.hash.slice(1)!==page)history.replaceState(null,"","#"+page)}catch(e){}
+  $(".side")?.classList.remove("open");render();window.scrollTo(0,0);
+}
+
+function counts(){return{pending:db.comments.filter(c=>c.status==="pending").length,drafts:db.articles.filter(a=>a.status!=="published").length,brk:db.breaking.filter(b=>b.active&&new Date(b.expires)>Date.now()).length}}
+
+function shell(inner){
+  const c=counts(), u=me();
+  const badge={comments:c.pending,articles:0,breaking:c.brk};
+  return `<div class="shell">
+  <aside class="side" id="side">
+    <div class="brand"><span class="a">समाचार</span><span class="b">भारती</span><small>एडमिन</small></div>
+    ${NAV.map(([g,items])=>{const vis=items.filter(([k])=>can(k));return vis.length?`<div class="navgroup"><h6>${g}</h6>${vis.map(([k,l,i])=>`<button class="navitem" data-go="${k}" ${S.page===k?'aria-current="page"':""}>${ic(i)}<span>${l}</span>${badge[k]?`<span class="count">${badge[k]}</span>`:""}</button>`).join("")}</div>`:""}).join("")}
+    <div class="side-foot">डेमो डेटा आपके ब्राउज़र में सेव होता है।<br><button data-act="reset">नमूना डेटा दोबारा लोड करें</button></div>
+  </aside>
+  <div style="min-width:0">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" data-act="menu" aria-label="मेनू खोलें">${ic("menu")}</button>
+      <form class="gsearch" id="gsearch" role="search">${ic("search")}<input id="gq" placeholder="ख़बरें खोजें…" aria-label="ख़बरें खोजें"></form>
+      <div class="top-actions">
+        <button class="btn primary" data-go="editor" data-new="1">${ic("plus")}<span>नई ख़बर</span></button>
+        <button class="icon-btn" data-act="notif" aria-label="सूचनाएँ">${ic("bell")}${c.pending?`<span class="dot">${c.pending}</span>`:""}</button>
+        <button class="icon-btn" data-act="theme" aria-label="डार्क/लाइट मोड">${ic("moon")}</button>
+        <button class="me" data-act="profile" aria-label="प्रोफ़ाइल"><span class="avatar" style="background:${hue(u.name)}">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><span>${ROLES[u.role]}</span></div></button>
+      </div>
+    </header>
+    <main class="content">${inner}</main>
+  </div></div>`;
+}
+
+/* ============ डैशबोर्ड ============ */
+function barChart(values){
+  const W=640,Hh=220,pl=44,pr=8,pt=14,pb=28, max=Math.ceil(Math.max(...values)/10000)*10000;
+  const iw=W-pl-pr, ih=Hh-pt-pb, bw=iw/values.length, gap=Math.min(22,bw*.35);
+  const days=values.map((_,i)=>{const d=new Date(Date.now()-(values.length-1-i)*864e5);return i===values.length-1?"आज":d.toLocaleDateString("hi-IN",{weekday:"short"})});
+  let g="";for(let k=0;k<=4;k++){const v=max*k/4,y=pt+ih-ih*k/4;g+=`<line class="grid" x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}"/><text class="axis" x="${pl-8}" y="${y+4}" text-anchor="end">${v>=1000?(v/1000)+"k":v}</text>`}
+  const bars=values.map((v,i)=>{const h=ih*v/max,x=pl+i*bw+gap/2,w=bw-gap,y=pt+ih-h,r=Math.min(4,w/2);
+    return `<rect class="hit" x="${pl+i*bw}" y="${pt}" width="${bw}" height="${ih}" data-tip="${days[i]}: ${nf(v)} व्यूज़" data-x="${x+w/2}" data-y="${y}"/><path class="bar${i===values.length-1?" today":""}" pointer-events="none" d="M${x},${pt+ih}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${pt+ih}Z"/><text class="axis" x="${x+w/2}" y="${Hh-8}" text-anchor="middle">${days[i]}</text>`}).join("");
+  return `<div class="chart" id="viewsChart"><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="पिछले 7 दिनों के पेज व्यूज़">${g}${bars}</svg><div class="tip" hidden></div></div>`;
+}
+function pageDashboard(){
+  const A=db.articles, pub=A.filter(a=>a.status==="published"), today=pub.filter(a=>Date.now()-new Date(a.date)<24*H);
+  const totalViews=A.reduce((s,a)=>s+a.views,0), c=counts();
+  const v7=db.views7, change=Math.round((v7[6]-v7[5])/v7[5]*100);
+  const byCat=db.cats.map(k=>({k,n:A.filter(a=>a.category===k.slug).length})).sort((a,b)=>b.n-a.n);
+  const maxN=Math.max(1,...byCat.map(x=>x.n));
+  const top=[...pub].sort((a,b)=>b.views-a.views).slice(0,5);
+  const pend=db.comments.filter(x=>x.status==="pending").slice(0,4);
+  const mine=me().role==="reporter"?`<p class="muted" style="margin:4px 0 0">आपकी ख़बरें: ${A.filter(a=>a.authorId===me().id).length}</p>`:"";
+  return `<div class="page-head"><div><h1>नमस्ते, ${esc(me().name)}</h1><p>${new Date().toLocaleDateString("hi-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"})} · आज की पूरी तस्वीर</p>${mine}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="breaking">${ic("bolt")}ब्रेकिंग जोड़ें</button><button class="btn primary" data-go="editor" data-new="1">${ic("plus")}नई ख़बर</button></div></div>
+  <div class="demo-note"><span>यह डेमो है: सभी आँकड़े नमूना हैं। आप जो भी बदलाव करेंगे, वे इसी ब्राउज़र में सेव रहेंगे।</span><button data-act="reset">नमूना डेटा दोबारा लोड करें</button></div>
+  <div class="stats">
+    <div class="card stat"><span class="lbl">${ic("news")}कुल ख़बरें</span><span class="num">${nf(A.length)}</span><span class="sub">आज प्रकाशित: <b>${today.length}</b></span></div>
+    <div class="card stat"><span class="lbl">${ic("eye")}आज के व्यूज़</span><span class="num">${nf(v7[6])}</span><span class="sub">कल से <b style="color:${change>=0?"var(--good)":"var(--bad)"}">${change>=0?"▲":"▼"} ${Math.abs(change)}%</b></span></div>
+    <div class="card stat"><span class="lbl">${ic("edit")}ड्राफ़्ट / शेड्यूल</span><span class="num">${nf(c.drafts)}</span><span class="sub">समीक्षा बाकी</span></div>
+    <div class="card stat"><span class="lbl">${ic("chat")}नई टिप्पणियाँ</span><span class="num">${nf(c.pending)}</span><span class="sub">मंज़ूरी का इंतज़ार</span></div>
+  </div>
+  <div class="dash">
+    <section class="card"><div class="card-h"><h2>पिछले 7 दिनों के पेज व्यूज़</h2><span class="muted small">कुल ${nf(v7.reduce((a,b)=>a+b,0))}</span></div><div class="card-b">${barChart(v7)}</div></section>
+    <section class="card"><div class="card-h"><h2>श्रेणी के हिसाब से ख़बरें</h2></div><div class="card-b hbars">${byCat.map(x=>`<div class="hbar"><span>${esc(x.k.name)}</span><span class="track"><span class="fill" style="width:${x.n/maxN*100}%;display:block"></span></span><span class="v">${x.n}</span></div>`).join("")}</div></section>
+    <section class="card"><div class="card-h"><h2>सबसे ज़्यादा पढ़ी गईं</h2><button class="btn sm" data-go="articles" data-sortviews="1">सभी देखें</button></div><ul class="mini-list">${top.map(a=>`<li>${thumbHtml(a)}<div class="t"><button class="linkish" data-edit="${a.id}">${esc(a.title)}</button><div class="ttl-meta">${esc(cat(a.category).name)} · ${ago(a.date)}</div></div><b style="font-variant-numeric:tabular-nums">${nf(a.views)}</b></li>`).join("")}</ul></section>
+    <section class="card"><div class="card-h"><h2>मंज़ूरी के लिए टिप्पणियाँ</h2><button class="btn sm" data-go="comments">सभी देखें</button></div>${pend.length?`<ul class="mini-list">${pend.map(x=>`<li><span class="avatar" style="background:${hue(x.name)}">${esc(initials(x.name))}</span><div class="t"><b>${esc(x.name)}</b><div class="small" style="font-family:var(--f-body)">${esc(x.text)}</div><div class="ttl-meta">${esc(short(art(x.articleId)?.title||"हटाई गई ख़बर",40))} · ${ago(x.date)}</div></div><div class="row-acts"><button title="मंज़ूर करें" aria-label="मंज़ूर करें" data-cmt="approved" data-id="${x.id}">${ic("check")}</button><button class="del" title="स्पैम" aria-label="स्पैम" data-cmt="spam" data-id="${x.id}">${ic("ban")}</button></div></li>`).join("")}</ul>`:`<div class="empty">कोई टिप्पणी बाकी नहीं है।</div>`}</section>
+    <section class="card span"><div class="card-h"><h2>हाल की गतिविधि</h2></div><ul class="mini-list log">${db.log.slice(0,6).map(l=>`<li><span class="avatar" style="background:${hue(l.user)};width:26px;height:26px;font-size:12px">${esc(initials(l.user))}</span><div class="t"><b style="font-family:var(--f-ui);font-weight:500">${esc(l.user)}: ${esc(l.text)}</b></div><time>${ago(l.t)}</time></li>`).join("")}</ul></section>
+  </div>`;
+}
+
+/* ============ ख़बरें ============ */
+const STATUS={published:"प्रकाशित",draft:"ड्राफ़्ट",scheduled:"शेड्यूल"};
+function filteredArticles(){
+  let L=db.articles.slice();
+  if(me().role==="reporter")L=L.filter(a=>a.authorId===me().id);
+  const q=S.q.trim().toLowerCase();
+  if(q)L=L.filter(a=>(a.title+" "+a.tags.join(" ")+" "+a.city+" "+user(a.authorId).name).toLowerCase().includes(q));
+  if(S.fcat)L=L.filter(a=>a.category===S.fcat);
+  if(S.fstatus)L=L.filter(a=>a.status===S.fstatus);
+  const sorts={new:(a,b)=>new Date(b.date)-new Date(a.date),old:(a,b)=>new Date(a.date)-new Date(b.date),views:(a,b)=>b.views-a.views,title:(a,b)=>a.title.localeCompare(b.title,"hi")};
+  return L.sort(sorts[S.sort]);
+}
+function pageArticles(){
+  const L=filteredArticles(), per=Number(db.settings.perPage)||10, pages=Math.max(1,Math.ceil(L.length/per));
+  if(S.pg>pages)S.pg=pages;
+  const rows=L.slice((S.pg-1)*per,S.pg*per);
+  const all=db.articles.filter(a=>me().role!=="reporter"||a.authorId===me().id);
+  const cnt=s=>all.filter(a=>!s||a.status===s).length;
+  const selN=S.sel.size;
+  return `<div class="page-head"><div><h1>सभी ख़बरें</h1><p>${nf(L.length)} ख़बरें मिलीं</p></div><button class="btn primary" data-go="editor" data-new="1">${ic("plus")}नई ख़बर</button></div>
+  <section class="card">
+    <div class="toolbar">
+      <div class="tabs" role="tablist">${[["","सभी"],["published","प्रकाशित"],["draft","ड्राफ़्ट"],["scheduled","शेड्यूल"]].map(([k,l])=>`<button class="tab" role="tab" data-fstatus="${k}" aria-selected="${S.fstatus===k}">${l} (${cnt(k)})</button>`).join("")}</div>
+    </div>
+    <div class="toolbar">
+      <label class="field-inline">${ic("search")}<input id="aq" value="${esc(S.q)}" placeholder="शीर्षक, टैग, शहर या लेखक" aria-label="ख़बरें खोजें"></label>
+      <select class="sel" id="fcat" aria-label="श्रेणी"><option value="">सभी श्रेणियाँ</option>${db.cats.map(c=>`<option value="${c.slug}" ${S.fcat===c.slug?"selected":""}>${esc(c.name)}</option>`).join("")}</select>
+      <select class="sel" id="fsort" aria-label="क्रम">${[["new","नई पहले"],["old","पुरानी पहले"],["views","सबसे ज़्यादा व्यूज़"],["title","शीर्षक (अ-ज्ञ)"]].map(([k,l])=>`<option value="${k}" ${S.sort===k?"selected":""}>${l}</option>`).join("")}</select>
+      <div class="bulk">${selN?`<span class="muted">${selN} चुनी गईं</span><button class="btn sm" data-bulk="published">प्रकाशित करें</button><button class="btn sm" data-bulk="draft">ड्राफ़्ट में डालें</button><button class="btn sm danger" data-bulk="delete">हटाएँ</button>`:`<span class="muted small">एक साथ बदलने के लिए ख़बरें चुनें</span>`}</div>
+    </div>
+    ${rows.length?`<div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="selAll" aria-label="इस पेज की सभी चुनें" ${rows.every(r=>S.sel.has(r.id))?"checked":""}></th><th>ख़बर</th><th>श्रेणी</th><th>लेखक</th><th>स्थिति</th><th class="num">व्यूज़</th><th>तारीख़</th><th></th></tr></thead><tbody>
+    ${rows.map(a=>`<tr><td><input type="checkbox" data-sel="${a.id}" aria-label="चुनें" ${S.sel.has(a.id)?"checked":""}></td>
+      <td><div class="tcell">${thumbHtml(a)}<div><button class="linkish ttl" data-edit="${a.id}">${esc(a.title)}</button><div class="ttl-meta">${a.breaking?'<span class="flag brk">ब्रेकिंग</span>':""}${a.featured?'<span class="flag feat">मुख्य</span>':""}${a.city?esc(a.city):""}</div></div></div></td>
+      <td style="white-space:nowrap"><span class="swatch" style="background:${cat(a.category).color}"></span>${esc(cat(a.category).name)}</td>
+      <td style="white-space:nowrap">${esc(user(a.authorId).name)}</td>
+      <td><span class="pill p-${a.status}">${STATUS[a.status]}</span></td>
+      <td class="num">${a.status==="published"?nf(a.views):"—"}</td>
+      <td style="white-space:nowrap" class="small">${fmtDate(a.date)}</td>
+      <td><div class="row-acts"><button title="एडिट करें" aria-label="एडिट करें" data-edit="${a.id}">${ic("edit")}</button><button title="प्रीव्यू" aria-label="प्रीव्यू" data-preview="${a.id}">${ic("eye")}</button><button title="कॉपी बनाएँ" aria-label="कॉपी बनाएँ" data-dup="${a.id}">${ic("copy")}</button><button class="del" title="हटाएँ" aria-label="हटाएँ" data-delart="${a.id}">${ic("trash")}</button></div></td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="pager"><span>${nf((S.pg-1)*per+1)}–${nf(Math.min(S.pg*per,L.length))} / ${nf(L.length)}</span><div class="pg">${Array.from({length:pages},(_,i)=>`<button data-pg="${i+1}" aria-current="${S.pg===i+1}">${i+1}</button>`).join("")}</div></div>`
+    :`<div class="empty">इन फ़िल्टर से कोई ख़बर नहीं मिली। फ़िल्टर हटाकर देखें।</div>`}
+  </section>`;
+}
+function previewArticle(a){
+  modal({title:"प्रीव्यू: वेबसाइट पर ऐसी दिखेगी",wide:true,body:`<div class="apv"><span class="pill p-${a.status}">${STATUS[a.status]}</span> <span class="small muted">${esc(cat(a.category).name)}${a.city?" › "+esc(a.city):""}</span>
+    <h1>${esc(a.title||"(शीर्षक नहीं)")}</h1>${a.summary?`<p class="dek">${esc(a.summary)}</p>`:""}
+    <p class="small muted">लेखक: ${esc(user(a.authorId).name)} · ${fmtDate(a.date)}</p>
+    ${a.image?`<img src="${a.image}" alt="">${a.caption?`<p class="small muted">${esc(a.caption)}</p>`:""}`:""}
+    <div class="body">${a.content||"<p class='muted'>(कंटेंट नहीं)</p>"}</div>
+    <p class="small">${a.tags.map(t=>"#"+esc(t)).join(" ")}</p></div>`});
+}
+
+/* ============ एडिटर ============ */
+let draft=null, errors={};
+function blankArticle(){return{id:null,title:"",slug:"",summary:"",content:"",category:"",city:"",authorId:me().id,status:"draft",date:new Date().toISOString(),views:0,breaking:false,featured:false,comments:true,tags:[],image:"",caption:"",video:"",seoTitle:"",seoDesc:""}}
+function pageEditor(){
+  if(!draft)draft=S.editId?JSON.parse(JSON.stringify(art(S.editId))):blankArticle();
+  const a=draft, isNew=!a.id, reporter=me().role==="reporter";
+  const cnt=(v,max)=>`<span class="${v.length>max?"over":""}">${v.length}/${max}</span>`;
+  const words=stripHtml(a.content).trim().split(/\s+/).filter(Boolean).length;
+  return `<div class="page-head"><div><h1>${isNew?"नई ख़बर लिखें":"ख़बर एडिट करें"}</h1><p>${isNew?"सभी ज़रूरी (*) जानकारी भरें, फिर ड्राफ़्ट सेव करें या प्रकाशित करें।":"आख़िरी बदलाव: "+fmtDate(a.date)}</p></div><button class="btn" data-go="articles">← सभी ख़बरें</button></div>
+  <form id="artForm" class="form-grid" novalidate>
+    <div class="stack">
+      <section class="card card-b stack">
+        <div class="fld"><label for="f_title">शीर्षक *</label><input id="f_title" class="inp title ${errors.title?"bad":""}" value="${esc(a.title)}" placeholder="ख़बर का शीर्षक लिखें" maxlength="150">
+          <div class="hint"><span>${errors.title?`<span class="err">${errors.title}</span>`:"साफ़ और छोटा शीर्षक सबसे ज़्यादा पढ़ा जाता है"}</span><span id="c_title">${cnt(a.title,100)}</span></div></div>
+        <div class="fld"><label for="f_slug">URL (स्लग)</label><input id="f_slug" class="inp" value="${esc(a.slug)}" placeholder="शीर्षक से अपने आप बनेगा"><div class="hint"><span>samacharbharti.in/${esc(cat(a.category).slug||"shreni")}/<b id="slugPrev">${esc(a.slug||"…")}</b></span></div></div>
+        <div class="fld"><label for="f_summary">सार (सारांश)</label><textarea id="f_summary" class="inp" rows="2" placeholder="1-2 लाइन में ख़बर का सार, जो होम पेज पर दिखेगा">${esc(a.summary)}</textarea><div class="hint"><span></span><span id="c_summary">${cnt(a.summary,200)}</span></div></div>
+        <div class="fld"><span class="lbl2">पूरी ख़बर *</span>
+          <div class="editor ${errors.content?"bad":""}">
+            <div class="etools" role="toolbar" aria-label="फ़ॉर्मैटिंग">
+              <button type="button" data-cmd="bold" title="बोल्ड"><b>B</b></button><button type="button" data-cmd="italic" title="इटैलिक"><i>I</i></button><button type="button" data-cmd="underline" title="अंडरलाइन"><u>U</u></button><span class="sep"></span>
+              <button type="button" data-cmd="formatBlock" data-val="h2" title="उप-शीर्षक">H2</button><button type="button" data-cmd="formatBlock" data-val="p" title="सामान्य पैराग्राफ़">¶</button><button type="button" data-cmd="formatBlock" data-val="blockquote" title="उद्धरण">❝</button><span class="sep"></span>
+              <button type="button" data-cmd="insertUnorderedList" title="बुलेट सूची">• सूची</button><button type="button" data-cmd="insertOrderedList" title="नंबर सूची">1. सूची</button><button type="button" data-cmd="createLink" title="लिंक जोड़ें">🔗 लिंक</button><button type="button" data-cmd="removeFormat" title="फ़ॉर्मैटिंग हटाएँ">साफ़ करें</button>
+            </div>
+            <div class="earea" id="f_content" contenteditable="true" data-ph="यहाँ ख़बर लिखें…" aria-label="पूरी ख़बर">${a.content}</div>
+            <div class="wc"><span>${errors.content?`<span class="err">${errors.content}</span>`:"Ctrl+B बोल्ड, Ctrl+I इटैलिक"}</span><span id="wc">${words} शब्द · लगभग ${Math.max(1,Math.round(words/200))} मिनट</span></div>
+          </div></div>
+        <div class="fld"><span class="lbl2">टैग</span><div class="chips" id="chips">${a.tags.map((t,i)=>`<span class="chip">${esc(t)}<button type="button" data-untag="${i}" aria-label="${esc(t)} हटाएँ">${ic("x")}</button></span>`).join("")}<input id="tagIn" placeholder="टैग लिखकर Enter दबाएँ" aria-label="टैग जोड़ें"></div></div>
+      </section>
+      <section class="card"><div class="card-h"><h2>SEO (गूगल सर्च)</h2></div><div class="card-b stack">
+        <div class="fld"><label for="f_seoTitle">मेटा टाइटल</label><input id="f_seoTitle" class="inp" value="${esc(a.seoTitle)}" placeholder="${esc(a.title||"ख़ाली छोड़ें तो शीर्षक ही लिया जाएगा")}"><div class="hint"><span>60 अक्षर तक सबसे अच्छा</span><span id="c_seoTitle">${cnt(a.seoTitle,60)}</span></div></div>
+        <div class="fld"><label for="f_seoDesc">मेटा विवरण</label><textarea id="f_seoDesc" class="inp" rows="2" placeholder="सर्च रिज़ल्ट में दिखने वाला विवरण">${esc(a.seoDesc)}</textarea><div class="hint"><span>160 अक्षर तक सबसे अच्छा</span><span id="c_seoDesc">${cnt(a.seoDesc,160)}</span></div></div>
+      </div></section>
+    </div>
+    <div class="stack">
+      <section class="card"><div class="card-h"><h2>प्रकाशन</h2></div><div class="card-b stack">
+        <div class="radios" role="radiogroup" aria-label="स्थिति">
+          ${[["draft","ड्राफ़्ट","अभी वेबसाइट पर नहीं दिखेगी"],["published","प्रकाशित","तुरंत वेबसाइट पर दिखेगी"],["scheduled","शेड्यूल","तय समय पर अपने आप प्रकाशित"]].map(([k,l,d])=>`<label class="radio"><input type="radio" name="status" value="${k}" ${a.status===k?"checked":""} ${reporter&&k!=="draft"?"disabled":""}><span><b>${l}</b><br><span class="small muted">${d}</span></span></label>`).join("")}
+          ${reporter?`<p class="small muted" style="margin:0">रिपोर्टर ख़बर ड्राफ़्ट में सेव करते हैं। संपादक समीक्षा के बाद प्रकाशित करेंगे।</p>`:""}
+        </div>
+        <div class="fld" id="dateWrap"><label for="f_date">${a.status==="scheduled"?"प्रकाशन का समय *":"तारीख़ और समय"}</label><input type="datetime-local" id="f_date" class="inp ${errors.date?"bad":""}" value="${toLocalInput(a.date)}">${errors.date?`<span class="err">${errors.date}</span>`:""}</div>
+        <div class="fld"><label for="f_author">लेखक</label><select id="f_author" class="inp" ${reporter?"disabled":""}>${db.users.map(u=>`<option value="${u.id}" ${a.authorId===u.id?"selected":""}>${esc(u.name)} (${ROLES[u.role]})</option>`).join("")}</select></div>
+      </div></section>
+      <section class="card"><div class="card-h"><h2>श्रेणी और जगह</h2></div><div class="card-b stack">
+        <div class="fld"><label for="f_category">श्रेणी *</label><select id="f_category" class="inp ${errors.category?"bad":""}"><option value="">श्रेणी चुनें</option>${db.cats.slice().sort((x,y)=>x.order-y.order).map(c=>`<option value="${c.slug}" ${a.category===c.slug?"selected":""}>${esc(c.name)}</option>`).join("")}</select>${errors.category?`<span class="err">${errors.category}</span>`:""}</div>
+        <div class="fld"><label for="f_city">शहर / ज़िला</label><select id="f_city" class="inp"><option value="">कोई नहीं</option>${db.cities.map(c=>`<option ${a.city===c.name?"selected":""}>${esc(c.name)}</option>`).join("")}</select></div>
+      </div></section>
+      <section class="card"><div class="card-h"><h2>मुख्य तस्वीर</h2></div><div class="card-b stack">
+        ${a.image?`<div class="preview-img"><img src="${a.image}" alt="मुख्य तस्वीर"><button type="button" class="btn sm" data-act="rmimg">${ic("trash")}हटाएँ</button></div>`
+          :`<label class="drop" id="drop">${ic("upload")}<b>तस्वीर चुनें या यहाँ खींचकर छोड़ें</b><span class="small">JPG, PNG, WebP · 16:9 सबसे अच्छा</span><input type="file" id="f_image" accept="image/*"></label>`}
+        ${db.media.length&&!a.image?`<button type="button" class="btn sm" data-act="pickmedia">${ic("media")}मीडिया लाइब्रेरी से चुनें</button>`:""}
+        <div class="fld"><label for="f_caption">तस्वीर का कैप्शन</label><input id="f_caption" class="inp" value="${esc(a.caption)}" placeholder="जैसे: फ्लाईओवर का उद्घाटन (फ़ोटो: संवाददाता)"></div>
+        <div class="fld"><label for="f_video">वीडियो लिंक (YouTube)</label><input id="f_video" class="inp" type="url" value="${esc(a.video)}" placeholder="https://youtube.com/watch?v=…"></div>
+      </div></section>
+      <section class="card"><div class="card-h"><h2>विकल्प</h2></div><div class="card-b">
+        ${[["breaking","ब्रेकिंग न्यूज़","टिकर पट्टी में दिखेगी"],["featured","मुख्य ख़बर","होम पेज पर सबसे ऊपर"],["comments","टिप्पणियाँ चालू","पाठक राय दे सकेंगे"]].map(([k,l,d])=>`<label class="toggle"><span>${l}<small>${d}</small></span><span class="sw"><input type="checkbox" id="f_${k}" ${a[k]?"checked":""}><i></i></span></label>`).join("")}
+      </div></section>
+    </div>
+    <div class="sticky-actions card" style="grid-column:1/-1">
+      ${!isNew?`<button type="button" class="btn danger" data-delart="${a.id}" style="margin-right:auto">${ic("trash")}हटाएँ</button>`:""}
+      <button type="button" class="btn" data-act="preview">${ic("eye")}प्रीव्यू</button>
+      <button type="button" class="btn" data-save="draft">ड्राफ़्ट सेव करें</button>
+      ${reporter?"":`<button type="submit" class="btn primary">${a.status==="scheduled"?"शेड्यूल करें":isNew||a.status!=="published"?"प्रकाशित करें":"अपडेट करें"}</button>`}
+    </div>
+  </form>`;
+}
+function readEditor(){
+  const a=draft, v=id=>$("#"+id)?.value??"";
+  a.title=v("f_title").trim();a.slug=slugify(v("f_slug")||a.title);a.summary=v("f_summary").trim();
+  a.content=$("#f_content").innerHTML.trim();if(!stripHtml(a.content).trim())a.content="";
+  a.category=v("f_category");a.city=v("f_city");a.caption=v("f_caption").trim();a.video=v("f_video").trim();
+  a.seoTitle=v("f_seoTitle").trim();a.seoDesc=v("f_seoDesc").trim();
+  if(!$("#f_author").disabled)a.authorId=+v("f_author");
+  const st=document.querySelector('input[name=status]:checked');if(st)a.status=st.value;
+  const d=v("f_date");if(d)a.date=new Date(d).toISOString();
+  ["breaking","featured","comments"].forEach(k=>a[k]=$("#f_"+k).checked);
+}
+function saveArticle(forceStatus){
+  readEditor();const a=draft;if(forceStatus)a.status=forceStatus;
+  errors={};
+  if(!a.title)errors.title="शीर्षक लिखना ज़रूरी है।";
+  if(!a.category)errors.category="श्रेणी चुनें।";
+  if(a.status!=="draft"&&!a.content)errors.content="प्रकाशित करने से पहले ख़बर लिखें।";
+  if(a.status==="scheduled"&&new Date(a.date)<=Date.now())errors.date="शेड्यूल का समय आने वाला होना चाहिए।";
+  if(Object.keys(errors).length){render();toast("कुछ ज़रूरी जानकारी छूट गई है। लाल निशान वाले खाने भरें।","bad");return}
+  if(a.status==="published"&&new Date(a.date)>Date.now())a.date=new Date().toISOString();
+  const isNew=!a.id;
+  if(isNew){a.id=nextId(db.articles);db.articles.push(a)}else{const i=db.articles.findIndex(x=>x.id===a.id);db.articles[i]=a}
+  if(a.breaking&&!db.breaking.some(b=>b.articleId===a.id)){db.breaking.push({id:nextId(db.breaking),text:a.title,articleId:a.id,active:true,expires:new Date(Date.now()+12*H).toISOString(),order:db.breaking.length+1})}
+  const verb=a.status==="published"?(isNew?"प्रकाशित की":"अपडेट की"):a.status==="scheduled"?"शेड्यूल की":"ड्राफ़्ट में सेव की";
+  logAct(`“${short(a.title,40)}” ख़बर ${verb}`);save();
+  toast(`ख़बर ${verb} गई।`);
+  draft=null;errors={};go("articles");
+}
+
+/* ============ सामान्य CRUD (श्रेणी, शहर, वीडियो आदि) ============ */
+const SLOTS={header:"हेडर · 728×90",sidebar:"साइडबार · 300×250",middle:"बीच में · 970×90",article:"ख़बर के अंदर · 300×250"};
+const ENT={
+  cats:{col:"cats",title:"श्रेणियाँ",one:"श्रेणी",desc:"वेबसाइट के मेनू में दिखने वाली श्रेणियाँ",sortable:true,
+    fields:[{k:"name",l:"नाम",t:"text",req:1},{k:"slug",l:"URL स्लग",t:"text",ph:"जैसे: khel",hint:"अंग्रेज़ी अक्षर, बिना स्पेस"},{k:"color",l:"रंग",t:"color"},{k:"menu",l:"मेनू में दिखाएँ",t:"toggle"}],
+    cols:[["नाम",x=>`<span class="swatch" style="background:${x.color}"></span><b>${esc(x.name)}</b>`],["स्लग",x=>`<code>${esc(x.slug)}</code>`],["ख़बरें",x=>nf(db.articles.filter(a=>a.category===x.slug).length),"num"],["मेनू",x=>x.menu?'<span class="pill p-active">दिख रही</span>':'<span class="pill p-inactive">छिपी</span>']],
+    defaults:()=>({color:"#d71920",menu:true}),
+    canDelete:x=>db.articles.some(a=>a.category===x.slug)?"इस श्रेणी में ख़बरें हैं। पहले उन्हें दूसरी श्रेणी में डालें।":""},
+  cities:{col:"cities",title:"शहर / ज़िले",one:"शहर",desc:"होम पेज के राज्य सेक्शन में ज़िलों के टैब",sortable:true,
+    fields:[{k:"name",l:"शहर / ज़िले का नाम",t:"text",req:1},{k:"state",l:"राज्य",t:"text"},{k:"tab",l:"होम पेज टैब में दिखाएँ",t:"toggle"}],
+    cols:[["नाम",x=>`<b>${esc(x.name)}</b>`],["राज्य",x=>esc(x.state)],["ख़बरें",x=>nf(db.articles.filter(a=>a.city===x.name).length),"num"],["टैब",x=>x.tab?'<span class="pill p-active">दिख रहा</span>':'<span class="pill p-inactive">छिपा</span>']],
+    defaults:()=>({state:"उत्तर प्रदेश",tab:true})},
+  breaking:{col:"breaking",title:"ब्रेकिंग न्यूज़",one:"ब्रेकिंग ख़बर",desc:"वेबसाइट की चलती पट्टी। ऊपर-नीचे तीर से क्रम बदलें।",sortable:true,
+    fields:[{k:"text",l:"ब्रेकिंग लाइन",t:"textarea",req:1,max:120},{k:"articleId",l:"किस ख़बर से जोड़ें",t:"select",opts:()=>[[0,"कोई नहीं"]].concat(db.articles.filter(a=>a.status==="published").map(a=>[a.id,short(a.title,60)])),num:1},{k:"expires",l:"कब तक दिखे",t:"datetime",req:1},{k:"active",l:"चालू",t:"toggle"}],
+    cols:[["ब्रेकिंग लाइन",x=>`<span class="ttl">${esc(x.text)}</span>${x.articleId&&art(x.articleId)?`<div class="ttl-meta">↳ ${esc(short(art(x.articleId).title,50))}</div>`:""}`],["स्थिति",x=>!x.active?'<span class="pill p-inactive">बंद</span>':new Date(x.expires)<Date.now()?'<span class="pill p-expired">समय ख़त्म</span>':'<span class="pill p-active">चल रही</span>'],["कब तक",x=>`<span class="small">${fmtDate(x.expires)}</span>`]],
+    defaults:()=>({active:true,articleId:0,expires:new Date(Date.now()+12*H).toISOString()})},
+  videos:{col:"videos",title:"वीडियो",one:"वीडियो",desc:"होम पेज के वीडियो सेक्शन में दिखने वाले वीडियो",
+    fields:[{k:"title",l:"शीर्षक",t:"text",req:1},{k:"url",l:"YouTube लिंक",t:"url",req:1,ph:"https://youtube.com/watch?v=…"},{k:"duration",l:"अवधि",t:"text",ph:"जैसे: 4:12"},{k:"category",l:"श्रेणी",t:"select",opts:()=>db.cats.map(c=>[c.slug,c.name])},{k:"featured",l:"सबसे बड़ा वीडियो (मुख्य)",t:"toggle"}],
+    cols:[["शीर्षक",x=>`<span class="ttl">${esc(x.title)}</span><div class="ttl-meta">${x.featured?'<span class="flag feat">मुख्य</span>':""}<a href="${esc(x.url)}" target="_blank" rel="noopener" style="color:var(--info)">${esc(short(x.url,34))}</a></div>`],["श्रेणी",x=>esc(cat(x.category).name)],["अवधि",x=>esc(x.duration||"—"),"num"],["व्यूज़",x=>nf(x.views||0),"num"],["तारीख़",x=>`<span class="small">${fmtDay(x.date)}</span>`]],
+    defaults:()=>({category:"up",views:0,date:new Date().toISOString()})},
+  galleries:{col:"galleries",title:"फ़ोटो गैलरी",one:"गैलरी",desc:"कई तस्वीरों वाली गैलरी बनाएँ",
+    fields:[{k:"title",l:"गैलरी का शीर्षक",t:"text",req:1},{k:"category",l:"श्रेणी",t:"select",opts:()=>db.cats.map(c=>[c.slug,c.name])},{k:"images",l:"तस्वीरें",t:"images"}],
+    cols:[["गैलरी",x=>`<div class="tcell" style="min-width:220px">${x.images[0]?`<img class="thumb" src="${x.images[0]}" alt="">`:`<span class="thumb" style="--c:${cat(x.category).color}">${ic("photo")}</span>`}<span class="ttl">${esc(x.title)}</span></div>`],["श्रेणी",x=>esc(cat(x.category).name)],["तस्वीरें",x=>nf(x.images.length),"num"],["तारीख़",x=>`<span class="small">${fmtDay(x.date)}</span>`]],
+    defaults:()=>({category:"up",images:[],date:new Date().toISOString()})},
+  ads:{col:"ads",title:"विज्ञापन",one:"विज्ञापन",desc:"वेबसाइट की विज्ञापन जगहों पर बैनर लगाएँ",
+    fields:[{k:"name",l:"विज्ञापन का नाम",t:"text",req:1},{k:"slot",l:"जगह",t:"select",opts:()=>Object.entries(SLOTS)},{k:"image",l:"बैनर इमेज",t:"image"},{k:"link",l:"क्लिक पर लिंक",t:"url",ph:"https://"},{k:"start",l:"शुरू",t:"date",req:1},{k:"end",l:"ख़त्म",t:"date",req:1},{k:"active",l:"चालू",t:"toggle"}],
+    cols:[["विज्ञापन",x=>`<div class="tcell" style="min-width:220px">${x.image?`<img class="thumb" src="${x.image}" alt="">`:`<span class="thumb" style="--c:#8a8590">${ic("ad")}</span>`}<div><b>${esc(x.name)}</b><div class="ttl-meta">${SLOTS[x.slot]}</div></div></div>`],["अवधि",x=>`<span class="small">${fmtDay(x.start)} – ${fmtDay(x.end)}</span>`],["इम्प्रेशन",x=>nf(x.impressions||0),"num"],["क्लिक",x=>nf(x.clicks||0),"num"],["CTR",x=>x.impressions?(x.clicks/x.impressions*100).toFixed(2)+"%":"—","num"],["स्थिति",x=>!x.active?'<span class="pill p-inactive">बंद</span>':new Date(x.end+"T23:59")<Date.now()?'<span class="pill p-expired">समय ख़त्म</span>':'<span class="pill p-active">चल रहा</span>']],
+    defaults:()=>({slot:"sidebar",active:true,impressions:0,clicks:0,start:toLocalInput(Date.now()).slice(0,10),end:toLocalInput(Date.now()+30*24*H).slice(0,10)}),
+    validate:x=>x.end<x.start?{end:"ख़त्म की तारीख़ शुरू से पहले नहीं हो सकती।"}:null},
+  users:{col:"users",title:"यूज़र / रिपोर्टर",one:"यूज़र",desc:"टीम के सदस्य और उनके अधिकार",
+    fields:[{k:"name",l:"पूरा नाम",t:"text",req:1},{k:"email",l:"ईमेल",t:"email",req:1},{k:"role",l:"रोल",t:"select",opts:()=>Object.entries(ROLES)},{k:"city",l:"शहर (रिपोर्टर के लिए)",t:"select",opts:()=>[["","कोई नहीं"]].concat(db.cities.map(c=>[c.name,c.name]))},{k:"password",l:"पासवर्ड",t:"password",req:1,hint:"कम से कम 6 अक्षर"},{k:"active",l:"खाता चालू",t:"toggle"}],
+    cols:[["नाम",x=>`<div class="tcell" style="min-width:200px"><span class="avatar" style="background:${hue(x.name)}">${esc(initials(x.name))}</span><div><b>${esc(x.name)}</b><div class="ttl-meta">${esc(x.email)}</div></div></div>`],["रोल",x=>ROLES[x.role]],["शहर",x=>esc(x.city||"—")],["ख़बरें",x=>nf(db.articles.filter(a=>a.authorId===x.id).length),"num"],["स्थिति",x=>x.active?'<span class="pill p-active">चालू</span>':'<span class="pill p-inactive">बंद</span>']],
+    defaults:()=>({role:"reporter",active:true,city:""}),
+    validate:(x,orig)=>{const e={};if(x.password&&x.password.length<6)e.password="पासवर्ड कम से कम 6 अक्षर का हो।";if(db.users.some(u=>u.email===x.email&&u.id!==orig?.id))e.email="यह ईमेल पहले से किसी यूज़र का है।";if(!/^\S+@\S+\.\S+$/.test(x.email))e.email="सही ईमेल लिखें।";return Object.keys(e).length?e:null},
+    canDelete:x=>x.id===me().id?"आप अपना ही खाता नहीं हटा सकते।":db.articles.some(a=>a.authorId===x.id)?"इस यूज़र की ख़बरें हैं। खाता हटाने की जगह ‘खाता चालू’ बंद करें।":""}
+};
+function pageEntity(key){
+  const E=ENT[key], L=db[E.col].slice().sort((a,b)=>E.sortable?a.order-b.order:new Date(b.date||0)-new Date(a.date||0)||b.id-a.id);
+  const q=S.eq.trim().toLowerCase();
+  const rows=q?L.filter(x=>JSON.stringify(x).toLowerCase().includes(q)):L;
+  return `<div class="page-head"><div><h1>${E.title}</h1><p>${E.desc} · ${nf(L.length)} कुल</p></div><button class="btn primary" data-new-ent="${key}">${ic("plus")}${E.one} जोड़ें</button></div>
+  <section class="card"><div class="toolbar"><label class="field-inline">${ic("search")}<input id="eq" value="${esc(S.eq)}" placeholder="${E.title} में खोजें" aria-label="खोजें"></label></div>
+  ${rows.length?`<div class="table-wrap"><table><thead><tr>${E.sortable&&!q?"<th>क्रम</th>":""}${E.cols.map(c=>`<th class="${c[2]||""}">${c[0]}</th>`).join("")}<th></th></tr></thead><tbody>
+  ${rows.map((x,i)=>`<tr>${E.sortable&&!q?`<td><div class="row-acts" style="justify-content:flex-start"><button aria-label="ऊपर" title="ऊपर" data-move="${key}:${x.id}:-1" ${i===0?"disabled":""}>${ic("up")}</button><button aria-label="नीचे" title="नीचे" data-move="${key}:${x.id}:1" ${i===rows.length-1?"disabled":""}>${ic("down")}</button></div></td>`:""}${E.cols.map(c=>`<td class="${c[2]||""}">${c[1](x)}</td>`).join("")}
+    <td><div class="row-acts">${"active" in x?`<button title="${x.active?"बंद करें":"चालू करें"}" aria-label="${x.active?"बंद करें":"चालू करें"}" data-toggle-ent="${key}:${x.id}">${ic(x.active?"ban":"check")}</button>`:""}<button title="एडिट" aria-label="एडिट" data-edit-ent="${key}:${x.id}">${ic("edit")}</button><button class="del" title="हटाएँ" aria-label="हटाएँ" data-del-ent="${key}:${x.id}">${ic("trash")}</button></div></td></tr>`).join("")}
+  </tbody></table></div>`:`<div class="empty">${q?"कोई नतीजा नहीं मिला।":`अभी कोई ${E.one} नहीं है। “${E.one} जोड़ें” दबाएँ।`}</div>`}
+  </section>`;
+}
+let formTmp={};
+function fieldHtml(f,val,err){
+  const id="e_"+f.k, req=f.req?" *":"", e=err?`<span class="err">${err}</span>`:"";
+  const hint=f.hint||f.max?`<div class="hint"><span>${f.hint||""}</span>${f.max?`<span>${String(val||"").length}/${f.max}</span>`:""}</div>`:"";
+  switch(f.t){
+    case "textarea":return `<div class="fld"><label for="${id}">${f.l}${req}</label><textarea id="${id}" class="inp ${err?"bad":""}" rows="3" ${f.max?`maxlength="${f.max}"`:""}>${esc(val)}</textarea>${hint}${e}</div>`;
+    case "select":return `<div class="fld"><label for="${id}">${f.l}${req}</label><select id="${id}" class="inp">${f.opts().map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(val)?"selected":""}>${esc(l)}</option>`).join("")}</select>${e}</div>`;
+    case "toggle":return `<label class="toggle"><span>${f.l}</span><span class="sw"><input type="checkbox" id="${id}" ${val?"checked":""}><i></i></span></label>`;
+    case "color":return `<div class="fld"><label for="${id}">${f.l}</label><input type="color" id="${id}" class="inp" style="height:40px;padding:3px" value="${esc(val||"#d71920")}"></div>`;
+    case "datetime":return `<div class="fld"><label for="${id}">${f.l}${req}</label><input type="datetime-local" id="${id}" class="inp ${err?"bad":""}" value="${val?toLocalInput(val):""}">${e}</div>`;
+    case "date":return `<div class="fld"><label for="${id}">${f.l}${req}</label><input type="date" id="${id}" class="inp ${err?"bad":""}" value="${esc(val||"")}">${e}</div>`;
+    case "image":formTmp[f.k]=val||"";return `<div class="fld"><span class="lbl2">${f.l}</span><div id="${id}_box">${imgBox(f.k)}</div></div>`;
+    case "images":formTmp[f.k]=(val||[]).slice();return `<div class="fld"><span class="lbl2">${f.l}</span><div id="${id}_box">${imgsBox(f.k)}</div></div>`;
+    default:return `<div class="fld"><label for="${id}">${f.l}${req}</label><input type="${f.t}" id="${id}" class="inp ${err?"bad":""}" value="${esc(val??"")}" placeholder="${esc(f.ph||"")}">${hint}${e}</div>`;
+  }
+}
+const imgBox=k=>formTmp[k]?`<div class="preview-img"><img src="${formTmp[k]}" alt=""><button type="button" class="btn sm" data-rm-tmp="${k}">${ic("trash")}हटाएँ</button></div>`:`<label class="drop">${ic("upload")}<b>इमेज चुनें</b><input type="file" accept="image/*" data-up-tmp="${k}"></label>`;
+const imgsBox=k=>`<div class="stack"><label class="drop">${ic("upload")}<b>एक या ज़्यादा तस्वीरें चुनें</b><span class="small">${formTmp[k].length} तस्वीरें जोड़ी गईं</span><input type="file" accept="image/*" multiple data-up-tmps="${k}"></label>${formTmp[k].length?`<div class="imgs-mini">${formTmp[k].map((s,i)=>`<div><img src="${s}" alt=""><button type="button" data-rm-tmps="${k}:${i}" aria-label="हटाएँ">×</button></div>`).join("")}</div>`:""}</div>`;
+function entityForm(key,id,errs={},pending){
+  const E=ENT[key], orig=id?db[E.col].find(x=>x.id===id):null, x=pending||(orig?{...orig}:{...E.defaults()});
+  formTmp={};
+  modal({title:(orig?E.one+" एडिट करें":"नई "+E.one).replace("नई वीडियो","नया वीडियो").replace("नई विज्ञापन","नया विज्ञापन").replace("नई यूज़र","नया यूज़र").replace("नई शहर","नया शहर"),
+    body:`<form id="entForm" class="stack" novalidate>${E.fields.map(f=>fieldHtml(f,x[f.k],errs[f.k])).join("")}</form>`,
+    foot:`<button class="btn" data-close>रद्द करें</button><button class="btn primary" id="entSave">सेव करें</button>`,
+    onMount:o=>{
+      o.querySelector("#entSave").onclick=()=>{
+        const v={...x};const e={};
+        E.fields.forEach(f=>{const el=o.querySelector("#e_"+f.k);
+          if(f.t==="toggle")v[f.k]=el.checked;else if(f.t==="image"||f.t==="images")v[f.k]=formTmp[f.k];
+          else if(f.t==="datetime")v[f.k]=el.value?new Date(el.value).toISOString():"";else v[f.k]=f.num?+el.value:el.value.trim();
+          if(f.req&&!v[f.k])e[f.k]="यह खाना भरना ज़रूरी है।";});
+        if(key==="cats"&&!v.slug)v.slug=slugify(v.name);
+        if(key==="cats"&&db.cats.some(c=>c.slug===v.slug&&c.id!==orig?.id))e.slug="यह स्लग पहले से इस्तेमाल हो रहा है।";
+        if(key==="cats"&&orig&&orig.slug!==v.slug)db.articles.forEach(a=>{if(a.category===orig.slug)a.category=v.slug});
+        if(key==="cities"&&orig&&orig.name!==v.name)db.articles.forEach(a=>{if(a.city===orig.name)a.city=v.name});
+        const ve=E.validate&&E.validate(v,orig);if(ve)Object.assign(e,ve);
+        if(Object.keys(e).length){entityForm(key,id,e,v);return}
+        if(orig)Object.assign(orig,v);else{v.id=nextId(db[E.col]);if(E.sortable)v.order=db[E.col].length+1;db[E.col].push(v)}
+        logAct(`${E.one}: “${short(v.name||v.title||v.text,40)}” ${orig?"अपडेट":"नया जोड़ा"}`);save();closeModal();render();toast("बदलाव सेव हो गए।");
+      };
+    }});
+}
+
+/* ============ टिप्पणियाँ ============ */
+function pageComments(){
+  const st=S.cstatus, L=db.comments.filter(c=>!st||c.status===st).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const n=s=>db.comments.filter(c=>!s||c.status===s).length;
+  return `<div class="page-head"><div><h1>टिप्पणियाँ</h1><p>पाठकों की राय को मंज़ूर करें, स्पैम हटाएँ</p></div></div>
+  <section class="card"><div class="toolbar"><div class="tabs">${[["pending","मंज़ूरी बाकी"],["approved","मंज़ूर"],["spam","स्पैम"],["","सभी"]].map(([k,l])=>`<button class="tab" data-cstatus="${k}" aria-selected="${st===k}">${l} (${n(k)})</button>`).join("")}</div></div>
+  ${L.length?`<ul class="mini-list">${L.map(x=>`<li><span class="avatar" style="background:${hue(x.name)}">${esc(initials(x.name))}</span><div class="t"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-family:var(--f-ui)">${esc(x.name)}</b><span class="small muted">${esc(x.email)}</span><span class="pill p-${x.status}">${{pending:"बाकी",approved:"मंज़ूर",spam:"स्पैम"}[x.status]}</span></div><div style="font-family:var(--f-body);margin:4px 0">${esc(x.text)}</div><div class="ttl-meta">ख़बर: ${esc(short(art(x.articleId)?.title||"हटाई गई ख़बर",60))} · ${ago(x.date)}</div></div>
+    <div class="row-acts">${x.status!=="approved"?`<button title="मंज़ूर करें" aria-label="मंज़ूर करें" data-cmt="approved" data-id="${x.id}">${ic("check")}</button>`:""}${x.status!=="spam"?`<button title="स्पैम" aria-label="स्पैम" data-cmt="spam" data-id="${x.id}">${ic("ban")}</button>`:""}<button class="del" title="हटाएँ" aria-label="हटाएँ" data-cmt="delete" data-id="${x.id}">${ic("trash")}</button></div></li>`).join("")}</ul>`:`<div class="empty">इस सूची में कोई टिप्पणी नहीं है।</div>`}
+  </section>`;
+}
+
+/* ============ मीडिया ============ */
+function pageMedia(){
+  return `<div class="page-head"><div><h1>मीडिया लाइब्रेरी</h1><p>अपलोड की गई सभी तस्वीरें · ${nf(db.media.length)}</p></div></div>
+  <section class="card card-b stack">
+    <label class="drop" id="mdrop">${ic("upload")}<b>तस्वीरें अपलोड करें</b><span class="small">एक साथ कई फ़ाइलें चुन सकते हैं। बड़ी तस्वीरें अपने आप छोटी हो जाएँगी।</span><input type="file" accept="image/*" multiple id="mUp"></label>
+    ${db.media.length?`<div class="gallery-grid">${db.media.map(m=>`<div class="media"><img src="${m.src}" alt="${esc(m.name)}"><div class="cap"><span>${esc(short(m.name,16))}</span><button class="btn ghost sm" data-delmedia="${m.id}" aria-label="हटाएँ">${ic("trash")}</button></div></div>`).join("")}</div>`:`<div class="empty">अभी कोई तस्वीर नहीं है। ऊपर से अपलोड करें, या ख़बर लिखते समय मुख्य तस्वीर जोड़ें।</div>`}
+  </section>`;
+}
+
+/* ============ सेटिंग ============ */
+function pageSettings(){
+  const s=db.settings, f=(k,l,t="text",ph="")=>`<div class="fld"><label for="s_${k}">${l}</label><input id="s_${k}" type="${t}" class="inp" value="${esc(s[k])}" placeholder="${ph}"></div>`;
+  formTmp={logo:s.logo};
+  return `<div class="page-head"><div><h1>साइट सेटिंग</h1><p>वेबसाइट का नाम, संपर्क, सोशल मीडिया और बाकी विकल्प</p></div></div>
+  <form id="setForm" class="form-grid" novalidate>
+    <div class="stack">
+      <section class="card"><div class="card-h"><h2>सामान्य</h2></div><div class="card-b stack">
+        <div class="two">${f("siteName","वेबसाइट का नाम")}${f("tagline","टैगलाइन")}</div>
+        <div class="two">${f("email","संपर्क ईमेल","email")}${f("phone","फ़ोन")}</div>
+        ${f("address","पता")}
+      </div></section>
+      <section class="card"><div class="card-h"><h2>सोशल मीडिया</h2></div><div class="card-b two">${f("facebook","Facebook","url")}${f("x","X (Twitter)","url")}${f("youtube","YouTube","url")}${f("instagram","Instagram","url")}</div></section>
+    </div>
+    <div class="stack">
+      <section class="card"><div class="card-h"><h2>लोगो</h2></div><div class="card-b"><div id="e_logo_box">${imgBox("logo")}</div></div></section>
+      <section class="card"><div class="card-h"><h2>दिखावट</h2></div><div class="card-b stack">
+        <div class="fld"><label for="s_color">मुख्य रंग</label><input id="s_color" type="color" class="inp" style="height:40px;padding:3px" value="${esc(s.color)}"></div>
+        <div class="fld"><label for="s_perPage">एक पेज पर ख़बरें (एडमिन सूची)</label><select id="s_perPage" class="inp">${[5,10,20,50].map(n=>`<option ${+s.perPage===n?"selected":""}>${n}</option>`).join("")}</select></div>
+        <div class="fld"><label for="s_tickerSpeed">ब्रेकिंग पट्टी की रफ़्तार</label><select id="s_tickerSpeed" class="inp">${[["slow","धीमी"],["medium","सामान्य"],["fast","तेज़"]].map(([k,l])=>`<option value="${k}" ${s.tickerSpeed===k?"selected":""}>${l}</option>`).join("")}</select></div>
+      </div></section>
+      <section class="card"><div class="card-h"><h2>टिप्पणियाँ</h2></div><div class="card-b">
+        <label class="toggle"><span>टिप्पणियाँ चालू<small>पूरी वेबसाइट पर</small></span><span class="sw"><input type="checkbox" id="s_comments" ${s.comments?"checked":""}><i></i></span></label>
+        <label class="toggle"><span>मंज़ूरी के बाद दिखें<small>नई टिप्पणी पहले समीक्षा में जाएगी</small></span><span class="sw"><input type="checkbox" id="s_moderate" ${s.moderate?"checked":""}><i></i></span></label>
+      </div></section>
+    </div>
+    <div class="sticky-actions card" style="grid-column:1/-1"><button type="submit" class="btn primary">सेटिंग सेव करें</button></div>
+  </form>`;
+}
+
+/* ============ लॉगिन ============ */
+function loginPage(err){
+  return `<div class="login"><form class="card stack" id="loginForm" novalidate>
+    <div class="brand"><span class="a">समाचार</span><span class="b">भारती</span></div>
+    <div><h1>एडमिन पैनल में लॉगिन करें</h1><p class="muted" style="margin:0">अपने ईमेल और पासवर्ड से लॉगिन करें।</p></div>
+    <div class="fld"><label for="l_email">ईमेल</label><input id="l_email" class="inp" type="email" value="admin@samacharbharti.in" autocomplete="username"></div>
+    <div class="fld"><label for="l_pass">पासवर्ड</label><input id="l_pass" class="inp" type="password" value="admin123" autocomplete="current-password"></div>
+    ${err?`<span class="err">${err}</span>`:""}
+    <button class="btn primary" type="submit" style="justify-content:center">लॉगिन करें</button>
+    <div class="creds">डेमो खाते:<br>एडमिन: <b>admin@samacharbharti.in</b> / <b>admin123</b><br>संपादक: <b>ravi@samacharbharti.in</b> / <b>editor123</b><br>रिपोर्टर: <b>amit@samacharbharti.in</b> / <b>reporter123</b></div>
+  </form></div>`;
+}
+
+/* ============ रेंडर ============ */
+const PAGES={dashboard:pageDashboard,articles:pageArticles,editor:pageEditor,comments:pageComments,media:pageMedia,settings:pageSettings};
+function render(){
+  const root=$("#root");
+  if(session.out){root.innerHTML=loginPage(session.err);return}
+  const fn=PAGES[S.page]||(ENT[S.page]?()=>pageEntity(S.page):pageDashboard);
+  root.innerHTML=shell(fn());
+  if(S.page==="editor")bindEditor();
+}
+
+/* एडिटर के इवेंट */
+function bindEditor(){
+  const upd=(id,max)=>{const el=$("#"+id),c=$("#c_"+id.slice(2));if(el&&c)c.innerHTML=`<span class="${el.value.length>max?"over":""}">${el.value.length}/${max}</span>`};
+  $("#f_title").addEventListener("input",e=>{upd("f_title",100);if(!draft.id&&!$("#f_slug").dataset.touched){$("#f_slug").value=slugify(e.target.value)}$("#slugPrev").textContent=$("#f_slug").value||"…"});
+  $("#f_slug").addEventListener("input",e=>{e.target.dataset.touched=1;$("#slugPrev").textContent=slugify(e.target.value)||"…"});
+  $("#f_summary").addEventListener("input",()=>upd("f_summary",200));
+  $("#f_seoTitle").addEventListener("input",()=>upd("f_seoTitle",60));
+  $("#f_seoDesc").addEventListener("input",()=>upd("f_seoDesc",160));
+  const ce=$("#f_content");
+  ce.addEventListener("input",()=>{const w=ce.textContent.trim().split(/\s+/).filter(Boolean).length;$("#wc").textContent=`${w} शब्द · लगभग ${Math.max(1,Math.round(w/200))} मिनट`});
+  document.querySelectorAll("input[name=status]").forEach(r=>r.addEventListener("change",()=>{readEditor();render()}));
+  $("#f_category").addEventListener("change",()=>{readEditor();render()});
+  const tagIn=$("#tagIn");
+  tagIn.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===",")&&tagIn.value.trim()){e.preventDefault();readEditor();const t=tagIn.value.trim().replace(/^#/,"");if(!draft.tags.includes(t))draft.tags.push(t);render();$("#tagIn").focus()}else if(e.key==="Backspace"&&!tagIn.value&&draft.tags.length){readEditor();draft.tags.pop();render();$("#tagIn").focus()}});
+  const fi=$("#f_image");
+  if(fi){const drop=$("#drop");
+    const take=async file=>{try{readEditor();draft.image=await readImage(file);addMedia(draft.image,file.name);save();render();toast("तस्वीर जोड़ दी गई।")}catch(err){toast(err.message,"bad")}};
+    fi.addEventListener("change",()=>fi.files[0]&&take(fi.files[0]));
+    ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
+    ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,()=>drop.classList.remove("over")));
+    drop.addEventListener("drop",e=>{e.preventDefault();const f=e.dataTransfer.files[0];f&&take(f)});
+  }
+}
+
+/* ============ क्लिक (एक जगह से) ============ */
+document.addEventListener("click",async e=>{
+  const t=e.target.closest("button,[data-go],label.drop,a");if(!t)return;
+  const d=t.dataset;
+  if(d.go){if(d.go==="editor"&&(d.new||t.classList.contains("navitem"))){draft=null;errors={};S.editId=null}if(d.sortviews)S.sort="views";if(d.go!==S.page)S.eq="";go(d.go);return}
+  if(d.edit){draft=null;errors={};go("editor",{editId:+d.edit});return}
+  if(d.preview){previewArticle(art(+d.preview));return}
+  if(d.dup){const a=JSON.parse(JSON.stringify(art(+d.dup)));a.id=nextId(db.articles);a.title+=" (कॉपी)";a.slug=slugify(a.title);a.status="draft";a.views=0;a.date=new Date().toISOString();a.breaking=false;db.articles.push(a);logAct(`“${short(a.title,40)}” की कॉपी बनाई`);save();render();toast("ड्राफ़्ट के रूप में कॉपी बन गई।");return}
+  if(d.delart){const a=art(+d.delart);confirmBox(`“${esc(short(a.title,70))}” ख़बर हमेशा के लिए हट जाएगी।`,()=>{db.articles=db.articles.filter(x=>x.id!==a.id);db.breaking=db.breaking.filter(b=>b.articleId!==a.id);S.sel.delete(a.id);logAct(`“${short(a.title,40)}” ख़बर हटाई`);save();draft=null;if(S.page==="editor")go("articles");else render();toast("ख़बर हटा दी गई।")});return}
+  if(d.fstatus!==undefined){S.fstatus=d.fstatus;S.pg=1;render();return}
+  if(d.pg){S.pg=+d.pg;render();return}
+  if(d.bulk){const ids=[...S.sel];if(d.bulk==="delete"){confirmBox(`${ids.length} ख़बरें हमेशा के लिए हट जाएँगी।`,()=>{db.articles=db.articles.filter(a=>!S.sel.has(a.id));logAct(`${ids.length} ख़बरें एक साथ हटाईं`);S.sel.clear();save();render();toast("ख़बरें हटा दी गईं।")})}else{if(me().role==="reporter"&&d.bulk==="published")return toast("रिपोर्टर ख़बरें प्रकाशित नहीं कर सकते।","bad");db.articles.forEach(a=>{if(S.sel.has(a.id)){a.status=d.bulk;if(d.bulk==="published"&&new Date(a.date)>Date.now())a.date=new Date().toISOString()}});logAct(`${ids.length} ख़बरें “${STATUS[d.bulk]}” कीं`);S.sel.clear();save();render();toast(`${ids.length} ख़बरें ${STATUS[d.bulk]} हो गईं।`)}return}
+  if(d.cmt){const c=db.comments.find(x=>x.id===+d.id);if(d.cmt==="delete"){confirmBox("यह टिप्पणी हमेशा के लिए हट जाएगी।",()=>{db.comments=db.comments.filter(x=>x!==c);save();render();toast("टिप्पणी हटा दी गई।")});return}c.status=d.cmt;logAct(`${c.name} की टिप्पणी ${d.cmt==="approved"?"मंज़ूर":"स्पैम"} की`);save();render();toast(d.cmt==="approved"?"टिप्पणी मंज़ूर हो गई।":"टिप्पणी स्पैम में डाल दी गई।");return}
+  if(d.cstatus!==undefined){S.cstatus=d.cstatus;render();return}
+  if(d.newEnt){entityForm(d.newEnt);return}
+  if(d.editEnt){const[k,id]=d.editEnt.split(":");entityForm(k,+id);return}
+  if(d.toggleEnt){const[k,id]=d.toggleEnt.split(":");const x=db[ENT[k].col].find(y=>y.id===+id);x.active=!x.active;if(k==="users"&&x.id===me().id&&!x.active){x.active=true;return toast("आप अपना ही खाता बंद नहीं कर सकते।","bad")}logAct(`${ENT[k].one}: “${short(x.name||x.title||x.text,40)}” ${x.active?"चालू":"बंद"} किया`);save();render();toast(x.active?"चालू कर दिया गया।":"बंद कर दिया गया।");return}
+  if(d.delEnt){const[k,id]=d.delEnt.split(":");const E=ENT[k],x=db[E.col].find(y=>y.id===+id);const block=E.canDelete&&E.canDelete(x);if(block)return toast(block,"bad");confirmBox(`“${esc(short(x.name||x.title||x.text,60))}” हमेशा के लिए हट जाएगा।`,()=>{db[E.col]=db[E.col].filter(y=>y!==x);if(E.sortable)db[E.col].sort((a,b)=>a.order-b.order).forEach((y,i)=>y.order=i+1);logAct(`${E.one}: “${short(x.name||x.title||x.text,40)}” हटाया`);save();render();toast("हटा दिया गया।")});return}
+  if(d.move){const[k,id,dir]=d.move.split(":");const L=db[ENT[k].col].sort((a,b)=>a.order-b.order);const i=L.findIndex(y=>y.id===+id),j=i+ +dir;if(j<0||j>=L.length)return;[L[i].order,L[j].order]=[L[j].order,L[i].order];save();render();return}
+  if(d.rmTmp){formTmp[d.rmTmp]="";const b=$("#e_"+d.rmTmp+"_box");b.innerHTML=imgBox(d.rmTmp);return}
+  if(d.rmTmps){const[k,i]=d.rmTmps.split(":");formTmp[k].splice(+i,1);$("#e_"+k+"_box").innerHTML=imgsBox(k);return}
+  if(d.delmedia){confirmBox("यह तस्वीर मीडिया लाइब्रेरी से हट जाएगी। जिन ख़बरों में लगी है, वहाँ बनी रहेगी।",()=>{db.media=db.media.filter(m=>m.id!==+d.delmedia);save();render();toast("तस्वीर हटा दी गई।")});return}
+  if(d.untag!==undefined){readEditor();draft.tags.splice(+d.untag,1);render();return}
+  if(d.cmd){e.preventDefault();$("#f_content").focus();if(d.cmd==="createLink"){modal({title:"लिंक जोड़ें",body:`<div class="fld"><label for="lnk">वेब पता</label><input id="lnk" class="inp" type="url" placeholder="https://"></div><p class="small muted">पहले ख़बर में शब्द चुनें, फिर लिंक जोड़ें।</p>`,foot:`<button class="btn" data-close>रद्द करें</button><button class="btn primary" id="lnkOk">जोड़ें</button>`,onMount:o=>{const sel=window.getSelection(),range=sel.rangeCount?sel.getRangeAt(0).cloneRange():null;o.querySelector("#lnkOk").onclick=()=>{const u=o.querySelector("#lnk").value.trim();closeModal();if(!/^https?:\/\//.test(u))return toast("लिंक https:// से शुरू होना चाहिए।","bad");$("#f_content").focus();if(range){sel.removeAllRanges();sel.addRange(range)}document.execCommand("createLink",false,u)}}});return}document.execCommand(d.cmd,false,d.val||null);return}
+  const act=d.act;
+  if(act==="menu"){$("#side").classList.toggle("open");return}
+  if(act==="theme"){const r=document.documentElement;const dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;r.dataset.theme=dark?"light":"dark";return}
+  if(act==="reset"){confirmBox("आपके सारे बदलाव मिट जाएँगे और नमूना डेटा फिर से लोड होगा।",()=>{db=seed();save();draft=null;setSession({userId:1});S.page="dashboard";render();toast("नमूना डेटा दोबारा लोड हो गया।")},"हाँ, रीसेट करें");return}
+  if(act==="preview"){readEditor();previewArticle(draft);return}
+  if(act==="rmimg"){readEditor();draft.image="";render();return}
+  if(act==="pickmedia"){modal({title:"मीडिया लाइब्रेरी से चुनें",wide:true,body:`<div class="gallery-grid">${db.media.map(m=>`<button class="media" style="padding:0;text-align:left" data-pick="${m.id}"><img src="${m.src}" alt="${esc(m.name)}"><div class="cap">${esc(short(m.name,18))}</div></button>`).join("")}</div>`});return}
+  if(d.pick){readEditor();draft.image=db.media.find(m=>m.id===+d.pick).src;closeModal();render();return}
+  if(act==="notif"){const c=db.comments.filter(x=>x.status==="pending"),s=db.articles.filter(a=>a.status==="scheduled");modal({title:"सूचनाएँ",body:`<ul class="mini-list">${c.map(x=>`<li>${ic("chat")}<div class="t"><b>${esc(x.name)} ने टिप्पणी की</b><span class="small muted">${esc(short(x.text,60))}</span></div><time class="small muted">${ago(x.date)}</time></li>`).join("")}${s.map(a=>`<li>${ic("bolt")}<div class="t"><b>शेड्यूल: ${esc(short(a.title,50))}</b><span class="small muted">${fmtDate(a.date)} पर प्रकाशित होगी</span></div></li>`).join("")}</ul>${!c.length&&!s.length?'<div class="empty">कोई नई सूचना नहीं है।</div>':""}`,foot:c.length?`<button class="btn primary" data-go="comments" data-close>टिप्पणियाँ देखें</button>`:""});return}
+  if(act==="profile"){const u=me();modal({title:"मेरी प्रोफ़ाइल",body:`<div style="display:flex;gap:12px;align-items:center"><span class="avatar" style="background:${hue(u.name)};width:48px;height:48px;font-size:20px">${esc(initials(u.name))}</span><div><b style="font-size:17px">${esc(u.name)}</b><div class="muted">${esc(u.email)} · ${ROLES[u.role]}</div></div></div><p class="small muted">अलग रोल देखने के लिए लॉगआउट करके संपादक या रिपोर्टर खाते से लॉगिन करें।</p>`,foot:`<button class="btn danger" data-act="logout">${ic("logout")}लॉगआउट</button>`});return}
+  if(act==="logout"){closeModal();setSession({userId:session.userId,out:true});render();return}
+  if(t.id==="selAll"){return}
+});
+document.addEventListener("change",async e=>{
+  const t=e.target;
+  if(t.dataset.sel){const id=+t.dataset.sel;t.checked?S.sel.add(id):S.sel.delete(id);render();return}
+  if(t.id==="selAll"){const per=Number(db.settings.perPage)||10;filteredArticles().slice((S.pg-1)*per,S.pg*per).forEach(a=>t.checked?S.sel.add(a.id):S.sel.delete(a.id));render();return}
+  if(t.id==="fcat"){S.fcat=t.value;S.pg=1;render();return}
+  if(t.id==="fsort"){S.sort=t.value;render();return}
+  if(t.dataset.upTmp){const k=t.dataset.upTmp;try{formTmp[k]=await readImage(t.files[0]);addMedia(formTmp[k],t.files[0].name);save();const b=$("#e_"+k+"_box");b&&(b.innerHTML=imgBox(k))}catch(err){toast(err.message,"bad")}return}
+  if(t.dataset.upTmps){const k=t.dataset.upTmps;for(const f of t.files){try{const s=await readImage(f);formTmp[k].push(s);addMedia(s,f.name)}catch(err){toast(err.message,"bad")}}save();$("#e_"+k+"_box").innerHTML=imgsBox(k);return}
+  if(t.id==="mUp"){let n=0;for(const f of t.files){try{addMedia(await readImage(f),f.name);n++}catch(err){toast(err.message,"bad")}}if(n){logAct(`${n} तस्वीरें अपलोड कीं`);save();render();toast(`${n} तस्वीरें अपलोड हो गईं।`)}return}
+});
+let qTimer;
+document.addEventListener("input",e=>{
+  const t=e.target;
+  if(t.id==="aq"){clearTimeout(qTimer);qTimer=setTimeout(()=>{S.q=t.value;S.pg=1;const pos=t.selectionStart;render();const n=$("#aq");n.focus();n.setSelectionRange(pos,pos)},250)}
+  if(t.id==="eq"){clearTimeout(qTimer);qTimer=setTimeout(()=>{S.eq=t.value;const pos=t.selectionStart;render();const n=$("#eq");n.focus();n.setSelectionRange(pos,pos)},250)}
+});
+document.addEventListener("submit",e=>{
+  e.preventDefault();const f=e.target;
+  if(f.id==="gsearch"){S.q=$("#gq").value.trim();S.fstatus="";S.fcat="";S.pg=1;go("articles");return}
+  if(f.id==="artForm"){saveArticle();return}
+  if(f.id==="setForm"){const s=db.settings;["siteName","tagline","email","phone","address","facebook","x","youtube","instagram","color","tickerSpeed"].forEach(k=>s[k]=$("#s_"+k).value.trim());s.perPage=+$("#s_perPage").value;s.comments=$("#s_comments").checked;s.moderate=$("#s_moderate").checked;s.logo=formTmp.logo||"";logAct("साइट सेटिंग बदली");save();toast("सेटिंग सेव हो गई।");return}
+  if(f.id==="loginForm"){const em=$("#l_email").value.trim().toLowerCase(),pw=$("#l_pass").value;const u=db.users.find(x=>x.email.toLowerCase()===em);
+    if(!u||u.password!==pw){setSession({...session,err:"ईमेल या पासवर्ड ग़लत है। नीचे दिए डेमो खाते आज़माएँ."});render();return}
+    if(!u.active){setSession({...session,err:"यह खाता बंद है। एडमिन से संपर्क करें।"});render();return}
+    setSession({userId:u.id});S.page="dashboard";S.sel=new Set();render();toast(`स्वागत है, ${u.name}!`);return}
+});
+document.addEventListener("click",e=>{if(e.target.closest("[data-save]")){saveArticle(e.target.closest("[data-save]").dataset.save)}});
+document.addEventListener("click",e=>{if(e.target.closest("[data-go]")&&e.target.closest("#overlay"))closeModal()},true);
+document.addEventListener("keydown",e=>{if(e.target.id==="aq"||e.target.id==="eq"){if(e.key==="Enter")e.preventDefault()}});
+
+/* ग्राफ़ टूलटिप */
+document.addEventListener("mouseover",e=>{const h=e.target.closest(".chart .hit");const ch=$("#viewsChart");if(!ch)return;const tip=ch.querySelector(".tip");
+  if(!h){tip.hidden=true;return}const svg=ch.querySelector("svg"),k=svg.clientWidth/640;tip.textContent=h.dataset.tip;tip.style.left=(+h.dataset.x*k)+"px";tip.style.top=(+h.dataset.y*k)+"px";tip.hidden=false});
+
+/* शुरू */
+load();
+const hp=location.hash.slice(1);if(hp&&(PAGES[hp]||ENT[hp]))S.page=hp;
+if(!can(S.page))S.page="dashboard";
+render();
+</script>
+</html>
