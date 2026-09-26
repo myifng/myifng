@@ -98,8 +98,17 @@ final class NewsService
             }
             self::syncRelations($id, $rel);
             self::addRevision($id, $reason !== '' ? $reason : ($news ? 'बदलाव' : 'पहला ड्राफ़्ट'), $correction && $news && $news['status'] === 'published');
+            if ($news && $news['status'] === 'published') {
+                self::changed();
+            }
             return $id;
         });
+    }
+
+    /** वेबसाइट के कैश (होमपेज सेक्शन, टिकर, साइडबार) साफ़ */
+    public static function changed(): void
+    {
+        cache()->flush('home');
     }
 
     public static function syncRelations(int $id, array $rel): void
@@ -169,7 +178,8 @@ final class NewsService
     {
         return [
             'topics' => array_map('intval', array_column(db()->all('SELECT topic_id FROM {p}news_topics WHERE news_id = ?', [$id]), 'topic_id')),
-            'tags' => array_column(db()->all('SELECT t.name FROM {p}news_tags nt JOIN {p}tags t ON t.id = nt.tag_id WHERE nt.news_id = ? ORDER BY t.name', [$id]), 'name'),
+            'tags' => array_column($tagRows = db()->all('SELECT t.name, t.slug FROM {p}news_tags nt JOIN {p}tags t ON t.id = nt.tag_id WHERE nt.news_id = ? ORDER BY t.name', [$id]), 'name'),
+            'tag_links' => $tagRows,
             'related' => db()->all('SELECT n.id, n.title, n.status FROM {p}news_related r JOIN {p}news n ON n.id = r.related_id WHERE r.news_id = ? ORDER BY r.sort_order', [$id]),
             'gallery' => db()->all('SELECT m.* FROM {p}news_gallery g JOIN {p}media m ON m.id = g.media_id WHERE g.news_id = ? ORDER BY g.sort_order', [$id]),
         ];
@@ -291,6 +301,7 @@ final class NewsService
                 self::recountTags(array_map('intval', array_column(db()->all('SELECT tag_id FROM {p}news_tags WHERE news_id = ?', [$news['id']]), 'tag_id')));
             }
         });
+        self::changed();
         AuditService::log($action, 'news', $news['id'], NewsWorkflow::label($news['status']) . ' → ' . NewsWorkflow::label($to) . ': ' . $news['title'] . ($remark !== '' ? ' (' . mb_substr($remark, 0, 120) . ')' : ''));
         return null;
     }

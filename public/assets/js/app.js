@@ -65,9 +65,10 @@
       return fetch(mc.dataset.save, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
         .then(function (r) { return r.json(); })
         .then(function (r) {
-          if (!r.ok) { hint.textContent = r.message || 'सेव नहीं हुआ'; return; }
+          if (!r.ok) { hint.textContent = r.message || 'सेव नहीं हुआ'; return r; }
           nameEl.textContent = r.name || 'चुनें'; clearBtn.hidden = !r.name; open(false);
           document.dispatchEvent(new CustomEvent('mycity', { detail: r }));
+          return r;
         })
         .catch(function () { hint.textContent = 'सेव नहीं हुआ। दोबारा कोशिश करें।'; });
     };
@@ -83,7 +84,83 @@
     clearBtn.addEventListener('click', function () { save(0); });
     document.addEventListener('click', function (e) { if (!panel.hidden && !mc.contains(e.target)) open(false); });
     mc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { open(false); btn.focus(); } });
+    // कहीं और के "शहर चुनें" बटन
+    $$('[data-open-mycity]').forEach(function (b) { b.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); open(true); }); });
+    // लोकेशन पेज: "इसे मेरा शहर बनाएँ"
+    $$('[data-set-city]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        save(b.dataset.setCity).then(function (r) { if (!r || !r.ok) { toast((r && r.message) || 'सेव नहीं हुआ'); return; } b.disabled = true; b.innerHTML = '<i class="fa-solid fa-location-dot"></i> यह आपका शहर है'; toast(b.dataset.cityName + ' आपका शहर चुना गया।'); });
+      });
+    });
   }
+
+  function toast(msg) {
+    var t = document.createElement('div'); t.className = 'toast-site'; t.setAttribute('role', 'status'); t.textContent = msg;
+    document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2600);
+  }
+
+  /* खोज पट्टी */
+  var sb = $('#siteSearch');
+  $$('[data-open-search]').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      if (!sb) return;
+      e.preventDefault();
+      sb.hidden = !sb.hidden;
+      $$('[data-open-search]').forEach(function (x) { if (x.hasAttribute('aria-expanded')) x.setAttribute('aria-expanded', String(!sb.hidden)); });
+      if (!sb.hidden) { window.scrollTo({ top: 0, behavior: 'smooth' }); $('input', sb).focus(); }
+    });
+  });
+
+  /* टैब (लोकेशन सेक्शन), कीबोर्ड के साथ */
+  $$('[data-tabs]').forEach(function (list) {
+    var tabs = $$('[role="tab"]', list);
+    function sel(t) {
+      tabs.forEach(function (x) { var on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; var p = document.getElementById(x.getAttribute('aria-controls')); if (p) p.hidden = !on; });
+    }
+    list.addEventListener('click', function (e) { var t = e.target.closest('[role="tab"]'); if (t) sel(t); });
+    list.addEventListener('keydown', function (e) {
+      var i = tabs.indexOf(document.activeElement); if (i < 0) return;
+      var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : -1;
+      if (j < 0 || j >= tabs.length) return;
+      e.preventDefault(); tabs[j].focus(); sel(tabs[j]);
+    });
+  });
+
+  /* स्लाइडर (हीरो) */
+  $$('[data-slider]').forEach(function (sl) {
+    var track = $('.slides', sl), n = track.children.length, i = 0, timer = null;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function go(k) { i = (k + n) % n; track.style.transform = 'translateX(' + (-100 * i) + '%)'; $$('.slide', sl).forEach(function (s, x) { s.setAttribute('aria-hidden', x !== i); $$('a', s).forEach(function (a) { a.tabIndex = x === i ? 0 : -1; }); }); }
+    function play() { if (sl.dataset.autoplay === '1' && !reduce && n > 1) { stop(); timer = setInterval(function () { go(i + 1); }, 6000); } }
+    function stop() { clearInterval(timer); }
+    $('.prev', sl).addEventListener('click', function () { go(i - 1); play(); });
+    $('.next', sl).addEventListener('click', function () { go(i + 1); play(); });
+    sl.addEventListener('mouseenter', stop); sl.addEventListener('mouseleave', play); sl.addEventListener('focusin', stop);
+    var x0 = null;
+    sl.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; stop(); }, { passive: true });
+    sl.addEventListener('touchend', function (e) { if (x0 === null) return; var d = e.changedTouches[0].clientX - x0; if (Math.abs(d) > 40) go(i + (d < 0 ? 1 : -1)); x0 = null; play(); });
+    go(0); play();
+  });
+
+  /* आड़ी पट्टी (स्लाइडर ब्लॉक) */
+  $$('[data-hscroll]').forEach(function (h) {
+    var t = $('.hs-track', h);
+    $('.prev', h).addEventListener('click', function () { t.scrollBy({ left: -t.clientWidth * 0.8, behavior: 'smooth' }); });
+    $('.next', h).addEventListener('click', function () { t.scrollBy({ left: t.clientWidth * 0.8, behavior: 'smooth' }); });
+  });
+
+  /* शेयर: लिंक कॉपी, मोबाइल शेयर */
+  $$('[data-copy-link]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var u = b.dataset.copyLink;
+      (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(function () { toast('लिंक कॉपी हो गया'); }, function () { prompt('लिंक कॉपी करें:', u); });
+    });
+  });
+  $$('[data-native-share]').forEach(function (b) {
+    if (!navigator.share) return;
+    b.hidden = false;
+    b.addEventListener('click', function () { navigator.share({ title: b.dataset.title, url: b.dataset.url }).catch(function () {}); });
+  });
 
   /* Google Analytics (सेटिंग में ID हो तो) */
   var ga = document.body.dataset.ga;

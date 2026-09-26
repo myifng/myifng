@@ -298,3 +298,4 @@ function my_city(): ?array
 }
 
 require_once __DIR__ . '/form.php';
+require_once __DIR__ . '/front.php';

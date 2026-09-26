@@ -270,6 +270,7 @@ final class NewsController extends Controller
         }
         News::delete($id);
         NewsService::recountTags(array_map('intval', array_column(db()->all('SELECT tag_id FROM {p}news_tags WHERE news_id = ?', [$id]), 'tag_id')));
+        NewsService::changed();
         AuditService::log('trash', 'news', $id, 'ख़बर ट्रैश में: ' . $news['title']);
         return $this->toRoute('admin.news.index')->with('success', '“' . $news['title'] . '” ट्रैश में चली गई' . ($news['status'] === 'published' ? ' और वेबसाइट से हट गई' : '') . '।');
     }
@@ -279,6 +280,7 @@ final class NewsController extends Controller
         $news = self::findVisible($id, true);
         News::restore($id);
         NewsService::recountTags(array_map('intval', array_column(db()->all('SELECT tag_id FROM {p}news_tags WHERE news_id = ?', [$id]), 'tag_id')));
+        NewsService::changed();
         AuditService::log('restore', 'news', $id, 'ख़बर वापस लाई: ' . $news['title']);
         return $this->back()->with('success', '“' . $news['title'] . '” वापस आ गई (स्थिति: ' . NewsWorkflow::label($news['status']) . ')।');
     }
@@ -295,6 +297,7 @@ final class NewsController extends Controller
         $tags = array_map('intval', array_column(db()->all('SELECT tag_id FROM {p}news_tags WHERE news_id = ?', [$id]), 'tag_id'));
         News::forceDelete($id);
         NewsService::recountTags($tags);
+        NewsService::changed();
         AuditService::log('delete', 'news', $id, 'ख़बर स्थायी रूप से हटाई: ' . $news['title'], ['title' => $news['title'], 'slug' => $news['slug'], 'status' => $news['status']]);
         return $this->back()->with('success', 'ख़बर और उसकी पूरी हिस्ट्री स्थायी रूप से हटा दी गई।');
     }
@@ -346,6 +349,7 @@ final class NewsController extends Controller
             AuditService::log('bulk_' . $action, 'news', implode(',', $ids), "$ok ख़बरों पर बल्क काम: $action");
             db()->query("UPDATE {p}tags t SET usage_count = (SELECT COUNT(*) FROM {p}news_tags nt JOIN {p}news n ON n.id = nt.news_id WHERE nt.tag_id = t.id AND n.status = 'published' AND n.deleted_at IS NULL)");
         }
+        NewsService::changed();
         $msg = "$ok ख़बरों पर काम हुआ।" . ($fail ? ' ' . count($fail) . ' पर नहीं हो सका (स्थिति या अनुमति): #' . implode(', #', array_slice($fail, 0, 10)) : '');
         return $this->back()->with($fail ? 'warning' : 'success', $msg);
     }

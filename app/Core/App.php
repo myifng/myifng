@@ -134,7 +134,8 @@ final class App
 
         $router = new Router();
         $this->set('router', $router);
-        foreach (['web', 'admin'] as $file) {
+        // एडमिन पहले: वेबसाइट का लोकेशन रूट (/{राज्य}/…) सबसे आख़िर में मिले
+        foreach (['admin', 'web'] as $file) {
             (static function (Router $router, string $path): void {
                 require $path;
             })($router, $base . '/routes/' . $file . '.php');

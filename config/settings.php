@@ -75,6 +75,7 @@ return [
         'label' => 'कंटेंट फ़ीचर', 'icon' => 'fa-toggle-on', 'permission' => 'edit',
         'fields' => [
             'breaking_ticker' => ['label' => 'ब्रेकिंग न्यूज़ पट्टी', 'type' => 'switch', 'default' => '1'],
+            'trending_bar' => ['label' => 'ट्रेंडिंग पट्टी (फ़ीचर्ड टॉपिक + ट्रेंडिंग टैग)', 'type' => 'switch', 'default' => '1'],
             'ticker_speed' => ['label' => 'पट्टी की रफ़्तार', 'type' => 'select', 'options' => ['slow' => 'धीमी', 'medium' => 'सामान्य', 'fast' => 'तेज़'], 'default' => 'medium', 'width' => 6],
             'comments_enabled' => ['label' => 'पाठकों की टिप्पणियाँ', 'type' => 'switch', 'default' => '1'],
             'comments_moderation' => ['label' => 'टिप्पणी मंज़ूरी के बाद दिखे', 'type' => 'switch', 'default' => '1'],

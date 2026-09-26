@@ -10,7 +10,7 @@ $layoutOptions ??= ['header' => true, 'footer' => true];
 $site = (string) setting('site_name');
 $docTitle = !empty($seo['title']) ? $seo['title'] . ' | ' . $site : $site . (setting('tagline') ? ' | ' . setting('tagline') : '');
 $desc = $seo['description'] ?? setting('site_description');
-$img = !empty($seo['image']) ? upload_url($seo['image']) : (setting('logo') ? upload_url(setting('logo')) : '');
+$img = !empty($seo['image']) ? (preg_match('~^https?://~', $seo['image']) ? $seo['image'] : media_url($seo['image'], 'large')) : (setting('logo') ? upload_url(setting('logo')) : '');
 $brand = preg_match('/^#[0-9a-f]{6}$/i', (string) setting('primary_color')) ? setting('primary_color') : '#d71920';
 $brand2 = preg_match('/^#[0-9a-f]{6}$/i', (string) setting('secondary_color')) ? setting('secondary_color') : '#15161a';
 $fonts = array_unique([setting('font_heading', 'Mukta'), setting('font_body', 'Noto Sans Devanagari')]);
@@ -33,6 +33,9 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <?php if (!empty($seo['canonical'])): ?><meta property="og:url" content="<?= e($seo['canonical']) ?>"><?php endif; ?>
 <?php if ($img): ?><meta property="og:image" content="<?= e($img) ?>"><?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
+<?php if (!empty($seo['published'])): ?><meta property="article:published_time" content="<?= e(date('c', strtotime($seo['published']))) ?>">
+<meta property="article:modified_time" content="<?= e(date('c', strtotime((string) $seo['modified']))) ?>"><?php if (!empty($seo['section'])): ?><meta property="article:section" content="<?= e($seo['section']) ?>"><?php endif; ?><?php endif; ?>
+<?= $seo['jsonld'] ?? '' /* SeoService: JSON_HEX_TAG के साथ सुरक्षित */ ?>
 <?php if (setting('search_console')): ?><meta name="google-site-verification" content="<?= e(setting('search_console')) ?>"><?php endif; ?>
 <meta name="theme-color" content="<?= e($brand) ?>">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
@@ -50,13 +53,15 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <body<?= setting('sticky_header', '1') === '1' ? ' class="sticky-nav"' : '' ?> data-ga="<?= e(setting('ga_id')) ?>">
 <a class="skip" href="#main">मुख्य सामग्री पर जाएँ</a>
 <?php if (!empty($isPreview)): ?><div class="preview-bar"><i class="fa-solid fa-eye"></i> प्रीव्यू: यह पेज अभी सिर्फ़ स्टाफ़ को दिख रहा है।</div><?php endif; ?>
-<?php if ($layoutOptions['header']): ?><?= $this->insert('partials/front/header', ['main' => MenuService::tree('main'), 'top' => MenuService::tree('top'), 'mobile' => MenuService::tree('mobile')]) ?><?php endif; ?>
+<?php if ($layoutOptions['header']): ?><?= $this->insert('partials/front/header', ['main' => MenuService::tree('main'), 'top' => MenuService::tree('top'), 'mobile' => MenuService::tree('mobile')]) ?>
+<?= $this->insert('partials/front/ticker') ?><?php endif; ?>
 
 <main id="main" class="site-main">
   <?= $this->section('content') ?>
 </main>
 
 <?php if ($layoutOptions['footer']): ?><?= $this->insert('partials/front/footer') ?><?php endif; ?>
+<?= $this->insert('partials/front/bottom-nav') ?>
 <script src="<?= asset('js/app.js') ?>" defer></script>
 <?= setting('footer_code') ?>
 </body>

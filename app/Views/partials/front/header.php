@@ -59,9 +59,18 @@ $renderMenu = function (array $items, int $depth = 0) use (&$renderMenu): string
     <div class="wrap">
       <button class="nav-toggle js-drawer" type="button" aria-label="मेनू खोलें" aria-controls="drawer" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
       <ul class="menu"><?= $renderMenu($main['items']) ?></ul>
+      <?php if (app('router')->has('search')): ?><button type="button" class="nav-tool" data-open-search aria-label="खोजें" aria-controls="siteSearch" aria-expanded="false"><i class="fa-solid fa-magnifying-glass"></i></button><?php endif; ?>
       <?php if (setting('live_tv_url')): ?><a class="live" href="<?= e(app('router')->has('live_tv') ? route('live_tv') : setting('live_tv_url')) ?>"<?= app('router')->has('live_tv') ? '' : ' target="_blank" rel="noopener"' ?>><i></i>LIVE</a><?php endif; ?>
     </div>
   </nav>
+  <?php if (app('router')->has('search')): ?>
+  <div class="searchbar" id="siteSearch" hidden>
+    <form class="wrap" action="<?= e(route('search')) ?>" method="get" role="search">
+      <input type="search" name="q" placeholder="ख़बरें खोजें…" aria-label="ख़बरें खोजें" maxlength="100" required>
+      <button class="btn" type="submit">खोजें</button>
+    </form>
+  </div>
+  <?php endif; ?>
   <div class="drawer" id="drawer" hidden>
     <div class="drawer-panel" role="dialog" aria-modal="true" aria-label="मेनू">
       <div class="drawer-head"><b><?= e(setting('site_name')) ?></b><button type="button" class="js-drawer-close" aria-label="मेनू बंद करें"><i class="fa-solid fa-xmark"></i></button></div>
