@@ -48,10 +48,10 @@ return [
         'assignments'  => ['label' => 'असाइनमेंट डेस्क', 'icon' => 'fa-list-check', 'group' => 'newsroom', 'phase' => 4, 'route' => 'admin.assignments.index', 'actions' => [...$crud, 'manage']],
 
         // ---------- Phase 6 ----------
-        'reporters'    => ['label' => 'रिपोर्टर', 'icon' => 'fa-id-card', 'group' => 'reporters', 'phase' => 6, 'actions' => [...$crud, 'approve', 'export', 'manage']],
-        'applications' => ['label' => 'रिपोर्टर आवेदन', 'icon' => 'fa-file-signature', 'group' => 'reporters', 'phase' => 6, 'actions' => ['view', 'edit', 'delete', 'approve', 'export']],
-        'bureaus'      => ['label' => 'ब्यूरो', 'icon' => 'fa-building', 'group' => 'reporters', 'phase' => 6, 'actions' => [...$crud]],
-        'employees'    => ['label' => 'कर्मचारी (HR)', 'icon' => 'fa-people-group', 'group' => 'reporters', 'phase' => 6, 'actions' => [...$crud, 'export', 'manage']],
+        'reporters'    => ['label' => 'रिपोर्टर', 'icon' => 'fa-id-card', 'group' => 'reporters', 'phase' => 6, 'route' => 'admin.reporters.index', 'actions' => [...$crud, 'approve', 'export', 'manage']],
+        'applications' => ['label' => 'रिपोर्टर आवेदन', 'icon' => 'fa-file-signature', 'group' => 'reporters', 'phase' => 6, 'route' => 'admin.applications.index', 'actions' => ['view', 'edit', 'delete', 'approve', 'export']],
+        'bureaus'      => ['label' => 'ब्यूरो', 'icon' => 'fa-building', 'group' => 'reporters', 'phase' => 6, 'route' => 'admin.bureaus.index', 'actions' => [...$crud]],
+        'employees'    => ['label' => 'कर्मचारी (HR)', 'icon' => 'fa-people-group', 'group' => 'reporters', 'phase' => 12, 'actions' => [...$crud, 'export', 'manage']],
 
         // ---------- Phase 7 ----------
         'breaking'     => ['label' => 'ब्रेकिंग कंट्रोल रूम', 'icon' => 'fa-bolt', 'group' => 'newsroom', 'phase' => 7, 'actions' => [...$crud, 'publish']],

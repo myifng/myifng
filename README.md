@@ -72,6 +72,17 @@ Core PHP 8.1+ पर बना, अपने Custom MVC वाला न्य�
 - **श्रेणी** `/category/…`, **लोकेशन** `/uttar-pradesh/maharajganj/`, **टॉपिक**, **टैग**, **ताज़ा**, **खोज**
 - **मोबाइल**: नीचे की पट्टी (होम, ताज़ा, मेरा शहर, खोज)
 
+## Phase 6 में क्या है
+
+- **रिपोर्टर बनें** `/join-as-reporter`: 5 चरणों का फ़ॉर्म, दस्तावेज़ अपलोड (निजी फ़ोल्डर में, वेब से पहुँच नहीं), spam से बचाव, आवेदन संख्या `RPT-APP-2026-000001`
+- **आवेदन की स्थिति** `/application-status`: आवेदन संख्या + मोबाइल + ईमेल OTP
+- **एडमिन**: आवेदन (स्थिति, सुधार माँगना, जाँच सौंपना, टिप्पणियाँ, दस्तावेज़ देखना + ऑडिट), मंज़ूरी पर रिपोर्टर खाता + ID `RPT-2026-0001` + पासवर्ड लिंक
+- **रिपोर्टर**: प्रोफ़ाइल, प्रदर्शन, नवीनीकरण, निलंबन/इस्तीफ़ा, CSV; **ब्यूरो** (मुख्यालय → राज्य → ज़िला…)
+- **दस्तावेज़**: ID कार्ड (QR सहित), अधिकार पत्र, नियुक्ति पत्र, प्रेस प्रमाणपत्र, अनुभव प्रमाणपत्र: ब्राउज़र से प्रिंट / PDF
+- **रिपोर्टर सत्यापन** `/verify-reporter`: ID + मोबाइल या QR स्कैन; निलंबित/समाप्त कार्ड "मान्य नहीं"
+- **रिपोर्टर पोर्टल**: रिपोर्टर अपना ID कार्ड, पत्र और आँकड़े देखे
+- सेटिंग → **रिपोर्टर** टैब: जॉइन चालू/बंद, घोषणा, ID प्रीफ़िक्स, वैधता, हस्ताक्षर/मुहर
+
 ## अपडेट कैसे करें (पहले से इंस्टॉल साइट)
 
 1. डेटाबेस और फ़ाइलों का बैकअप लें।
@@ -85,7 +96,7 @@ index.php          Front Controller
 app/               Core, Controllers, Models, Services, Repositories, Validators, Middleware, Helpers, Views
 config/            app.php, database.php, modules.php (मॉड्यूल रजिस्ट्री), roles.php, env.php (इंस्टॉलर बनाता है)
 routes/            web.php, admin.php
-public/assets/     css, js, vendor (Bootstrap 5, Font Awesome 6, Chart.js 4: सब लोकल)
+public/assets/     css, js, vendor (Bootstrap 5, Font Awesome 6, Chart.js 4, QR: सब लोकल)
 public/uploads/    अपलोड (PHP चलना बंद)
 storage/           cache, logs, sessions, private, backups
 database/          migrations, seeds
@@ -107,3 +118,4 @@ demo/              शुरुआती HTML डिज़ाइन डेमो
 - Bootstrap 5.3.3 (MIT)
 - Font Awesome Free 6.6.0 (आइकन CC BY 4.0, फ़ॉन्ट SIL OFL 1.1, कोड MIT)
 - Chart.js 4.4.4 (MIT)
+- qrcode-generator 1.4.4, Kazuhiko Arase (MIT): रिपोर्टर ID कार्ड का QR

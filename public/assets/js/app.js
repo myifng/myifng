@@ -162,6 +162,40 @@
     b.addEventListener('click', function () { navigator.share({ title: b.dataset.title, url: b.dataset.url }).catch(function () {}); });
   });
 
+  /* रिपोर्टर फ़ॉर्म: चरण (बिना JS पूरा फ़ॉर्म एक साथ), राज्य → ज़िले */
+  var sf = $('[data-steps]');
+  if (sf) {
+    var steps = $$('[data-step]', sf), nav = $('[data-steps-nav]'), prev = $('[data-step-prev]', sf), next = $('[data-step-next]', sf), submit = $('[data-step-submit]', sf), cur = 0;
+    // सर्वर से त्रुटि आई हो तो पहली त्रुटि वाले चरण पर
+    var errStep = steps.findIndex(function (s) { return $('.has-err, .notice', s); });
+    if (errStep > -1) cur = errStep;
+    var show = function (i) {
+      cur = i;
+      steps.forEach(function (s, k) { s.hidden = k !== i; });
+      if (nav) $$('li', nav).forEach(function (li, k) { li.classList.toggle('on', k === i); li.classList.toggle('done', k < i); });
+      prev.hidden = i === 0; next.hidden = i === steps.length - 1; submit.hidden = i !== steps.length - 1;
+    };
+    var valid = function (i) {
+      var bad = $$('input, select, textarea', steps[i]).filter(function (el) { return !el.checkValidity(); });
+      if (bad.length) { bad[0].reportValidity(); bad[0].focus(); return false; }
+      return true;
+    };
+    if (nav) nav.hidden = false;
+    next.addEventListener('click', function () { if (valid(cur)) { show(cur + 1); sf.scrollIntoView({ behavior: 'smooth' }); } });
+    prev.addEventListener('click', function () { show(cur - 1); sf.scrollIntoView({ behavior: 'smooth' }); });
+    sf.addEventListener('submit', function (e) { for (var k = 0; k < steps.length; k++) { if (!valid(k)) { e.preventDefault(); show(k); valid(k); return; } } });
+    show(cur);
+    var st = $('[data-state-select]', sf), ds = $('[data-district-select]', sf);
+    if (st && ds) {
+      var all = $$('option', ds).filter(function (o) { return o.value; });
+      var filter = function () {
+        all.forEach(function (o) { o.hidden = o.disabled = !!st.value && o.dataset.parent !== st.value; });
+        if (ds.selectedOptions[0] && ds.selectedOptions[0].disabled) ds.value = '';
+      };
+      st.addEventListener('change', filter); filter();
+    }
+  }
+
   /* Google Analytics (सेटिंग में ID हो तो) */
   var ga = document.body.dataset.ga;
   if (ga) {

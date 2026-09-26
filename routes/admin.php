@@ -4,9 +4,11 @@
  * हर रूट पर अनुमति middleware: can:मॉड्यूल.action
  * @var App\Core\Router $router
  */
+use App\Controllers\Admin\ApplicationController;
 use App\Controllers\Admin\AssignmentController;
 use App\Controllers\Admin\AuditLogController;
 use App\Controllers\Admin\AuthController;
+use App\Controllers\Admin\BureauController;
 use App\Controllers\Admin\CategoryController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
@@ -17,6 +19,8 @@ use App\Controllers\Admin\MenuController;
 use App\Controllers\Admin\NewsController;
 use App\Controllers\Admin\NewsWorkflowController;
 use App\Controllers\Admin\PageController;
+use App\Controllers\Admin\ReporterController;
+use App\Controllers\Admin\ReporterPortalController;
 use App\Controllers\Admin\SettingsController;
 use App\Controllers\Admin\SystemController;
 use App\Controllers\Admin\TagController;
@@ -197,6 +201,46 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->post('/assignments/{id:\d+}/status', [AssignmentController::class, 'status'])->name('assignments.status')->middleware('can:assignments.view');
         $r->post('/assignments/{id:\d+}/start', [AssignmentController::class, 'start'])->name('assignments.start')->middleware('can:news.create');
         $r->delete('/assignments/{id:\d+}', [AssignmentController::class, 'destroy'])->name('assignments.destroy')->middleware('can:assignments.delete');
+
+        // ---------- Phase 6 ----------
+        // रिपोर्टर आवेदन
+        $r->get('/applications', [ApplicationController::class, 'index'])->name('applications.index')->middleware('can:applications.view');
+        $r->get('/applications/export', [ApplicationController::class, 'export'])->name('applications.export')->middleware('can:applications.export');
+        $r->get('/applications/{id:\d+}', [ApplicationController::class, 'show'])->name('applications.show')->middleware('can:applications.view');
+        $r->get('/applications/{id:\d+}/documents/{key:[a-z_]+}', [ApplicationController::class, 'document'])->name('applications.document')->middleware('can:applications.view');
+        $r->post('/applications/{id:\d+}/remarks', [ApplicationController::class, 'remark'])->name('applications.remark')->middleware('can:applications.edit');
+        $r->post('/applications/{id:\d+}/status', [ApplicationController::class, 'status'])->name('applications.status')->middleware('can:applications.edit');
+        $r->post('/applications/{id:\d+}/assign', [ApplicationController::class, 'assign'])->name('applications.assign')->middleware('can:applications.edit');
+        $r->get('/applications/{id:\d+}/approve', [ApplicationController::class, 'approveForm'])->name('applications.approve')->middleware('can:applications.approve');
+        $r->post('/applications/{id:\d+}/approve', [ApplicationController::class, 'approve'])->name('applications.approve.run')->middleware('can:applications.approve');
+        $r->delete('/applications/{id:\d+}', [ApplicationController::class, 'destroy'])->name('applications.destroy')->middleware('can:applications.delete');
+
+        // रिपोर्टर
+        $r->get('/reporters', [ReporterController::class, 'index'])->name('reporters.index')->middleware('can:reporters.view');
+        $r->get('/reporters/export', [ReporterController::class, 'export'])->name('reporters.export')->middleware('can:reporters.export');
+        $r->get('/reporters/create', [ReporterController::class, 'create'])->name('reporters.create')->middleware('can:reporters.create');
+        $r->post('/reporters', [ReporterController::class, 'store'])->name('reporters.store')->middleware('can:reporters.create');
+        $r->get('/reporters/{id:\d+}', [ReporterController::class, 'show'])->name('reporters.show')->middleware('can:reporters.view');
+        $r->get('/reporters/{id:\d+}/edit', [ReporterController::class, 'edit'])->name('reporters.edit')->middleware('can:reporters.edit');
+        $r->put('/reporters/{id:\d+}', [ReporterController::class, 'update'])->name('reporters.update')->middleware('can:reporters.edit');
+        $r->post('/reporters/{id:\d+}/renew', [ReporterController::class, 'renew'])->name('reporters.renew')->middleware('can:reporters.manage');
+        $r->post('/reporters/{id:\d+}/status', [ReporterController::class, 'status'])->name('reporters.status')->middleware('can:reporters.manage');
+        $r->get('/reporters/{id:\d+}/kyc/{key:[a-z_]+}', [ReporterController::class, 'kyc'])->name('reporters.kyc')->middleware('can:reporters.view');
+        $r->post('/reporters/{id:\d+}/documents', [ReporterController::class, 'issue'])->name('reporters.issue')->middleware('can:reporters.approve');
+        $r->get('/reporters/{id:\d+}/documents/{doc:\d+}', [ReporterController::class, 'document'])->name('reporters.document')->middleware('can:reporters.view');
+        $r->post('/reporters/{id:\d+}/documents/{doc:\d+}/revoke', [ReporterController::class, 'revoke'])->name('reporters.revoke')->middleware('can:reporters.approve');
+
+        // रिपोर्टर पोर्टल (अपना प्रोफ़ाइल)
+        $r->get('/my-reporter-profile', [ReporterPortalController::class, 'index'])->name('portal');
+        $r->get('/my-reporter-profile/documents/{doc:\d+}', [ReporterPortalController::class, 'document'])->name('portal.document');
+
+        // ब्यूरो
+        $r->get('/bureaus', [BureauController::class, 'index'])->name('bureaus.index')->middleware('can:bureaus.view');
+        $r->get('/bureaus/create', [BureauController::class, 'create'])->name('bureaus.create')->middleware('can:bureaus.create');
+        $r->post('/bureaus', [BureauController::class, 'store'])->name('bureaus.store')->middleware('can:bureaus.create');
+        $r->get('/bureaus/{id:\d+}/edit', [BureauController::class, 'edit'])->name('bureaus.edit')->middleware('can:bureaus.edit');
+        $r->put('/bureaus/{id:\d+}', [BureauController::class, 'update'])->name('bureaus.update')->middleware('can:bureaus.edit');
+        $r->delete('/bureaus/{id:\d+}', [BureauController::class, 'destroy'])->name('bureaus.destroy')->middleware('can:bureaus.delete');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

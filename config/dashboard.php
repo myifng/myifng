@@ -14,7 +14,8 @@ return [
         'my_assignments'  => ['label' => 'मेरे असाइनमेंट', 'icon' => 'fa-list-check', 'module' => 'assignments', 'permission' => 'assignments.view', 'provider' => 'myAssignments', 'route' => 'admin.assignments.index', 'query' => 'mine=1'],
         // Phase 6
         'reporters'       => ['label' => 'सक्रिय रिपोर्टर', 'icon' => 'fa-id-card', 'module' => 'reporters', 'permission' => 'reporters.view', 'provider' => 'reporters', 'route' => 'admin.reporters.index'],
-        'applications'    => ['label' => 'नए रिपोर्टर आवेदन', 'icon' => 'fa-file-signature', 'module' => 'applications', 'permission' => 'applications.view', 'provider' => 'applications', 'route' => 'admin.applications.index'],
+        'applications'    => ['label' => 'नए रिपोर्टर आवेदन', 'icon' => 'fa-file-signature', 'module' => 'applications', 'permission' => 'applications.view', 'provider' => 'applications', 'route' => 'admin.applications.index', 'query' => 'status=open'],
+        'my_card'         => ['label' => 'मेरा रिपोर्टर ID', 'icon' => 'fa-address-card', 'module' => 'reporters', 'permission' => 'dashboard.view', 'provider' => 'myCard', 'route' => 'admin.portal'],
         // Phase 3
         'media'           => ['label' => 'मीडिया लाइब्रेरी', 'icon' => 'fa-photo-film', 'module' => 'media', 'permission' => 'media.view', 'provider' => 'media', 'route' => 'admin.media.index'],
         'categories'      => ['label' => 'श्रेणियाँ', 'icon' => 'fa-folder-tree', 'module' => 'categories', 'permission' => 'categories.view', 'provider' => 'categories', 'route' => 'admin.categories.index'],

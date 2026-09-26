@@ -108,6 +108,22 @@ return [
             'watermark_text' => ['label' => 'वॉटरमार्क टेक्स्ट', 'type' => 'text', 'rules' => 'nullable|max:60|regex:/^[\x20-\x7E]*$/', 'placeholder' => 'www.example.com', 'help' => 'सिर्फ़ अंग्रेज़ी अक्षर/अंक (हिंदी के लिए लोगो वाला वॉटरमार्क चुनें)', 'width' => 6],
         ],
     ],
+    'reporters' => [
+        'label' => 'रिपोर्टर और ID कार्ड', 'icon' => 'fa-id-card', 'permission' => 'edit',
+        'fields' => [
+            'join_enabled' => ['label' => '“रिपोर्टर बनें” फ़ॉर्म चालू (/join-as-reporter)', 'type' => 'switch', 'default' => '1'],
+            'join_intro' => ['label' => 'फ़ॉर्म के ऊपर परिचय', 'type' => 'textarea', 'rules' => 'nullable|max:1000', 'default' => 'हमारे साथ जुड़कर अपने क्षेत्र की ख़बरें दुनिया तक पहुँचाएँ। सभी खाने सही भरें और दस्तावेज़ साफ़ अपलोड करें।'],
+            'join_declaration' => ['label' => 'घोषणा (आवेदक को स्वीकार करनी होगी)', 'type' => 'textarea', 'rules' => 'nullable|max:2000', 'default' => 'मैं घोषणा करता/करती हूँ कि दी गई सभी जानकारी और दस्तावेज़ सही हैं। मैं संस्थान की संपादकीय नीति, आचार संहिता और रिपोर्टर नीति का पालन करूँगा/करूँगी। ग़लत जानकारी पाए जाने पर आवेदन या नियुक्ति रद्द की जा सकती है।'],
+            'reporter_id_prefix' => ['label' => 'रिपोर्टर ID का शुरुआती हिस्सा', 'type' => 'text', 'default' => 'RPT', 'rules' => 'required|max:8|regex:/^[A-Z]{2,8}$/', 'width' => 4, 'help' => 'जैसे RPT → RPT-2026-0001'],
+            'reporter_validity_months' => ['label' => 'ID कार्ड की वैधता (महीने)', 'type' => 'number', 'default' => '12', 'rules' => 'required|integer|min:1|max:60', 'width' => 4],
+            'signatory_name' => ['label' => 'हस्ताक्षरकर्ता का नाम', 'type' => 'text', 'rules' => 'nullable|max:100', 'width' => 6],
+            'signatory_designation' => ['label' => 'हस्ताक्षरकर्ता का पद', 'type' => 'text', 'default' => 'प्रधान संपादक', 'rules' => 'nullable|max:100', 'width' => 6],
+            'signature_image' => ['label' => 'हस्ताक्षर (पारदर्शी PNG)', 'type' => 'image', 'width' => 6],
+            'stamp_image' => ['label' => 'मुहर (पारदर्शी PNG)', 'type' => 'image', 'width' => 6],
+            'registration_no' => ['label' => 'पंजीकरण संख्या (पत्रों में)', 'type' => 'text', 'rules' => 'nullable|max:100', 'width' => 6],
+            'id_card_note' => ['label' => 'ID कार्ड के पीछे का नोट', 'type' => 'textarea', 'rules' => 'nullable|max:300', 'default' => 'यह कार्ड संस्थान की संपत्ति है। मिलने पर ऊपर दिए पते पर लौटाएँ। सत्यापन के लिए QR स्कैन करें।'],
+        ],
+    ],
     'analytics' => [
         'label' => 'एनालिटिक्स और कोड', 'icon' => 'fa-code', 'permission' => 'manage',
         'fields' => [

@@ -75,3 +75,36 @@ function block_head(string $title, ?string $more = null, string $h = 'h2'): stri
 {
     return '<div class="bhead"><' . $h . '>' . e($title) . '</' . $h . '>' . ($more ? '<a class="more" href="' . e($more) . '">और पढ़ें <i class="fa-solid fa-angle-right" aria-hidden="true"></i></a>' : '') . '</div>';
 }
+
+/**
+ * वेबसाइट के फ़ॉर्म का खाना (पुराना मान और त्रुटि के साथ)
+ *   ff('text', 'full_name', 'पूरा नाम', ['required' => true])
+ *   ff('select', 'gender', 'लिंग', ['options' => [...]])
+ */
+function ff(string $type, string $name, string $label, array $o = []): string
+{
+    $id = 'ff_' . preg_replace('/[^a-z0-9_]/i', '_', $name);
+    $err = error($name);
+    $val = in_array($type, ['file', 'password'], true) ? '' : (string) old($name, $o['value'] ?? '');
+    $req = !empty($o['required']);
+    $a = $req ? ' required' : '';
+    foreach (($o['attrs'] ?? []) as $k => $v) {
+        $a .= ' ' . e($k) . ($v === true ? '' : '="' . e($v) . '"');
+    }
+    $a .= $err ? ' aria-invalid="true" aria-describedby="' . $id . '_e"' : (!empty($o['help']) ? ' aria-describedby="' . $id . '_h"' : '');
+    $lab = '<label for="' . $id . '">' . e($label) . ($req ? ' <span class="req" aria-hidden="true">*</span>' : '') . '</label>';
+    if ($type === 'select') {
+        $opts = '<option value="">' . e($o['empty'] ?? 'चुनें…') . '</option>';
+        foreach ($o['options'] ?? [] as $k => $v) {
+            $extra = is_array($v) ? ' data-parent="' . e($v[1]) . '"' : '';
+            $opts .= '<option value="' . e($k) . '"' . selected($k, $val) . $extra . '>' . e(is_array($v) ? $v[0] : $v) . '</option>';
+        }
+        $input = '<select id="' . $id . '" name="' . e($name) . '"' . $a . '>' . $opts . '</select>';
+    } elseif ($type === 'textarea') {
+        $input = '<textarea id="' . $id . '" name="' . e($name) . '" rows="' . (int) ($o['rows'] ?? 3) . '"' . $a . '>' . e($val) . '</textarea>';
+    } else {
+        $input = '<input type="' . e($type) . '" id="' . $id . '" name="' . e($name) . '"' . ($type !== 'file' ? ' value="' . e($val) . '"' : '') . $a . '>';
+    }
+    $help = $err ? '<small class="ff-err" id="' . $id . '_e">' . e($err) . '</small>' : (!empty($o['help']) ? '<small class="ff-help" id="' . $id . '_h">' . e($o['help']) . '</small>' : '');
+    return '<div class="ff' . ($err ? ' has-err' : '') . (!empty($o['wide']) ? ' ff-wide' : '') . '">' . $lab . $input . $help . '</div>';
+}

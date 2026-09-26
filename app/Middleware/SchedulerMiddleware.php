@@ -22,6 +22,11 @@ final class SchedulerMiddleware implements Middleware
                 if (NewsService::publishDue() > 0) {
                     cache()->flush('home');
                 }
+                if (cache()->get('scheduler.daily') === null) {
+                    cache()->set('scheduler.daily', time(), 3600);
+                    \App\Services\ReporterService::expireDue(); // वैधता ख़त्म हुए रिपोर्टर
+                    \App\Services\OtpService::prune();
+                }
             }
         } catch (\Throwable $e) {
             // टेबल अभी न हो (अपडेट बाकी) या DB की दिक्कत: पेज चलता रहे

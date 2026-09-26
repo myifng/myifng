@@ -76,9 +76,12 @@ final class Router
         throw new HttpException($allowed ? 405 : 404);
     }
 
+    /** {name} या {name:regex}; regex में {4} / {2,8} जैसे quantifier भी चलते हैं */
+    private const PARAM = '/\{(\w+)(?::((?:[^{}]|\{[0-9,]+\})+))?\}/';
+
     private function compile(string $path): string
     {
-        $regex = preg_replace_callback('/\{(\w+)(?::([^}]+))?\}/', static fn($m) => '(?P<' . $m[1] . '>' . ($m[2] ?? '[^/]+') . ')', $path);
+        $regex = preg_replace_callback(self::PARAM, static fn($m) => '(?P<' . $m[1] . '>' . ($m[2] ?? '[^/]+') . ')', $path);
         return '#^' . $regex . '$#u';
     }
 
@@ -88,7 +91,7 @@ final class Router
         if (!isset($this->named[$name])) {
             throw new \InvalidArgumentException("रूट नहीं मिला: $name");
         }
-        $path = preg_replace_callback('/\{(\w+)(?::[^}]+)?\}/', static function ($m) use (&$params, $name) {
+        $path = preg_replace_callback(self::PARAM, static function ($m) use (&$params, $name) {
             if (!array_key_exists($m[1], $params)) {
                 throw new \InvalidArgumentException("रूट $name के लिए {$m[1]} चाहिए");
             }

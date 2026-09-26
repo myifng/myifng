@@ -19,6 +19,9 @@ final class DashboardService
                 continue;
             }
             $data = self::{$c['provider']}();
+            if (!empty($data['skip'])) {
+                continue;
+            }
             $out[$key] = $c + $data + ['link' => ($c['route'] && app('router')->has($c['route'])) ? route($c['route']) . (!empty($c['query']) ? '?' . $c['query'] : '') : null];
             if (count($out) >= (int) config('dashboard.max_cards', 8)) {
                 break;
@@ -80,6 +83,29 @@ final class DashboardService
         $r = db()->first("SELECT SUM(status IN ('open','accepted','in_progress')) open, SUM(status IN ('open','accepted','in_progress') AND deadline < NOW()) late
                           FROM {p}assignments WHERE reporter_id = ?", [auth()->id()]);
         return ['value' => (int) $r['open'], 'sub' => (int) $r['late'] ? 'देर हो चुकी: ' . num($r['late']) : 'खुले असाइनमेंट', 'alert' => (int) $r['late'] > 0];
+    }
+
+    private static function reporters(): array
+    {
+        $r = db()->first("SELECT SUM(status = 'active') active, SUM(status = 'active' AND valid_until <= CURDATE() + INTERVAL 30 DAY) expiring FROM {p}reporters");
+        return ['value' => (int) $r['active'], 'sub' => (int) $r['expiring'] ? '30 दिन में वैधता ख़त्म: ' . num($r['expiring']) : 'सभी की वैधता ठीक', 'alert' => (int) $r['expiring'] > 0];
+    }
+
+    private static function applications(): array
+    {
+        $r = db()->first("SELECT SUM(status = 'new') n, SUM(status NOT IN ('approved','rejected')) open FROM {p}reporter_applications");
+        return ['value' => (int) $r['n'], 'sub' => 'कुल खुले: ' . num($r['open']), 'alert' => (int) $r['n'] > 0];
+    }
+
+    /** सिर्फ़ उन्हें जिनका रिपोर्टर प्रोफ़ाइल है */
+    private static function myCard(): array
+    {
+        $r = ReporterService::forUser((int) auth()->id());
+        if (!$r) {
+            return ['skip' => true];
+        }
+        $days = (int) floor((strtotime((string) $r['valid_until']) - strtotime('today')) / 86400);
+        return ['value' => $r['reporter_code'], 'sub' => $days >= 0 ? 'वैधता: ' . hindi_date($r['valid_until']) : 'वैधता ख़त्म, नवीनीकरण कराएँ', 'alert' => $days < 30];
     }
 
     private static function media(): array

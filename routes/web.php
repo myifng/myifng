@@ -9,8 +9,10 @@ use App\Controllers\Front\LocationApiController;
 use App\Controllers\Front\LocationController;
 use App\Controllers\Front\NewsController;
 use App\Controllers\Front\PageController;
+use App\Controllers\Front\ReporterJoinController;
 use App\Controllers\Front\SearchController;
 use App\Controllers\Front\TopicController;
+use App\Controllers\Front\VerifyController;
 
 $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/', [HomeController::class, 'index'])->name('home');
@@ -27,6 +29,18 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/tag/{slug:[a-z0-9-]+}', [TopicController::class, 'tag'])->name('tag');
     $r->get('/latest', [SearchController::class, 'latest'])->name('latest');
     $r->get('/search', [SearchController::class, 'search'])->name('search');
+
+    // Phase 6: रिपोर्टर बनें, आवेदन की स्थिति, सत्यापन
+    $r->get('/join-as-reporter', [ReporterJoinController::class, 'form'])->name('join');
+    $r->post('/join-as-reporter', [ReporterJoinController::class, 'submit'])->name('join.submit')->middleware('throttle:5,60');
+    $r->get('/join-as-reporter/done', [ReporterJoinController::class, 'done'])->name('join.done');
+    $r->get('/application-status', [ReporterJoinController::class, 'status'])->name('application.status');
+    $r->post('/application-status', [ReporterJoinController::class, 'lookup'])->name('application.lookup')->middleware('throttle:10,15');
+    $r->post('/application-status/otp', [ReporterJoinController::class, 'verifyOtp'])->name('application.otp')->middleware('throttle:15,15');
+    $r->post('/application-status/reset', [ReporterJoinController::class, 'reset'])->name('application.reset');
+    $r->get('/verify-reporter', [VerifyController::class, 'form'])->name('verify');
+    $r->post('/verify-reporter', [VerifyController::class, 'check'])->name('verify.check')->middleware('throttle:20,10');
+    $r->get('/verify-reporter/{code:[A-Za-z]+-[0-9]+-[0-9]+}/{token:[a-f0-9]+}', [VerifyController::class, 'qr'])->name('verify.qr');
 
     // लोकेशन: सबसे आख़िर में (slug आरक्षित शब्दों से नहीं टकराते: TaxonomyService::RESERVED)
     $r->get('/{path:[a-z0-9-]+(?:/[a-z0-9-]+)*}', [LocationController::class, 'show'])->name('location');

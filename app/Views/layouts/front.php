@@ -57,6 +57,7 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <?= $this->insert('partials/front/ticker') ?><?php endif; ?>
 
 <main id="main" class="site-main">
+  <?= $this->insert('partials/front/flash') ?>
   <?= $this->section('content') ?>
 </main>
 
