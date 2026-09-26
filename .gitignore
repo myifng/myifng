@@ -1,0 +1,13 @@
+# इंस्टॉलर से बनने वाली फ़ाइलें: कभी commit न करें
+/config/env.php
+/storage/installed.lock
+/storage/cache/*
+/storage/logs/*
+/storage/sessions/*
+/storage/private/*
+/storage/backups/*
+/public/uploads/*
+!/storage/*/.gitkeep
+!/public/uploads/.gitkeep
+!/public/uploads/.htaccess
+.DS_Store

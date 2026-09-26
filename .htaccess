@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------
+#  Front Controller + सुरक्षा (Apache / cPanel / DirectAdmin)
+# ---------------------------------------------------------------
+Options -Indexes
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # सब-फ़ोल्डर में इंस्टॉल हो और URL काम न करें, तो यह लाइन चालू करके फ़ोल्डर का नाम लिखें:
+  # RewriteBase /news/
+
+  # संवेदनशील फ़ोल्डर बाहर से कभी न खुलें
+  RewriteRule ^(app|config|routes|storage|database|modules|docs)(/|$) - [F,L,NC]
+
+  # छुपी फ़ाइलें (.env, .git आदि) बंद
+  RewriteRule (^|/)\.(?!well-known/) - [F,L]
+
+  # मौजूद फ़ाइल/फ़ोल्डर (public/assets, public/uploads, install) सीधे परोसें
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # बाकी सब Front Controller पर
+  RewriteRule ^ index.php [L,QSA]
+</IfModule>
+
+<FilesMatch "\.(sql|md|log|lock|ini|json|dist|sh|bak)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
