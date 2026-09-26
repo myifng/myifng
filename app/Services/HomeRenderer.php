@@ -24,7 +24,8 @@ final class HomeRenderer
             if (!$block || HomepageService::readiness($block) !== null) {
                 continue; // मॉड्यूल अभी तैयार नहीं
             }
-            $dynamic = $s['block_type'] === 'location' && empty($s['settings']['location']);
+            // पाठक का शहर हर पाठक का अलग; ब्रेकिंग अपने समय पर ख़त्म होती है (उसका अपना 60 सेकंड कैश)
+            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || $s['block_type'] === 'breaking';
             $key = 'home.section.' . $s['id'] . '.' . md5($s['updated_at'] . json_encode($s['settings']));
             $inner = $dynamic ? self::section($s) : cache()->remember($key, self::TTL, static fn() => self::section($s));
             if ($inner === '') {
@@ -51,6 +52,17 @@ final class HomeRenderer
             $html .= '<div class="two">' . implode('', $halfBuffer) . '</div>';
         }
         return $html;
+    }
+
+    /** होमपेज पर बैनर वाला ब्रेकिंग सेक्शन है? (तब ऊपर अपने आप वाला अलर्ट बैनर नहीं) */
+    public static function hasBreakingBanner(): bool
+    {
+        foreach (HomepageService::sections(true) as $s) {
+            if ($s['block_type'] === 'breaking' && ($s['settings']['style'] ?? 'list') !== 'list') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** एक सेक्शन का HTML (डेटा न हो तो '') */
@@ -128,14 +140,48 @@ final class HomeRenderer
                 $items = NewsQuery::mostRead((int) ($set['period'] ?? 7), $count);
                 return $items ? ['items' => $items] : null;
             case 'live_tv':
-                $url = (string) setting('live_tv_url');
-                $id = preg_match('~(?:youtu\.be/|v=|live/|embed/|shorts/)([A-Za-z0-9_-]{11})~', $url, $m) ? $m[1] : null;
-                return $id ? ['yt' => $id, 'url' => $url] : null;
+                $ch = LiveTvService::main();
+                $player = $ch ? LiveTvService::player($ch, !empty($set['autoplay'])) : null;
+                return $player ? ['channel' => $ch, 'player' => $player, 'now' => LiveTvService::current((int) $ch['id'])] : null;
+            case 'videos':
+                [$w, $p] = self::mmWhere($set, ['featured' => 'x.is_featured = 1', 'short' => "x.type = 'short'", 'interview' => "x.type = 'interview'", 'ground_report' => "x.type = 'ground_report'", 'show' => "x.type = 'show'"]);
+                if (($set['layout'] ?? '') === 'shorts' && ($set['filter'] ?? '') === '') {
+                    $w .= " AND x.type = 'short'";
+                }
+                $items = MultimediaService::list('video', $w, $p, $count);
+                return $items ? ['items' => $items, 'more' => !empty($set['more']) ? route('videos') . (($set['layout'] ?? '') === 'shorts' ? '?type=short' : '') : null] : null;
+            case 'gallery':
+                $items = MultimediaService::list('gallery', '1=1', [], $count);
+                return $items ? ['items' => $items, 'more' => !empty($set['more']) ? route('galleries') : null] : null;
+            case 'web_stories':
+                $items = MultimediaService::list('story', '1=1', [], $count);
+                return $items ? ['items' => $items, 'more' => !empty($set['more']) ? route('stories') : null] : null;
+            case 'audio':
+                [$w, $p] = self::mmWhere($set, ['news' => "x.type = 'news'", 'episode' => "x.type = 'episode'"]);
+                $items = MultimediaService::list('audio', $w, $p, $count);
+                return $items ? ['items' => $items, 'more' => !empty($set['more']) ? route('audio') : null] : null;
+            case 'breaking':
+                if (($set['style'] ?? 'list') !== 'list') { // बैनर (पुराना 'ticker' मान भी): होमपेज अलर्ट वाले आइटम
+                    return BreakingService::banner() ? ['banner' => true] : null;
+                }
+                $items = BreakingService::active();
+                return $items ? ['items' => $items, 'banner' => false] : null;
             case 'custom_html':
                 return trim((string) ($set['html'] ?? '')) !== '' ? [] : null;
             default:
                 return null; // विज्ञापन (Phase 9), न्यूज़लेटर (Phase 11) आदि
         }
+    }
+
+    /** वीडियो/ऑडियो ब्लॉक: फ़िल्टर + श्रेणी */
+    private static function mmWhere(array $set, array $filters): array
+    {
+        $w = $filters[$set['filter'] ?? ''] ?? '1=1';
+        $p = [];
+        if (!empty($set['category'])) {
+            $w .= ' AND x.category_id IN (' . implode(',', array_map('intval', array_merge([(int) $set['category']], array_column(db()->all('SELECT id FROM {p}categories WHERE parent_id = ?', [(int) $set['category']]), 'id')))) . ')';
+        }
+        return [$w, $p];
     }
 
     /** लोकेशन सेक्शन: चुनी लोकेशन (या पाठक का शहर) + नीचे वाली लोकेशन के टैब */

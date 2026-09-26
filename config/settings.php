@@ -77,6 +77,9 @@ return [
             'breaking_ticker' => ['label' => 'ब्रेकिंग न्यूज़ पट्टी', 'type' => 'switch', 'default' => '1'],
             'trending_bar' => ['label' => 'ट्रेंडिंग पट्टी (फ़ीचर्ड टॉपिक + ट्रेंडिंग टैग)', 'type' => 'switch', 'default' => '1'],
             'ticker_speed' => ['label' => 'पट्टी की रफ़्तार', 'type' => 'select', 'options' => ['slow' => 'धीमी', 'medium' => 'सामान्य', 'fast' => 'तेज़'], 'default' => 'medium', 'width' => 6],
+            'breaking_expiry_hours' => ['label' => 'ब्रेकिंग अपने आप कितने घंटे में हटे', 'type' => 'number', 'default' => '6', 'rules' => 'required|integer|min:0|max:720', 'width' => 6, 'help' => 'कंट्रोल रूम में नए आइटम का डिफ़ॉल्ट; 0 = हाथ से हटाने तक'],
+            'live_blog_refresh' => ['label' => 'लाइव ब्लॉग: नए अपडेट की जाँच (सेकंड)', 'type' => 'number', 'default' => '30', 'rules' => 'required|integer|min:15|max:300', 'width' => 6],
+            'live_show_author' => ['label' => 'लाइव अपडेट पर लिखने वाले का नाम', 'type' => 'switch', 'default' => '1', 'width' => 6],
             'comments_enabled' => ['label' => 'पाठकों की टिप्पणियाँ', 'type' => 'switch', 'default' => '1'],
             'comments_moderation' => ['label' => 'टिप्पणी मंज़ूरी के बाद दिखे', 'type' => 'switch', 'default' => '1'],
             'share_buttons' => ['label' => 'शेयर बटन', 'type' => 'checkboxes', 'options' => ['whatsapp' => 'WhatsApp', 'facebook' => 'Facebook', 'x' => 'X', 'telegram' => 'Telegram', 'linkedin' => 'LinkedIn', 'copy' => 'लिंक कॉपी', 'native' => 'मोबाइल शेयर'], 'default' => 'whatsapp,facebook,x,telegram,copy,native'],
@@ -90,7 +93,7 @@ return [
     'media' => [
         'label' => 'लाइव टीवी और ई-पेपर', 'icon' => 'fa-tv', 'permission' => 'edit',
         'fields' => [
-            'live_tv_url' => ['label' => 'लाइव टीवी (YouTube लाइव लिंक)', 'type' => 'url', 'rules' => 'nullable|url|max:500', 'help' => 'विस्तृत लाइव टीवी मॉड्यूल Phase 7 में'],
+            'live_tv_url' => ['label' => 'लाइव टीवी (YouTube लाइव लिंक)', 'type' => 'url', 'rules' => 'nullable|url|max:500', 'help' => 'सिर्फ़ तब इस्तेमाल होता है जब "लाइव टीवी" मॉड्यूल में कोई चालू चैनल न हो'],
             'epaper_enabled' => ['label' => 'ई-पेपर दिखाएँ', 'type' => 'switch', 'default' => '1'],
         ],
     ],

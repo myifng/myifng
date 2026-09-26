@@ -1,4 +1,5 @@
 <aside class="side">
+  <?= $before ?? '' /* पेज के अपने बॉक्स (जैसे प्लेलिस्ट), पहले से escape */ ?>
   <?php if ($side['latest']): ?>
   <section class="box">
     <?= block_head('ताज़ा ख़बरें', route('latest')) ?>

@@ -83,6 +83,17 @@ Core PHP 8.1+ पर बना, अपने Custom MVC वाला न्य�
 - **रिपोर्टर पोर्टल**: रिपोर्टर अपना ID कार्ड, पत्र और आँकड़े देखे
 - सेटिंग → **रिपोर्टर** टैब: जॉइन चालू/बंद, घोषणा, ID प्रीफ़िक्स, वैधता, हस्ताक्षर/मुहर
 
+## Phase 7 में क्या है
+
+- **ब्रेकिंग कंट्रोल रूम**: ब्रेकिंग / फ़्लैश / अलर्ट, प्राथमिकता, शुरू-ख़त्म का समय (अपने आप हटते हैं), टिकर, होमपेज अलर्ट बैनर, मोबाइल अलर्ट, पुश (कतार; भेजना Phase 11)
+- **लाइव ब्लॉग**: किसी ख़बर पर समय वाली टाइमलाइन; एडमिन से बिना रीलोड अपडेट; पाठक के पेज पर अपने आप नए अपडेट
+- **लाइव टीवी** `/live-tv`: कई चैनल (YouTube, एम्बेड, HLS/MP4 स्ट्रीम), कार्यक्रम सूची, "अभी चल रहा"
+- **वीडियो** `/videos`: वीडियो, शॉर्ट्स, इंटरव्यू, ग्राउंड रिपोर्ट, शो; प्लेलिस्ट; वीडियो SEO
+- **फ़ोटो गैलरी** `/photos`: एल्बम, हर फ़ोटो का कैप्शन/फ़ोटोग्राफ़र/क्रेडिट/कॉपीराइट, फ़ुलस्क्रीन गैलरी
+- **वेब स्टोरी** `/web-stories`: 9:16 स्लाइड बिल्डर (लाइव प्रीव्यू), फ़ुलस्क्रीन प्लेयर, Google के लिए AMP संस्करण
+- **ऑडियो / पॉडकास्ट** `/audio`: ऑडियो न्यूज़, पॉडकास्ट सीरीज़ और एपिसोड, ट्रांसक्रिप्ट, RSS फ़ीड; Text-to-Speech के लिए ढाँचा (`config/tts.php`)
+- होमपेज बिल्डर में वीडियो, गैलरी, वेब स्टोरी, ऑडियो, लाइव टीवी और ब्रेकिंग ब्लॉक
+
 ## अपडेट कैसे करें (पहले से इंस्टॉल साइट)
 
 1. डेटाबेस और फ़ाइलों का बैकअप लें।
@@ -96,7 +107,7 @@ index.php          Front Controller
 app/               Core, Controllers, Models, Services, Repositories, Validators, Middleware, Helpers, Views
 config/            app.php, database.php, modules.php (मॉड्यूल रजिस्ट्री), roles.php, env.php (इंस्टॉलर बनाता है)
 routes/            web.php, admin.php
-public/assets/     css, js, vendor (Bootstrap 5, Font Awesome 6, Chart.js 4, QR: सब लोकल)
+public/assets/     css, js, vendor (Bootstrap 5, Font Awesome 6, Chart.js 4, QR, hls.js: सब लोकल)
 public/uploads/    अपलोड (PHP चलना बंद)
 storage/           cache, logs, sessions, private, backups
 database/          migrations, seeds
@@ -119,3 +130,4 @@ demo/              शुरुआती HTML डिज़ाइन डेमो
 - Font Awesome Free 6.6.0 (आइकन CC BY 4.0, फ़ॉन्ट SIL OFL 1.1, कोड MIT)
 - Chart.js 4.4.4 (MIT)
 - qrcode-generator 1.4.4, Kazuhiko Arase (MIT): रिपोर्टर ID कार्ड का QR
+- hls.js 1.5.17 light (Apache-2.0, `public/assets/vendor/hls/LICENSE`): लाइव टीवी की HLS स्ट्रीम

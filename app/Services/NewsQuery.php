@@ -174,16 +174,23 @@ final class NewsQuery
     /** एक सत्र में एक ख़बर का एक व्यू; बॉट नहीं */
     public static function countView(array $news): void
     {
+        self::hit('news', (int) $news['id']);
+    }
+
+    /** किसी भी टेबल (ख़बर, वीडियो, गैलरी, स्टोरी, ऑडियो) का व्यू: एक सत्र में एक बार, बॉट नहीं */
+    public static function hit(string $table, int $id): void
+    {
         $ua = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
         if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|whatsapp|preview|curl|wget|python|headless/', $ua)) {
             return;
         }
-        $seen = (array) app('session')->get('viewed_news', []);
-        if (in_array((int) $news['id'], $seen, true)) {
+        $key = $table === 'news' ? 'viewed_news' : 'viewed_' . $table;
+        $seen = (array) app('session')->get($key, []);
+        if (in_array($id, $seen, true)) {
             return;
         }
-        $seen[] = (int) $news['id'];
-        app('session')->set('viewed_news', array_slice($seen, -200));
-        db()->query('UPDATE {p}news SET views = views + 1 WHERE id = ?', [$news['id']]);
+        $seen[] = $id;
+        app('session')->set($key, array_slice($seen, -200));
+        db()->query("UPDATE {p}$table SET views = views + 1 WHERE id = ?", [$id]);
     }
 }

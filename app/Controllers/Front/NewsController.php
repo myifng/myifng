@@ -9,6 +9,7 @@ use App\Core\Response;
 use App\Models\Category;
 use App\Models\Location;
 use App\Services\ContentRenderer;
+use App\Services\LiveBlogService;
 use App\Services\NewsQuery;
 use App\Services\NewsService;
 use App\Services\NewsWorkflow;
@@ -42,9 +43,11 @@ final class NewsController extends FrontController
         }
         $crumbs[] = [\App\Helpers\Str::limit((string) $news['title'], 60), null];
         $related = setting('related_news', '1') === '1' ? NewsQuery::related($news, 6) : [];
+        $live = LiveBlogService::forNews((int) $news['id']);
+        $liveUpdates = $live ? LiveBlogService::updates((int) $live['id']) : [];
         return $this->view('front/article', [
             'news' => $news, 'content' => $content, 'isPreview' => $isPreview, 'rel' => $rel, 'category' => $cat, 'locationChain' => $chain,
-            'reporter' => $reporter, 'crumbs' => $crumbs, 'related' => $related, 'side' => $this->sidebar(),
+            'reporter' => $reporter, 'crumbs' => $crumbs, 'related' => $related, 'side' => $this->sidebar(), 'live' => $live, 'liveUpdates' => $liveUpdates,
             'previewNote' => $isPreview ? 'प्रीव्यू · स्थिति: ' . NewsWorkflow::label($news['status']) . ($news['deleted_at'] ? ' (ट्रैश में)' : '') : '',
             'shareUrl' => NewsService::url($news),
             'seo' => [
@@ -56,7 +59,8 @@ final class NewsController extends FrontController
                 'canonical' => $news['canonical_url'] ?: NewsService::url($news),
                 'og_type' => 'article',
                 'published' => $news['published_at'], 'modified' => $news['corrected_at'] ?: $news['updated_at'], 'section' => $cat['name'] ?? null,
-                'jsonld' => $isPreview ? '' : SeoService::article($news, $reporter['name'] ?? null, $cat['name'] ?? null, $rel['tags']) . SeoService::breadcrumbs($crumbs, NewsService::url($news)),
+                'jsonld' => $isPreview ? '' : SeoService::article($news, $reporter['name'] ?? null, $cat['name'] ?? null, $rel['tags']) . SeoService::breadcrumbs($crumbs, NewsService::url($news))
+                    . ($live ? LiveBlogService::schema($news, $live, $liveUpdates) : ''),
             ],
         ]);
     }

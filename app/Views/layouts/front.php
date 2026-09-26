@@ -62,6 +62,7 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 </main>
 
 <?php if ($layoutOptions['footer']): ?><?= $this->insert('partials/front/footer') ?><?php endif; ?>
+<?= $this->insert('partials/front/breaking-alerts', ['where' => 'mobile']) ?>
 <?= $this->insert('partials/front/bottom-nav') ?>
 <script src="<?= asset('js/app.js') ?>" defer></script>
 <?= setting('footer_code') ?>

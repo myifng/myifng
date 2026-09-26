@@ -601,6 +601,7 @@
       x.send(fd);
     });
   }
+  window.AdminUpload = uploadFile; // Phase 7 (गैलरी) भी इसे इस्तेमाल करती है
 
   /* ---------- मीडिया पेज: ड्रैग-ड्रॉप अपलोड (एक-एक करके) ---------- */
   $$('[data-uploader]').forEach(function (zone) {
@@ -920,6 +921,210 @@
       var count = function () { var t = (area.innerText || '').trim(); var n = t ? t.split(/\s+/).length : 0; wc.textContent = n + ' शब्द · पढ़ने में लगभग ' + Math.max(1, Math.ceil(n / 200)) + ' मिनट'; };
       area.addEventListener('input', count); count();
     }
+  }
+})();
+
+/* ==========================================================
+   Phase 7: ब्रेकिंग फ़ॉर्म, लाइव ब्लॉग कंट्रोल, गैलरी फ़ोटो, वेब स्टोरी बिल्डर, लाइव टीवी
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var csrf = ($('meta[name="csrf-token"]') || {}).content || '';
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function toast(msg, type) {
+    var wrap = $('.toast-stack');
+    if (!wrap) { wrap = document.createElement('div'); wrap.className = 'toast-stack'; wrap.setAttribute('aria-live', 'polite'); document.body.appendChild(wrap); }
+    var t = document.createElement('div'); t.className = 'toast-msg ' + (type || 'ok'); t.textContent = msg; wrap.appendChild(t);
+    setTimeout(function () { t.remove(); }, 3500);
+  }
+  function send(url, fd) {
+    return fetch(url, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, message: 'सर्वर से सही जवाब नहीं मिला (' + r.status + ')' }; }); })
+      .catch(function () { return { ok: false, message: 'नेटवर्क में दिक्कत है। दोबारा कोशिश करें।' }; });
+  }
+  function firstError(r) { if (r.errors) { var k = Object.keys(r.errors)[0]; if (k) return r.errors[k]; } return r.message || 'कुछ गड़बड़ हुई।'; }
+
+  /* ---------- ब्रेकिंग: "तय समय" चुनने पर ही ख़त्म होने का खाना ---------- */
+  $$('[data-ends-in]').forEach(function (sel) {
+    var box = $('[data-ends-at]', sel.form);
+    var sync = function () { if (box) box.hidden = sel.value !== 'custom'; };
+    sel.addEventListener('change', sync); sync();
+  });
+
+  /* ---------- data-when="source:youtube,embed": किसी चुनाव पर ही खाना दिखे ---------- */
+  $$('[data-when]').forEach(function (el) {
+    var parts = el.dataset.when.split(':'), form = el.closest('form'); if (!form) return;
+    var ctl = form.elements[parts[0]], vals = parts[1].split(','); if (!ctl) return;
+    var sync = function () { var v = ctl.value; if (ctl.length && !ctl.tagName) { v = (Array.prototype.find.call(ctl, function (r) { return r.checked; }) || {}).value; } el.hidden = vals.indexOf(v) === -1; };
+    (ctl.tagName ? [ctl] : Array.prototype.slice.call(ctl)).forEach(function (c) { c.addEventListener('change', sync); });
+    sync();
+  });
+
+  /* ---------- गैलरी: कई फ़ोटो अपलोड, लाइब्रेरी से, क्रम, हटाना ---------- */
+  var gp = $('[data-gp]');
+  if (gp) {
+    var gpList = $('[data-gp-list]', gp), gpTpl = $('[data-gp-template]', gp), gpCount = $('[data-gp-count]', gp), gpEmpty = $('[data-gp-empty]', gp);
+    var gpStatus = $('[data-gp-status]', gp), gpMax = +gp.dataset.max || 200, gpN = 0;
+    var gpRefresh = function () { var c = gpList.children.length; gpCount.textContent = c; gpEmpty.hidden = c > 0; gpList.dispatchEvent(new Event('input', { bubbles: true })); };
+    var gpAdd = function (it) {
+      if (gpList.children.length >= gpMax) { toast('ज़्यादा से ज़्यादा ' + gpMax + ' फ़ोटो।', 'err'); return; }
+      var t = document.createElement('div'); t.innerHTML = gpTpl.innerHTML.replace(/__i__/g, 'n' + (++gpN) + '_' + Date.now());
+      var li = t.firstElementChild;
+      $('[data-gp-image]', li).value = it.file; $('[data-gp-thumb]', li).src = it.thumb || '';
+      var cap = $('input[name$="[caption]"]', li), cr = $('input[name$="[credit]"]', li);
+      if (cap && it.caption) cap.value = it.caption; if (cr && it.credit) cr.value = it.credit;
+      gpList.appendChild(li); gpRefresh();
+    };
+    gpList.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return; var li = b.closest('[data-gp-item]');
+      if (b.hasAttribute('data-gp-remove')) { li.remove(); gpRefresh(); }
+      else if (b.hasAttribute('data-gp-up') && li.previousElementSibling) { gpList.insertBefore(li, li.previousElementSibling); b.focus(); gpRefresh(); }
+      else if (b.hasAttribute('data-gp-down') && li.nextElementSibling) { gpList.insertBefore(li.nextElementSibling, li); b.focus(); gpRefresh(); }
+    });
+    var gpPick = $('[data-gp-pick]', gp);
+    if (gpPick && window.MediaPicker) gpPick.addEventListener('click', function () {
+      window.MediaPicker.open({ kind: 'image', onChoose: function (it, alt, cap) { gpAdd({ file: it.file, thumb: it.thumb, caption: cap || it.caption, credit: it.credit }); gpPick.focus(); } });
+    });
+    var gpUpload = function (files) {
+      if (!gp.dataset.upload || !window.AdminUpload) return;
+      files = Array.prototype.filter.call(files, function (f) { return /^image\//.test(f.type); });
+      var total = files.length, done = 0;
+      var next = function () {
+        var f = files.shift();
+        if (!f) { gpStatus.textContent = done + ' / ' + total + ' फ़ोटो जुड़ीं। सेव करना न भूलें।'; return; }
+        gpStatus.textContent = (done + 1) + ' / ' + total + ': ' + f.name + ' अपलोड हो रही है…';
+        window.AdminUpload(gp.dataset.upload, f, { only: 'image' }, function (pc) { gpStatus.textContent = (done + 1) + ' / ' + total + ': ' + f.name + ' ' + pc + '%'; }).then(function (r) {
+          if (r.ok) { done++; gpAdd(r.item); } else toast(f.name + ': ' + (r.message || 'अपलोड नहीं हुई'), 'err');
+          next();
+        });
+      };
+      next();
+    };
+    var gpFiles = $('[data-gp-files]', gp);
+    if (gpFiles) gpFiles.addEventListener('change', function () { var f = Array.prototype.slice.call(gpFiles.files); gpFiles.value = ''; gpUpload(f); });
+    ['dragenter', 'dragover'].forEach(function (ev) { gp.addEventListener(ev, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') > -1) { e.preventDefault(); gp.classList.add('drop-over'); } }); });
+    ['dragleave', 'drop'].forEach(function (ev) { gp.addEventListener(ev, function () { gp.classList.remove('drop-over'); }); });
+    gp.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); gpUpload(e.dataTransfer.files); } });
+  }
+
+  /* ---------- वेब स्टोरी बिल्डर: स्लाइड जोड़ें/क्रम/कॉपी/हटाएँ, मीडिया, 9:16 प्रीव्यू ---------- */
+  var ws = $('[data-ws]');
+  if (ws) {
+    var slList = $('[data-sl-list]', ws), slTpl = $('[data-sl-template]', ws), slCount = $('[data-sl-count]', ws), slMax = +slList.dataset.max || 30, slN = 0, current = null;
+    var pv = $('[data-ws-preview]', ws), pvMedia = $('[data-wsp-media]', pv), pvText = $('[data-wsp-text]', pv), pvBars = $('[data-wsp-bars]', pv);
+    var val = function (li, k) { var el = $('[data-sl="' + k + '"]', li); return el ? el.value : ''; };
+    var isVideo = function (p) { return /\.(mp4|webm|mov)$/i.test(p || ''); };
+    var render = function () {
+      var items = $$('[data-sl-item]', slList);
+      items.forEach(function (li, i) { $('[data-sl-no]', li).textContent = 'स्लाइड ' + (i + 1); });
+      slCount.textContent = items.length;
+      if (!current || !current.parentNode) current = items[0] || null;
+      pvBars.innerHTML = items.map(function (li) { return '<i class="' + (li === current ? 'on' : '') + '"></i>'; }).join('');
+      if (!current) { pvMedia.innerHTML = ''; pvText.hidden = true; return; }
+      var m = val(current, 'media'), thumb = $('[data-sl-thumb] img, [data-sl-thumb] video', current);
+      pvMedia.innerHTML = m ? (isVideo(m) ? '<video src="' + esc(thumb ? thumb.src : '') + '" muted autoplay loop playsinline></video>' : '<img src="' + esc(thumb ? thumb.src : '') + '" alt="">') : '';
+      pv.className = 'ws-preview pos-' + val(current, 'text_position') + ' theme-' + val(current, 'theme') + (m ? '' : ' no-media');
+      $('[data-wsp-h]', pv).textContent = val(current, 'heading'); $('[data-wsp-p]', pv).textContent = val(current, 'body');
+      var cta = $('[data-wsp-cta]', pv); cta.textContent = val(current, 'cta_label') || 'और पढ़ें'; cta.hidden = !val(current, 'cta_url');
+      pvText.hidden = !val(current, 'heading') && !val(current, 'body');
+      items.forEach(function (li) { li.classList.toggle('active', li === current); });
+    };
+    var fresh = function (html) { var t = document.createElement('div'); t.innerHTML = html.replace(/__i__/g, 's' + (++slN) + '_' + Date.now()); return t.firstElementChild; };
+    var changed = function () { slList.dispatchEvent(new Event('input', { bubbles: true })); render(); };
+    $('[data-sl-add]', ws).addEventListener('click', function () {
+      if ($$('[data-sl-item]', slList).length >= slMax) { toast('ज़्यादा से ज़्यादा ' + slMax + ' स्लाइड।', 'err'); return; }
+      var li = fresh(slTpl.innerHTML); slList.appendChild(li); current = li; changed(); $('[data-sl="heading"]', li).focus();
+    });
+    slList.addEventListener('focusin', function (e) { var li = e.target.closest('[data-sl-item]'); if (li && li !== current) { current = li; render(); } });
+    slList.addEventListener('input', function (e) { if (e.target.closest('[data-sl-item]')) render(); });
+    slList.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return; var li = b.closest('[data-sl-item]'); current = li;
+      if (b.hasAttribute('data-sl-remove')) { if ($$('[data-sl-item]', slList).length > 1 || confirm('आख़िरी स्लाइड हटाएँ?')) { li.remove(); current = null; changed(); } }
+      else if (b.hasAttribute('data-sl-up') && li.previousElementSibling) { slList.insertBefore(li, li.previousElementSibling); b.focus(); changed(); }
+      else if (b.hasAttribute('data-sl-down') && li.nextElementSibling) { slList.insertBefore(li.nextElementSibling, li); b.focus(); changed(); }
+      else if (b.hasAttribute('data-sl-copy')) {
+        if ($$('[data-sl-item]', slList).length >= slMax) return;
+        var c = fresh(slTpl.innerHTML);
+        $$('[data-sl]', li).forEach(function (el) { var t = $('[data-sl="' + el.dataset.sl + '"]', c); if (t) t.value = el.value; });
+        $('[data-sl-thumb]', c).innerHTML = $('[data-sl-thumb]', li).innerHTML;
+        li.parentNode.insertBefore(c, li.nextSibling); current = c; changed();
+      }
+      else if (b.hasAttribute('data-sl-clear')) { $('[data-sl="media"]', li).value = ''; $('[data-sl-thumb]', li).innerHTML = '<i class="fa-regular fa-image"></i>'; changed(); }
+      else if (b.dataset.slPick && window.MediaPicker) {
+        window.MediaPicker.open({ kind: b.dataset.slPick, onChoose: function (it) {
+          $('[data-sl="media"]', li).value = it.file;
+          $('[data-sl-thumb]', li).innerHTML = it.kind === 'video' || isVideo(it.file) ? '<video src="' + esc(it.url) + '" muted preload="metadata"></video>' : '<img src="' + esc(it.large || it.thumb) + '" alt="">';
+          current = li; changed(); b.focus();
+        } });
+      }
+    });
+    render();
+  }
+
+  /* ---------- लाइव ब्लॉग कंट्रोल: अपडेट डालना/बदलना/पिन/हटाना बिना रीलोड ---------- */
+  var lf = $('[data-lu-form]'), list = $('[data-lu-list]');
+  if (lf && list) {
+    var status = $('[data-lu-status]', lf), submit = $('[data-lu-submit]', lf), cancel = $('[data-lu-cancel]', lf), mode = $('[data-lu-mode]');
+    var empty = $('[data-lu-empty]'), count = $('[data-lu-count]'), editing = null;
+    var field = function (n) { return lf.elements[n]; };
+    var setCount = function () { if (count) count.textContent = list.children.length; if (empty) empty.hidden = list.children.length > 0; };
+    var setImage = function (path, thumb) {
+      var box = $('[data-media-field]', lf); if (!box) return;
+      $('input[type="hidden"]', box).value = path || '';
+      $('[data-mf-preview]', box).innerHTML = thumb ? '<img src="' + esc(thumb) + '" alt="">' : '<i class="fa-regular fa-image"></i>';
+      box.classList.toggle('has-value', !!path); $('[data-mf-clear]', box).hidden = !path;
+    };
+    var reset = function () {
+      editing = null; lf.reset(); setImage('', '');
+      $$('input[type="checkbox"]', lf).forEach(function (c) { c.checked = false; });
+      $('span', submit).textContent = 'अपडेट डालें'; mode.textContent = 'नया अपडेट'; cancel.hidden = true;
+      var m = $('input[name="_method"]', lf); if (m) m.remove();
+    };
+    var bindItem = function (li) {
+      var edit = $('[data-lu-edit]', li);
+      if (edit) edit.addEventListener('click', function () {
+        var d = JSON.parse(li.dataset.json); editing = d.id;
+        field('title').value = d.title; field('body').value = d.body; field('embed_url').value = d.embed_url; field('posted_at').value = d.posted_at;
+        field('is_key').checked = !!d.is_key; field('is_pinned').checked = !!d.is_pinned; setImage(d.image, d.image_thumb);
+        if (!$('input[name="_method"]', lf)) lf.insertAdjacentHTML('afterbegin', '<input type="hidden" name="_method" value="PUT">');
+        $('span', submit).textContent = 'बदलाव सेव करें'; mode.textContent = 'अपडेट बदलें'; cancel.hidden = false;
+        field('body').focus(); lf.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      $$('form[data-lu-ajax]', li).forEach(function (f) {
+        f.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (f.dataset.luConfirm && !confirm(f.dataset.luConfirm)) return;
+          send(f.action, new FormData(f)).then(function (r) {
+            if (!r.ok) { toast(firstError(r), 'err'); return; }
+            if (r.html) { var n = place(r.html); n.classList.add('flash'); } else { li.remove(); setCount(); if (editing === r.id) reset(); }
+            toast(r.message);
+          });
+        });
+      });
+    };
+    var place = function (html) {
+      var tmp = document.createElement('div'); tmp.innerHTML = html.trim(); var li = tmp.firstChild;
+      var old = $('[data-update-id="' + li.dataset.updateId + '"]', list);
+      if (old) list.replaceChild(li, old); else list.insertBefore(li, list.firstChild);
+      bindItem(li); setCount(); return li;
+    };
+    $$('li[data-update-id]', list).forEach(bindItem);
+    cancel.addEventListener('click', reset);
+    lf.addEventListener('keydown', function (e) { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); lf.requestSubmit ? lf.requestSubmit() : submit.click(); } });
+    lf.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var url = editing ? lf.dataset.updateBase + editing : lf.dataset.store;
+      submit.disabled = true; status.textContent = 'भेज रहे हैं…';
+      send(url, new FormData(lf)).then(function (r) {
+        submit.disabled = false;
+        if (!r.ok) { status.textContent = ''; toast(firstError(r), 'err'); return; }
+        var li = place(r.html); li.classList.add('flash');
+        status.textContent = r.message; setTimeout(function () { status.textContent = ''; }, 3000);
+        reset(); field('body').focus();
+      });
+    });
   }
 })();
 

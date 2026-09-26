@@ -35,16 +35,21 @@ return [
         'layout' => ['label' => 'लेआउट', 'type' => 'select', 'options' => ['tabs' => 'ज़िलों के टैब', 'lead-list' => '1 बड़ी + सूची'], 'default' => 'tabs'], 'count' => $count(6),
     ]],
     'videos' => ['label' => 'वीडियो', 'icon' => 'fa-video', 'needs' => 'videos', 'desc' => 'वीडियो की पट्टी', 'fields' => [
-        'layout' => ['label' => 'लेआउट', 'type' => 'select', 'options' => ['dark-strip' => 'काली पट्टी', 'grid' => 'ग्रिड'], 'default' => 'dark-strip'], 'count' => $count(5, 12), 'more' => $more,
+        'layout' => ['label' => 'लेआउट', 'type' => 'select', 'options' => ['dark-strip' => 'काली पट्टी', 'grid' => 'ग्रिड', 'shorts' => 'शॉर्ट्स (9:16)'], 'default' => 'dark-strip'],
+        'filter' => ['label' => 'कौन-से वीडियो', 'type' => 'select', 'options' => ['' => 'सभी', 'featured' => 'फ़ीचर्ड', 'short' => 'शॉर्ट वीडियो', 'interview' => 'इंटरव्यू', 'ground_report' => 'ग्राउंड रिपोर्ट', 'show' => 'शो'], 'default' => ''],
+        'category' => ['label' => 'श्रेणी (ख़ाली = सभी)', 'type' => 'category'], 'count' => $count(5, 12), 'more' => $more,
     ]],
     'gallery' => ['label' => 'फ़ोटो गैलरी', 'icon' => 'fa-images', 'needs' => 'galleries', 'desc' => 'ताज़ा फ़ोटो गैलरी', 'fields' => ['count' => $count(4, 12), 'more' => $more]],
-    'web_stories' => ['label' => 'वेब स्टोरी', 'icon' => 'fa-mobile-screen', 'needs' => 'web_stories', 'desc' => '9:16 वेब स्टोरी की पट्टी', 'fields' => ['count' => $count(8, 20)]],
+    'web_stories' => ['label' => 'वेब स्टोरी', 'icon' => 'fa-mobile-screen', 'needs' => 'web_stories', 'desc' => '9:16 वेब स्टोरी की पट्टी', 'fields' => ['count' => $count(8, 20), 'more' => $more]],
+    'audio' => ['label' => 'ऑडियो / पॉडकास्ट', 'icon' => 'fa-podcast', 'needs' => 'audio', 'desc' => 'ताज़ा ऑडियो न्यूज़ और पॉडकास्ट एपिसोड', 'fields' => [
+        'filter' => ['label' => 'क्या दिखाएँ', 'type' => 'select', 'options' => ['' => 'सभी', 'news' => 'ऑडियो न्यूज़', 'episode' => 'पॉडकास्ट एपिसोड'], 'default' => ''], 'count' => $count(4, 12), 'more' => $more,
+    ]],
     'epaper' => ['label' => 'ई-पेपर', 'icon' => 'fa-book-open', 'needs' => 'epaper', 'desc' => 'आज के ई-पेपर का कवर', 'fields' => []],
-    'live_tv' => ['label' => 'लाइव टीवी', 'icon' => 'fa-tv', 'needs' => null, 'desc' => 'लाइव टीवी प्लेयर (सेटिंग का लिंक)', 'fields' => [
+    'live_tv' => ['label' => 'लाइव टीवी', 'icon' => 'fa-tv', 'needs' => 'live_tv', 'desc' => 'डिफ़ॉल्ट चैनल का प्लेयर + अभी का कार्यक्रम', 'fields' => [
         'autoplay' => ['label' => 'अपने आप चले (म्यूट)', 'type' => 'switch', 'default' => 0],
     ]],
-    'breaking' => ['label' => 'ब्रेकिंग', 'icon' => 'fa-bolt', 'needs' => 'breaking', 'desc' => 'ब्रेकिंग टिकर या अलर्ट बैनर', 'fields' => [
-        'style' => ['label' => 'शैली', 'type' => 'select', 'options' => ['ticker' => 'चलती पट्टी', 'banner' => 'लाल बैनर'], 'default' => 'ticker'],
+    'breaking' => ['label' => 'ब्रेकिंग', 'icon' => 'fa-bolt', 'needs' => 'breaking', 'desc' => 'कंट्रोल रूम के चालू आइटम (सूची या बैनर)', 'fields' => [
+        'style' => ['label' => 'शैली', 'type' => 'select', 'options' => ['banner' => 'लाल अलर्ट बैनर (होमपेज अलर्ट वाले आइटम)', 'list' => 'समय वाली सूची (सभी चालू आइटम)'], 'default' => 'banner'],
     ]],
     'trending' => ['label' => 'ट्रेंडिंग', 'icon' => 'fa-fire', 'needs' => 'news', 'desc' => 'ट्रेंडिंग टैग और ख़बरें', 'fields' => ['count' => $count(6)]],
     'most_read' => ['label' => 'सबसे ज़्यादा पढ़ी गईं', 'icon' => 'fa-ranking-star', 'needs' => 'news', 'desc' => 'नंबर वाली सूची', 'fields' => [

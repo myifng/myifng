@@ -108,6 +108,26 @@ final class DashboardService
         return ['value' => $r['reporter_code'], 'sub' => $days >= 0 ? 'वैधता: ' . hindi_date($r['valid_until']) : 'वैधता ख़त्म, नवीनीकरण कराएँ', 'alert' => $days < 30];
     }
 
+    private static function breaking(): array
+    {
+        $n = BreakingService::countActive();
+        $urgent = (int) db()->value('SELECT COUNT(*) FROM {p}breaking_news b WHERE ' . BreakingService::ACTIVE . ' AND b.priority = 3');
+        return ['value' => $n, 'sub' => $n ? ($urgent ? 'अति ज़रूरी: ' . num($urgent) : 'टिकर पर चल रहे') : 'अभी कोई ब्रेकिंग नहीं', 'alert' => $urgent > 0];
+    }
+
+    private static function liveBlogs(): array
+    {
+        $r = db()->first("SELECT SUM(status = 'live') live, SUM(status = 'paused') paused FROM {p}live_blogs");
+        return ['value' => (int) $r['live'], 'sub' => (int) $r['paused'] ? 'रुके हुए: ' . num($r['paused']) : 'लाइव ब्लॉग', 'alert' => false];
+    }
+
+    private static function multimedia(): array
+    {
+        $r = db()->first("SELECT (SELECT COUNT(*) FROM {p}videos WHERE status = 'published') v, (SELECT COUNT(*) FROM {p}galleries WHERE status = 'published') g,
+                          (SELECT COUNT(*) FROM {p}web_stories WHERE status = 'published') s, (SELECT COUNT(*) FROM {p}audio_items WHERE status = 'published') a");
+        return ['value' => (int) $r['v'], 'sub' => 'गैलरी ' . num($r['g']) . ' · स्टोरी ' . num($r['s']) . ' · ऑडियो ' . num($r['a']), 'alert' => false];
+    }
+
     private static function media(): array
     {
         $r = db()->first("SELECT COUNT(*) total, SUM(kind = 'image') images, COALESCE(SUM(size), 0) bytes FROM {p}media WHERE deleted_at IS NULL");

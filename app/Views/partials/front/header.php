@@ -60,7 +60,7 @@ $renderMenu = function (array $items, int $depth = 0) use (&$renderMenu): string
       <button class="nav-toggle js-drawer" type="button" aria-label="मेनू खोलें" aria-controls="drawer" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
       <ul class="menu"><?= $renderMenu($main['items']) ?></ul>
       <?php if (app('router')->has('search')): ?><button type="button" class="nav-tool" data-open-search aria-label="खोजें" aria-controls="siteSearch" aria-expanded="false"><i class="fa-solid fa-magnifying-glass"></i></button><?php endif; ?>
-      <?php if (setting('live_tv_url')): ?><a class="live" href="<?= e(app('router')->has('live_tv') ? route('live_tv') : setting('live_tv_url')) ?>"<?= app('router')->has('live_tv') ? '' : ' target="_blank" rel="noopener"' ?>><i></i>LIVE</a><?php endif; ?>
+      <?php if (\App\Services\LiveTvService::isOn()): ?><a class="live" href="<?= e(route('live_tv')) ?>"><i></i>LIVE</a><?php endif; ?>
     </div>
   </nav>
   <?php if (app('router')->has('search')): ?>

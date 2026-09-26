@@ -3,8 +3,12 @@
  * वेबसाइट के रूट। लोकेशन वाला रूट (/{राज्य}/{ज़िला}/…) सबसे आख़िर में, ताकि बाकी रास्ते पहले मिलें।
  * @var App\Core\Router $router
  */
+use App\Controllers\Front\AudioController;
 use App\Controllers\Front\CategoryController;
+use App\Controllers\Front\GalleryController;
 use App\Controllers\Front\HomeController;
+use App\Controllers\Front\LiveBlogController;
+use App\Controllers\Front\LiveTvController;
 use App\Controllers\Front\LocationApiController;
 use App\Controllers\Front\LocationController;
 use App\Controllers\Front\NewsController;
@@ -13,6 +17,8 @@ use App\Controllers\Front\ReporterJoinController;
 use App\Controllers\Front\SearchController;
 use App\Controllers\Front\TopicController;
 use App\Controllers\Front\VerifyController;
+use App\Controllers\Front\VideoController;
+use App\Controllers\Front\WebStoryController;
 
 $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/', [HomeController::class, 'index'])->name('home');
@@ -41,6 +47,23 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/verify-reporter', [VerifyController::class, 'form'])->name('verify');
     $r->post('/verify-reporter', [VerifyController::class, 'check'])->name('verify.check')->middleware('throttle:20,10');
     $r->get('/verify-reporter/{code:[A-Za-z]+-[0-9]+-[0-9]+}/{token:[a-f0-9]+}', [VerifyController::class, 'qr'])->name('verify.qr');
+
+    // Phase 7: लाइव ब्लॉग, लाइव टीवी, वीडियो, फ़ोटो, वेब स्टोरी, ऑडियो/पॉडकास्ट
+    $r->get('/live-updates/{id:\d+}', [LiveBlogController::class, 'updates'])->name('live.updates');
+    $r->get('/live-tv', [LiveTvController::class, 'show'])->name('live_tv');
+    $r->get('/live-tv/{slug:[a-z0-9-]+}', [LiveTvController::class, 'show'])->name('live_tv.channel');
+    $r->get('/videos', [VideoController::class, 'index'])->name('videos');
+    $r->get('/videos/playlist/{slug:[a-z0-9-]+}', [VideoController::class, 'playlist'])->name('videos.playlist');
+    $r->get('/video/{slug:[a-z0-9-]+}', [VideoController::class, 'show'])->name('video.show');
+    $r->get('/photos', [GalleryController::class, 'index'])->name('galleries');
+    $r->get('/photos/{slug:[a-z0-9-]+}', [GalleryController::class, 'show'])->name('gallery.show');
+    $r->get('/web-stories', [WebStoryController::class, 'index'])->name('stories');
+    $r->get('/web-stories/{slug:[a-z0-9-]+}', [WebStoryController::class, 'show'])->name('story.show');
+    $r->get('/web-stories/{slug:[a-z0-9-]+}/amp', [WebStoryController::class, 'amp'])->name('story.amp');
+    $r->get('/audio', [AudioController::class, 'index'])->name('audio');
+    $r->get('/audio/{slug:[a-z0-9-]+}', [AudioController::class, 'show'])->name('audio.show');
+    $r->get('/podcast/{slug:[a-z0-9-]+}', [AudioController::class, 'series'])->name('podcast');
+    $r->get('/podcast/{slug:[a-z0-9-]+}/feed', [AudioController::class, 'feed'])->name('podcast.feed');
 
     // लोकेशन: सबसे आख़िर में (slug आरक्षित शब्दों से नहीं टकराते: TaxonomyService::RESERVED)
     $r->get('/{path:[a-z0-9-]+(?:/[a-z0-9-]+)*}', [LocationController::class, 'show'])->name('location');

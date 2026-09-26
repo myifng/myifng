@@ -15,7 +15,7 @@ final class HomeController extends FrontController
     {
         return $this->view('front/home', [
             'sections' => HomeRenderer::render(),
-            'isHome' => true,
+            'isHome' => true, 'autoBanner' => !HomeRenderer::hasBreakingBanner(),
             'seo' => [
                 'title' => null, 'canonical' => url(), 'description' => setting('site_description') ?: setting('tagline'),
                 'jsonld' => SeoService::website(),

@@ -108,3 +108,49 @@ function ff(string $type, string $name, string $label, array $o = []): string
     $help = $err ? '<small class="ff-err" id="' . $id . '_e">' . e($err) . '</small>' : (!empty($o['help']) ? '<small class="ff-help" id="' . $id . '_h">' . e($o['help']) . '</small>' : '');
     return '<div class="ff' . ($err ? ' has-err' : '') . (!empty($o['wide']) ? ' ff-wide' : '') . '">' . $lab . $input . $help . '</div>';
 }
+
+/**
+ * Phase 7: वीडियो / गैलरी / वेब स्टोरी / ऑडियो का कार्ड
+ *   mm_card($row)            → $row['kind'] (MultimediaService::list देता है) से
+ *   mm_card($row, 'tall')    → 9:16 (वेब स्टोरी, शॉर्ट्स)
+ *   mm_card($row, 'row')     → छोटी पंक्ति (साइडबार, प्लेलिस्ट)
+ */
+function mm_thumb_src(array $m, string $size = 'medium'): ?string
+{
+    if (!empty($m['cover'])) {
+        return media_url($m['cover'], $size);
+    }
+    if (($m['kind'] ?? '') === 'video' && ($m['source'] ?? '') === 'youtube' && ($id = \App\Services\EmbedService::youtubeId($m['source_url'] ?? null))) {
+        return 'https://i.ytimg.com/vi/' . $id . '/hqdefault.jpg';
+    }
+    if (($m['kind'] ?? '') === 'audio' && !empty($m['series_cover'])) {
+        return media_url($m['series_cover'], $size);
+    }
+    return null;
+}
+
+function mm_card(array $m, string $variant = 'card', array $o = []): string
+{
+    $kind = $m['kind'] ?? 'video';
+    $url = e(\App\Services\MultimediaService::url($kind, $m));
+    $title = e($m['title']);
+    $tag = $o['h'] ?? 'h3';
+    $src = mm_thumb_src($m, $variant === 'row' ? 'thumb' : 'medium');
+    $img = $src ? '<img src="' . e($src) . '" alt="' . $title . '" loading="lazy">' : '<span class="th-empty" style="--c:var(--brand)"><b>' . e(mb_substr((string) $m['title'], 0, 1)) . '</b></span>';
+    $dur = \App\Services\EmbedService::duration(isset($m['duration']) ? (int) $m['duration'] : null);
+    $badge = match ($kind) {
+        'video' => '<span class="mm-badge"><i class="fa-solid fa-play"></i>' . ($dur ? ' ' . e($dur) : '') . '</span>',
+        'gallery' => '<span class="mm-badge"><i class="fa-solid fa-images"></i> ' . num($m['photo_count'] ?? 0) . '</span>',
+        'story' => '<span class="mm-badge"><i class="fa-solid fa-clone"></i> ' . num($m['slide_count'] ?? 0) . '</span>',
+        'audio' => '<span class="mm-badge"><i class="fa-solid fa-headphones"></i>' . ($dur ? ' ' . e($dur) : '') . '</span>',
+        default => '',
+    };
+    $time = !empty($m['published_at']) ? '<time class="time" datetime="' . e($m['published_at']) . '"><i class="fa-regular fa-clock" aria-hidden="true"></i> ' . e(news_time($m['published_at'])) . '</time>' : '';
+    $kicker = !empty($o['kicker']) && !empty($m['category']) ? '<span class="kicker">' . e($m['category']) . '</span>' : '';
+    $cls = 'mm mm-' . e($kind);
+    return match ($variant) {
+        'tall' => '<a class="' . $cls . ' mm-tall" href="' . $url . '"><span class="th">' . $img . $badge . '</span><' . $tag . ' class="hd">' . $title . '</' . $tag . '></a>',
+        'row' => '<a class="story row ' . $cls . '" href="' . $url . '"><span class="th sm">' . $img . $badge . '</span><span class="row-body"><' . $tag . ' class="hd">' . $title . '</' . $tag . '>' . $time . '</span></a>',
+        default => '<a class="story card-story ' . $cls . '" href="' . $url . '"><span class="th">' . $img . $badge . '</span>' . $kicker . '<' . $tag . ' class="hd">' . $title . '</' . $tag . '>' . $time . '</a>',
+    };
+}

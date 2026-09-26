@@ -54,13 +54,13 @@ return [
         'employees'    => ['label' => 'कर्मचारी (HR)', 'icon' => 'fa-people-group', 'group' => 'reporters', 'phase' => 12, 'actions' => [...$crud, 'export', 'manage']],
 
         // ---------- Phase 7 ----------
-        'breaking'     => ['label' => 'ब्रेकिंग कंट्रोल रूम', 'icon' => 'fa-bolt', 'group' => 'newsroom', 'phase' => 7, 'actions' => [...$crud, 'publish']],
-        'live_blogs'   => ['label' => 'लाइव ब्लॉग', 'icon' => 'fa-tower-broadcast', 'group' => 'newsroom', 'phase' => 7, 'actions' => [...$crud, 'publish']],
-        'live_tv'      => ['label' => 'लाइव टीवी', 'icon' => 'fa-tv', 'group' => 'media', 'phase' => 7, 'actions' => ['view', 'edit']],
-        'videos'       => ['label' => 'वीडियो', 'icon' => 'fa-video', 'group' => 'media', 'phase' => 7, 'actions' => [...$crud, 'publish']],
-        'galleries'    => ['label' => 'फ़ोटो गैलरी', 'icon' => 'fa-images', 'group' => 'media', 'phase' => 7, 'actions' => [...$crud, 'publish']],
-        'web_stories'  => ['label' => 'वेब स्टोरी', 'icon' => 'fa-mobile-screen', 'group' => 'media', 'phase' => 7, 'actions' => [...$crud, 'publish']],
-        'audio'        => ['label' => 'ऑडियो / पॉडकास्ट', 'icon' => 'fa-podcast', 'group' => 'media', 'phase' => 7, 'actions' => [...$crud, 'publish']],
+        'breaking'     => ['label' => 'ब्रेकिंग कंट्रोल रूम', 'icon' => 'fa-bolt', 'group' => 'newsroom', 'phase' => 7, 'route' => 'admin.breaking.index', 'actions' => [...$crud, 'publish']],
+        'live_blogs'   => ['label' => 'लाइव ब्लॉग', 'icon' => 'fa-tower-broadcast', 'group' => 'newsroom', 'phase' => 7, 'route' => 'admin.live_blogs.index', 'actions' => [...$crud, 'publish']],
+        'live_tv'      => ['label' => 'लाइव टीवी', 'icon' => 'fa-tv', 'group' => 'media', 'phase' => 7, 'route' => 'admin.live_tv.index', 'actions' => ['view', 'edit']],
+        'videos'       => ['label' => 'वीडियो', 'icon' => 'fa-video', 'group' => 'media', 'phase' => 7, 'route' => 'admin.videos.index', 'actions' => [...$crud, 'publish']],
+        'galleries'    => ['label' => 'फ़ोटो गैलरी', 'icon' => 'fa-images', 'group' => 'media', 'phase' => 7, 'route' => 'admin.galleries.index', 'actions' => [...$crud, 'publish']],
+        'web_stories'  => ['label' => 'वेब स्टोरी', 'icon' => 'fa-mobile-screen', 'group' => 'media', 'phase' => 7, 'route' => 'admin.web_stories.index', 'actions' => [...$crud, 'publish']],
+        'audio'        => ['label' => 'ऑडियो / पॉडकास्ट', 'icon' => 'fa-podcast', 'group' => 'media', 'phase' => 7, 'route' => 'admin.audio.index', 'actions' => [...$crud, 'publish']],
 
         // ---------- Phase 8-9 ----------
         'epaper'       => ['label' => 'ई-पेपर', 'icon' => 'fa-book-open', 'group' => 'media', 'phase' => 8, 'actions' => [...$crud, 'publish']],

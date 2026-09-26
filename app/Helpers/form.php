@@ -8,8 +8,9 @@ declare(strict_types=1);
 function field(string $type, string $name, string $label, mixed $value = null, array $o = []): string
 {
     $id = $o['id'] ?? 'f_' . preg_replace('/[^a-z0-9_]/i', '_', $name);
-    $err = error($name);
-    $val = in_array($type, ['password', 'file'], true) ? '' : old($name, $value ?? '');
+    // 'fresh' => true: एक पेज पर कई फ़ॉर्म हों तो दूसरे फ़ॉर्म का पुराना मान/त्रुटि न दिखे
+    $err = !empty($o['fresh']) ? null : error($name);
+    $val = in_array($type, ['password', 'file'], true) ? '' : (!empty($o['fresh']) ? ($value ?? '') : old($name, $value ?? ''));
     $req = !empty($o['required']);
     $cls = ($type === 'select' ? 'form-select' : ($type === 'color' ? 'form-control form-control-color' : 'form-control')) . ($err ? ' is-invalid' : '') . (!empty($o['class']) ? ' ' . $o['class'] : '');
     $attrs = '';
@@ -26,7 +27,7 @@ function field(string $type, string $name, string $label, mixed $value = null, a
     $labelHtml = '<label class="form-label" for="' . $id . '">' . e($label) . ($req ? ' <span class="text-danger" aria-hidden="true">*</span>' : '') . '</label>';
 
     if ($type === 'switch') {
-        $on = old($name, $value) ? ' checked' : '';
+        $on = (!empty($o['fresh']) ? $value : old($name, $value)) ? ' checked' : '';
         $html = '<div class="form-check form-switch"><input type="hidden" name="' . e($name) . '" value="0"><input class="form-check-input" type="checkbox" role="switch" id="' . $id . '" name="' . e($name) . '" value="1"' . $on . $attrs . '><label class="form-check-label" for="' . $id . '">' . e($label) . '</label></div>';
     } elseif ($type === 'textarea') {
         $html = $labelHtml . '<textarea class="' . $cls . '" id="' . $id . '" name="' . e($name) . '" rows="' . (int) ($o['rows'] ?? 3) . '"' . $attrs . $describedBy . '>' . e($val) . '</textarea>';

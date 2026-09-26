@@ -8,17 +8,24 @@ use App\Controllers\Admin\ApplicationController;
 use App\Controllers\Admin\AssignmentController;
 use App\Controllers\Admin\AuditLogController;
 use App\Controllers\Admin\AuthController;
+use App\Controllers\Admin\AudioController;
+use App\Controllers\Admin\BreakingController;
 use App\Controllers\Admin\BureauController;
 use App\Controllers\Admin\CategoryController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
+use App\Controllers\Admin\GalleryController;
 use App\Controllers\Admin\HomepageController;
+use App\Controllers\Admin\LiveBlogController;
+use App\Controllers\Admin\LiveTvController;
 use App\Controllers\Admin\LocationController;
 use App\Controllers\Admin\MediaController;
 use App\Controllers\Admin\MenuController;
 use App\Controllers\Admin\NewsController;
 use App\Controllers\Admin\NewsWorkflowController;
 use App\Controllers\Admin\PageController;
+use App\Controllers\Admin\PlaylistController;
+use App\Controllers\Admin\PodcastController;
 use App\Controllers\Admin\ReporterController;
 use App\Controllers\Admin\ReporterPortalController;
 use App\Controllers\Admin\SettingsController;
@@ -28,6 +35,8 @@ use App\Controllers\Admin\TopicController;
 use App\Controllers\Admin\ProfileController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\UserController;
+use App\Controllers\Admin\VideoController;
+use App\Controllers\Admin\WebStoryController;
 
 $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'admin.'], function ($r) {
 
@@ -241,6 +250,58 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/bureaus/{id:\d+}/edit', [BureauController::class, 'edit'])->name('bureaus.edit')->middleware('can:bureaus.edit');
         $r->put('/bureaus/{id:\d+}', [BureauController::class, 'update'])->name('bureaus.update')->middleware('can:bureaus.edit');
         $r->delete('/bureaus/{id:\d+}', [BureauController::class, 'destroy'])->name('bureaus.destroy')->middleware('can:bureaus.delete');
+
+        // ---------- Phase 7: ब्रेकिंग, लाइव ब्लॉग, लाइव टीवी, वीडियो, गैलरी, वेब स्टोरी, ऑडियो ----------
+        $r->get('/breaking', [BreakingController::class, 'index'])->name('breaking.index')->middleware('can:breaking.view');
+        $r->post('/breaking', [BreakingController::class, 'store'])->name('breaking.store')->middleware('can:breaking.create');
+        $r->get('/breaking/{id:\d+}/edit', [BreakingController::class, 'edit'])->name('breaking.edit')->middleware('can:breaking.edit');
+        $r->put('/breaking/{id:\d+}', [BreakingController::class, 'update'])->name('breaking.update')->middleware('can:breaking.edit');
+        $r->post('/breaking/{id:\d+}/stop', [BreakingController::class, 'stop'])->name('breaking.stop')->middleware('can:breaking.publish');
+        $r->post('/breaking/{id:\d+}/restart', [BreakingController::class, 'restart'])->name('breaking.restart')->middleware('can:breaking.publish');
+        $r->delete('/breaking/{id:\d+}', [BreakingController::class, 'destroy'])->name('breaking.destroy')->middleware('can:breaking.delete');
+
+        $r->get('/live-blogs', [LiveBlogController::class, 'index'])->name('live_blogs.index')->middleware('can:live_blogs.view');
+        $r->post('/live-blogs', [LiveBlogController::class, 'store'])->name('live_blogs.store')->middleware('can:live_blogs.publish');
+        $r->get('/live-blogs/{id:\d+}', [LiveBlogController::class, 'show'])->name('live_blogs.show')->middleware('can:live_blogs.view');
+        $r->post('/live-blogs/{id:\d+}/status', [LiveBlogController::class, 'status'])->name('live_blogs.status')->middleware('can:live_blogs.publish');
+        $r->delete('/live-blogs/{id:\d+}', [LiveBlogController::class, 'destroy'])->name('live_blogs.destroy')->middleware('can:live_blogs.delete');
+        $r->post('/live-blogs/{id:\d+}/updates', [LiveBlogController::class, 'storeUpdate'])->name('live_blogs.updates.store')->middleware('can:live_blogs.create', 'throttle:120,10');
+        $r->put('/live-blogs/{id:\d+}/updates/{uid:\d+}', [LiveBlogController::class, 'updateUpdate'])->name('live_blogs.updates.update')->middleware('can:live_blogs.edit');
+        $r->post('/live-blogs/{id:\d+}/updates/{uid:\d+}/pin', [LiveBlogController::class, 'pin'])->name('live_blogs.updates.pin')->middleware('can:live_blogs.edit');
+        $r->delete('/live-blogs/{id:\d+}/updates/{uid:\d+}', [LiveBlogController::class, 'destroyUpdate'])->name('live_blogs.updates.destroy')->middleware('can:live_blogs.delete');
+
+        $r->get('/live-tv', [LiveTvController::class, 'index'])->name('live_tv.index')->middleware('can:live_tv.view');
+        $r->get('/live-tv/channels/create', [LiveTvController::class, 'create'])->name('live_tv.create')->middleware('can:live_tv.edit');
+        $r->post('/live-tv/channels', [LiveTvController::class, 'store'])->name('live_tv.store')->middleware('can:live_tv.edit');
+        $r->get('/live-tv/channels/{id:\d+}/edit', [LiveTvController::class, 'edit'])->name('live_tv.edit')->middleware('can:live_tv.edit');
+        $r->put('/live-tv/channels/{id:\d+}', [LiveTvController::class, 'update'])->name('live_tv.update')->middleware('can:live_tv.edit');
+        $r->post('/live-tv/channels/{id:\d+}/toggle', [LiveTvController::class, 'toggle'])->name('live_tv.toggle')->middleware('can:live_tv.edit');
+        $r->delete('/live-tv/channels/{id:\d+}', [LiveTvController::class, 'destroy'])->name('live_tv.destroy')->middleware('can:live_tv.edit');
+        $r->post('/live-tv/channels/{id:\d+}/programs', [LiveTvController::class, 'programStore'])->name('live_tv.programs.store')->middleware('can:live_tv.edit');
+        $r->put('/live-tv/programs/{pid:\d+}', [LiveTvController::class, 'programUpdate'])->name('live_tv.programs.update')->middleware('can:live_tv.edit');
+        $r->delete('/live-tv/programs/{pid:\d+}', [LiveTvController::class, 'programDestroy'])->name('live_tv.programs.destroy')->middleware('can:live_tv.edit');
+
+        foreach ([
+            ['videos', 'videos', VideoController::class], ['galleries', 'galleries', GalleryController::class],
+            ['web-stories', 'web_stories', WebStoryController::class], ['audio', 'audio', AudioController::class],
+        ] as [$path, $mod, $ctrl]) {
+            $r->get("/$path", [$ctrl, 'index'])->name("$mod.index")->middleware("can:$mod.view");
+            $r->get("/$path/create", [$ctrl, 'create'])->name("$mod.create")->middleware("can:$mod.create");
+            $r->post("/$path", [$ctrl, 'store'])->name("$mod.store")->middleware("can:$mod.create");
+            $r->get("/$path/{id:\\d+}/edit", [$ctrl, 'edit'])->name("$mod.edit")->middleware("can:$mod.view");
+            $r->put("/$path/{id:\\d+}", [$ctrl, 'update'])->name("$mod.update")->middleware("can:$mod.edit");
+            $r->delete("/$path/{id:\\d+}", [$ctrl, 'destroy'])->name("$mod.destroy")->middleware("can:$mod.delete");
+        }
+        $r->get('/video-playlists', [PlaylistController::class, 'index'])->name('playlists.index')->middleware('can:videos.view');
+        $r->post('/video-playlists', [PlaylistController::class, 'store'])->name('playlists.store')->middleware('can:videos.create');
+        $r->get('/video-playlists/{id:\d+}/edit', [PlaylistController::class, 'edit'])->name('playlists.edit')->middleware('can:videos.edit');
+        $r->put('/video-playlists/{id:\d+}', [PlaylistController::class, 'update'])->name('playlists.update')->middleware('can:videos.edit');
+        $r->delete('/video-playlists/{id:\d+}', [PlaylistController::class, 'destroy'])->name('playlists.destroy')->middleware('can:videos.delete');
+        $r->get('/podcasts', [PodcastController::class, 'index'])->name('podcasts.index')->middleware('can:audio.view');
+        $r->post('/podcasts', [PodcastController::class, 'store'])->name('podcasts.store')->middleware('can:audio.create');
+        $r->get('/podcasts/{id:\d+}/edit', [PodcastController::class, 'edit'])->name('podcasts.edit')->middleware('can:audio.edit');
+        $r->put('/podcasts/{id:\d+}', [PodcastController::class, 'update'])->name('podcasts.update')->middleware('can:audio.edit');
+        $r->delete('/podcasts/{id:\d+}', [PodcastController::class, 'destroy'])->name('podcasts.destroy')->middleware('can:audio.delete');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

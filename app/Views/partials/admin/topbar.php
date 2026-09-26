@@ -11,7 +11,10 @@
   <div class="topbar-actions">
     <?php $router = app('router'); $quick = array_filter([
         can('news.create') && $router->has('admin.news.create') ? ['admin.news.create', 'fa-pen-nib', 'नई ख़बर'] : null,
+        can('breaking.create') && $router->has('admin.breaking.index') ? ['admin.breaking.index', 'fa-bolt', 'ब्रेकिंग चलाएँ'] : null,
         can('assignments.create') && $router->has('admin.assignments.create') ? ['admin.assignments.create', 'fa-list-check', 'नया असाइनमेंट'] : null,
+        can('videos.create') && $router->has('admin.videos.create') ? ['admin.videos.create', 'fa-video', 'नया वीडियो'] : null,
+        can('web_stories.create') && $router->has('admin.web_stories.create') ? ['admin.web_stories.create', 'fa-mobile-screen', 'नई वेब स्टोरी'] : null,
         can('pages.create') && $router->has('admin.pages.create') ? ['admin.pages.create', 'fa-file-circle-plus', 'नया पेज'] : null,
         can('media.create') && $router->has('admin.media.index') ? ['admin.media.index', 'fa-cloud-arrow-up', 'मीडिया अपलोड'] : null,
         can('users.create') ? ['admin.users.create', 'fa-user-plus', 'नया यूज़र'] : null,
