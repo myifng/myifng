@@ -7,6 +7,12 @@
 use App\Controllers\Admin\AuditLogController;
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\DashboardController;
+use App\Controllers\Admin\EditorController;
+use App\Controllers\Admin\HomepageController;
+use App\Controllers\Admin\MenuController;
+use App\Controllers\Admin\PageController;
+use App\Controllers\Admin\SettingsController;
+use App\Controllers\Admin\SystemController;
 use App\Controllers\Admin\ProfileController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\UserController;
@@ -24,8 +30,13 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
     });
 
     // ---------- लॉगिन के बाद ----------
+    // लॉगआउट और सिस्टम अपडेट: डेटाबेस अपडेट बाकी हो तब भी चलें
     $r->group(['middleware' => ['auth']], function ($r) {
         $r->post('/logout', [AuthController::class, 'logout'])->name('logout');
+        $r->post('/system/migrate', [SystemController::class, 'migrate'])->name('system.migrate');
+    });
+
+    $r->group(['middleware' => ['auth', 'uptodate']], function ($r) {
         $r->get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('can:dashboard.view');
 
         $r->get('/profile', [ProfileController::class, 'edit'])->name('profile');
@@ -52,6 +63,42 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->put('/roles/{id:\d+}', [RoleController::class, 'update'])->name('roles.update')->middleware('can:roles.edit');
         $r->delete('/roles/{id:\d+}', [RoleController::class, 'destroy'])->name('roles.destroy')->middleware('can:roles.delete');
         $r->post('/roles/sync', [RoleController::class, 'sync'])->name('roles.sync')->middleware('can:roles.manage');
+
+        // ---------- Phase 2 ----------
+        // साइट सेटिंग
+        $r->get('/settings', [SettingsController::class, 'index'])->name('settings.index')->middleware('can:settings.view');
+        $r->get('/settings/{tab:[a-z_]+}', [SettingsController::class, 'edit'])->name('settings')->middleware('can:settings.view');
+        $r->post('/settings/{tab:[a-z_]+}', [SettingsController::class, 'update'])->name('settings.update')->middleware('can:settings.edit,settings.manage');
+
+        // पेज
+        $r->get('/pages', [PageController::class, 'index'])->name('pages.index')->middleware('can:pages.view');
+        $r->get('/pages/create', [PageController::class, 'create'])->name('pages.create')->middleware('can:pages.create');
+        $r->post('/pages', [PageController::class, 'store'])->name('pages.store')->middleware('can:pages.create');
+        $r->post('/pages/bulk', [PageController::class, 'bulk'])->name('pages.bulk')->middleware('can:pages.edit,pages.delete,pages.publish');
+        $r->get('/pages/{id:\d+}/edit', [PageController::class, 'edit'])->name('pages.edit')->middleware('can:pages.edit');
+        $r->put('/pages/{id:\d+}', [PageController::class, 'update'])->name('pages.update')->middleware('can:pages.edit');
+        $r->get('/pages/{id:\d+}/preview', [PageController::class, 'preview'])->name('pages.preview')->middleware('can:pages.view');
+        $r->post('/pages/{id:\d+}/duplicate', [PageController::class, 'duplicate'])->name('pages.duplicate')->middleware('can:pages.create');
+        $r->post('/pages/{id:\d+}/trash', [PageController::class, 'trash'])->name('pages.trash')->middleware('can:pages.delete');
+        $r->post('/pages/{id:\d+}/restore', [PageController::class, 'restore'])->name('pages.restore')->middleware('can:pages.delete');
+        $r->delete('/pages/{id:\d+}', [PageController::class, 'destroy'])->name('pages.destroy')->middleware('can:pages.delete');
+
+        // मेनू बिल्डर
+        $r->get('/menus', [MenuController::class, 'index'])->name('menus.index')->middleware('can:menus.view');
+        $r->get('/menus/{id:\d+}', [MenuController::class, 'edit'])->name('menus.edit')->middleware('can:menus.view');
+        $r->post('/menus/{id:\d+}', [MenuController::class, 'update'])->name('menus.update')->middleware('can:menus.edit');
+
+        // होमपेज बिल्डर
+        $r->get('/homepage', [HomepageController::class, 'index'])->name('homepage')->middleware('can:homepage.view');
+        $r->post('/homepage/sections', [HomepageController::class, 'store'])->name('homepage.store')->middleware('can:homepage.edit');
+        $r->post('/homepage/reorder', [HomepageController::class, 'reorder'])->name('homepage.reorder')->middleware('can:homepage.edit');
+        $r->put('/homepage/sections/{id:\d+}', [HomepageController::class, 'update'])->name('homepage.update')->middleware('can:homepage.edit');
+        $r->post('/homepage/sections/{id:\d+}/toggle', [HomepageController::class, 'toggle'])->name('homepage.toggle')->middleware('can:homepage.edit');
+        $r->post('/homepage/sections/{id:\d+}/duplicate', [HomepageController::class, 'duplicate'])->name('homepage.duplicate')->middleware('can:homepage.edit');
+        $r->delete('/homepage/sections/{id:\d+}', [HomepageController::class, 'destroy'])->name('homepage.destroy')->middleware('can:homepage.edit');
+
+        // रिच एडिटर में इमेज
+        $r->post('/editor/upload', [EditorController::class, 'upload'])->name('editor.upload')->middleware('can:pages.create,pages.edit,news.create,news.edit', 'throttle:60,5');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

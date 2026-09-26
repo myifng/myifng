@@ -8,10 +8,11 @@ final class SettingService
 {
     private const CACHE_KEY = 'settings.all';
 
+    /** सभी सेटिंग: डेटाबेस के मान, न हों तो schema के डिफ़ॉल्ट */
     public static function all(): array
     {
         return cache()->remember(self::CACHE_KEY, 3600, static function (): array {
-            $out = [];
+            $out = SettingsSchema::defaults();
             foreach (db()->all('SELECT name, value FROM {p}settings') as $r) {
                 $out[$r['name']] = $r['value'];
             }

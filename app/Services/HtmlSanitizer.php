@@ -12,10 +12,12 @@ final class HtmlSanitizer
     private const ALLOWED = [
         'p' => [], 'br' => [], 'strong' => [], 'b' => [], 'em' => [], 'i' => [], 'u' => [], 's' => [], 'sub' => [], 'sup' => [],
         'h2' => ['id'], 'h3' => ['id'], 'h4' => ['id'], 'blockquote' => [], 'ul' => [], 'ol' => [], 'li' => [],
-        'a' => ['href', 'title', 'target'], 'img' => ['src', 'alt', 'width', 'height'], 'figure' => [], 'figcaption' => [],
-        'hr' => [], 'table' => [], 'thead' => [], 'tbody' => [], 'tr' => [], 'th' => ['colspan', 'rowspan'], 'td' => ['colspan', 'rowspan'],
-        'code' => [], 'pre' => [], 'mark' => [],
+        'a' => ['href', 'title', 'target', 'class'], 'img' => ['src', 'alt', 'width', 'height'], 'figure' => ['class', 'data-youtube'], 'figcaption' => [],
+        'hr' => [], 'table' => ['class'], 'thead' => [], 'tbody' => [], 'tr' => [], 'th' => ['colspan', 'rowspan'], 'td' => ['colspan', 'rowspan'],
+        'code' => [], 'pre' => [], 'mark' => [], 'div' => ['class'],
     ];
+    /** class में सिर्फ़ ये नाम चलते हैं (बटन, सूचना बॉक्स, एम्बेड) */
+    private const CLASSES = ['btn-cta', 'callout', 'callout-info', 'callout-warning', 'callout-success', 'callout-danger', 'embed', 'table', 'table-bordered', 'gallery'];
     private const DROP = ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select', 'svg', 'math', 'link', 'meta', 'base', 'frame', 'frameset', 'template'];
 
     public static function clean(?string $html, string $siteUrl = ''): string
@@ -69,6 +71,21 @@ final class HtmlSanitizer
                 if (!in_array(strtolower($attr->name), self::ALLOWED[$tag], true)) {
                     $child->removeAttribute($attr->name);
                 }
+            }
+            if ($child->hasAttribute('class')) {
+                $cls = array_intersect(preg_split('/\s+/', trim($child->getAttribute('class'))) ?: [], self::CLASSES);
+                $cls ? $child->setAttribute('class', implode(' ', $cls)) : $child->removeAttribute('class');
+            }
+            if ($child->hasAttribute('data-youtube') && !preg_match('/^[A-Za-z0-9_-]{11}$/', $child->getAttribute('data-youtube'))) {
+                $child->removeAttribute('data-youtube');
+            }
+            if ($tag === 'div' && !$child->hasAttribute('class')) {
+                // बिना class वाला div: टैग हटाएँ, सामग्री रखें
+                while ($child->firstChild) {
+                    $node->insertBefore($child->firstChild, $child);
+                }
+                $node->removeChild($child);
+                continue;
             }
             if ($tag === 'a') {
                 $href = trim($child->getAttribute('href'));

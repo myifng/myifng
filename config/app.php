@@ -3,8 +3,8 @@
 $env = is_file(__DIR__ . '/env.php') ? require __DIR__ . '/env.php' : [];
 
 return [
-    'version'      => '1.0.0',
-    'phase'        => 1,                                   // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
+    'version'      => '1.1.0',
+    'phase'        => 2,                                   // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
     'url'          => rtrim((string) ($env['APP_URL'] ?? ''), '/'),
     'key'          => (string) ($env['APP_KEY'] ?? ''),
     'debug'        => (bool) ($env['DEBUG'] ?? false),
@@ -24,5 +24,6 @@ return [
         'can'         => App\Middleware\PermissionMiddleware::class,
         'maintenance' => App\Middleware\MaintenanceMiddleware::class,
         'throttle'    => App\Middleware\ThrottleMiddleware::class,
+        'uptodate'    => App\Middleware\UpToDateMiddleware::class,
     ],
 ];

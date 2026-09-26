@@ -31,10 +31,10 @@ return [
         'audit'        => ['label' => 'ऑडिट लॉग', 'icon' => 'fa-clipboard-list', 'group' => 'system', 'phase' => 1, 'route' => 'admin.audit.index', 'actions' => ['view', 'export']],
 
         // ---------- Phase 2 ----------
-        'settings'     => ['label' => 'साइट सेटिंग', 'icon' => 'fa-sliders', 'group' => 'website', 'phase' => 2, 'actions' => ['view', 'edit', 'manage']],
-        'pages'        => ['label' => 'पेज', 'icon' => 'fa-file-lines', 'group' => 'website', 'phase' => 2, 'actions' => [...$crud, 'publish']],
-        'menus'        => ['label' => 'मेनू बिल्डर', 'icon' => 'fa-bars-staggered', 'group' => 'website', 'phase' => 2, 'actions' => [...$crud]],
-        'homepage'     => ['label' => 'होमपेज बिल्डर', 'icon' => 'fa-table-cells-large', 'group' => 'website', 'phase' => 2, 'actions' => ['view', 'edit', 'manage']],
+        'settings'     => ['label' => 'साइट सेटिंग', 'icon' => 'fa-sliders', 'group' => 'website', 'phase' => 2, 'route' => 'admin.settings.index', 'actions' => ['view', 'edit', 'manage']],
+        'pages'        => ['label' => 'पेज', 'icon' => 'fa-file-lines', 'group' => 'website', 'phase' => 2, 'route' => 'admin.pages.index', 'actions' => [...$crud, 'publish']],
+        'menus'        => ['label' => 'मेनू बिल्डर', 'icon' => 'fa-bars-staggered', 'group' => 'website', 'phase' => 2, 'route' => 'admin.menus.index', 'actions' => [...$crud]],
+        'homepage'     => ['label' => 'होमपेज बिल्डर', 'icon' => 'fa-table-cells-large', 'group' => 'website', 'phase' => 2, 'route' => 'admin.homepage', 'actions' => ['view', 'edit', 'manage']],
 
         // ---------- Phase 3 ----------
         'categories'   => ['label' => 'श्रेणियाँ', 'icon' => 'fa-folder-tree', 'group' => 'content', 'phase' => 3, 'actions' => [...$crud]],
