@@ -8,7 +8,10 @@ return [
     'cards' => [
         // Phase 4
         'news_today'      => ['label' => 'आज की ख़बरें', 'icon' => 'fa-newspaper', 'module' => 'news', 'permission' => 'news.view', 'provider' => 'newsToday', 'route' => 'admin.news.index'],
-        'news_pending'    => ['label' => 'मंज़ूरी बाकी', 'icon' => 'fa-hourglass-half', 'module' => 'news', 'permission' => 'news.approve', 'provider' => 'newsPending', 'route' => 'admin.news.index'],
+        'news_pending'    => ['label' => 'मंज़ूरी बाकी', 'icon' => 'fa-hourglass-half', 'module' => 'news', 'permission' => 'news.approve', 'provider' => 'newsPending', 'route' => 'admin.news.index', 'query' => 'status=desk'],
+        'news_mine'       => ['label' => 'मेरी ख़बरें', 'icon' => 'fa-pen-nib', 'module' => 'news', 'permission' => 'news.create', 'provider' => 'newsMine', 'route' => 'admin.news.index', 'query' => 'mine=1'],
+        'news_scheduled'  => ['label' => 'शेड्यूल', 'icon' => 'fa-calendar-check', 'module' => 'news', 'permission' => 'news.publish', 'provider' => 'newsScheduled', 'route' => 'admin.news.index', 'query' => 'status=scheduled'],
+        'my_assignments'  => ['label' => 'मेरे असाइनमेंट', 'icon' => 'fa-list-check', 'module' => 'assignments', 'permission' => 'assignments.view', 'provider' => 'myAssignments', 'route' => 'admin.assignments.index', 'query' => 'mine=1'],
         // Phase 6
         'reporters'       => ['label' => 'सक्रिय रिपोर्टर', 'icon' => 'fa-id-card', 'module' => 'reporters', 'permission' => 'reporters.view', 'provider' => 'reporters', 'route' => 'admin.reporters.index'],
         'applications'    => ['label' => 'नए रिपोर्टर आवेदन', 'icon' => 'fa-file-signature', 'module' => 'applications', 'permission' => 'applications.view', 'provider' => 'applications', 'route' => 'admin.applications.index'],
@@ -23,5 +26,5 @@ return [
         'logins_today'    => ['label' => 'आज के लॉगिन', 'icon' => 'fa-right-to-bracket', 'module' => 'dashboard', 'permission' => 'dashboard.view', 'provider' => 'loginsToday', 'route' => null],
         'failed_logins'   => ['label' => 'असफल लॉगिन (24 घंटे)', 'icon' => 'fa-shield-halved', 'module' => 'audit', 'permission' => 'audit.view', 'provider' => 'failedLogins', 'route' => 'admin.audit.index'],
     ],
-    'max_cards' => 8,
+    'max_cards' => 10,
 ];

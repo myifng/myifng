@@ -19,7 +19,7 @@ final class DashboardService
                 continue;
             }
             $data = self::{$c['provider']}();
-            $out[$key] = $c + $data + ['link' => ($c['route'] && app('router')->has($c['route'])) ? route($c['route']) : null];
+            $out[$key] = $c + $data + ['link' => ($c['route'] && app('router')->has($c['route'])) ? route($c['route']) . (!empty($c['query']) ? '?' . $c['query'] : '') : null];
             if (count($out) >= (int) config('dashboard.max_cards', 8)) {
                 break;
             }
@@ -45,6 +45,41 @@ final class DashboardService
     {
         $r = db()->first('SELECT COUNT(*) total, SUM(is_active) active FROM {p}home_sections');
         return ['value' => (int) $r['active'], 'sub' => 'चालू · कुल ' . num($r['total'])];
+    }
+
+    private static function newsToday(): array
+    {
+        [$scope, $p] = NewsService::scope('n');
+        $r = db()->first("SELECT SUM(n.status = 'published' AND DATE(n.published_at) = CURDATE()) today, SUM(n.status = 'published') total
+                          FROM {p}news n WHERE $scope AND n.deleted_at IS NULL", $p);
+        return ['value' => (int) $r['today'], 'sub' => 'कुल प्रकाशित: ' . num($r['total'])];
+    }
+
+    private static function newsPending(): array
+    {
+        $r = db()->first("SELECT SUM(status = 'submitted') s, SUM(status = 'review') r, SUM(status = 'fact_check') f FROM {p}news WHERE deleted_at IS NULL");
+        $n = (int) $r['s'] + (int) $r['r'] + (int) $r['f'];
+        return ['value' => $n, 'sub' => 'नई ' . num($r['s']) . ' · समीक्षा ' . num($r['r']) . ' · फ़ैक्ट चेक ' . num($r['f']), 'alert' => (int) $r['s'] > 0];
+    }
+
+    private static function newsMine(): array
+    {
+        $uid = auth()->id();
+        $r = db()->first("SELECT SUM(status = 'draft') d, SUM(status = 'rejected') rj, SUM(status = 'published') p FROM {p}news WHERE (reporter_id = ? OR created_by = ?) AND deleted_at IS NULL", [$uid, $uid]);
+        return ['value' => (int) $r['p'], 'sub' => 'प्रकाशित · ड्राफ़्ट ' . num($r['d']) . ' · सुधार माँगे ' . num($r['rj']), 'alert' => (int) $r['rj'] > 0];
+    }
+
+    private static function newsScheduled(): array
+    {
+        $r = db()->first("SELECT COUNT(*) c, MIN(scheduled_at) nxt FROM {p}news WHERE status = 'scheduled' AND deleted_at IS NULL");
+        return ['value' => (int) $r['c'], 'sub' => $r['nxt'] ? 'अगली: ' . hindi_date($r['nxt'], true) : 'कोई शेड्यूल नहीं'];
+    }
+
+    private static function myAssignments(): array
+    {
+        $r = db()->first("SELECT SUM(status IN ('open','accepted','in_progress')) open, SUM(status IN ('open','accepted','in_progress') AND deadline < NOW()) late
+                          FROM {p}assignments WHERE reporter_id = ?", [auth()->id()]);
+        return ['value' => (int) $r['open'], 'sub' => (int) $r['late'] ? 'देर हो चुकी: ' . num($r['late']) : 'खुले असाइनमेंट', 'alert' => (int) $r['late'] > 0];
     }
 
     private static function media(): array

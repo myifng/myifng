@@ -531,3 +531,82 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 .loc-picker { position: relative; }
 .loc-results { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20; max-height: 320px; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,.12); }
 .loc-results .list-group-item { cursor: pointer; }
+
+/* ==========================================================
+   Phase 4: ख़बरें, वर्कफ़्लो, हिस्ट्री, असाइनमेंट
+   ========================================================== */
+.text-bg-teal { background: #0f766e !important; color: #fff !important; }
+.text-bg-purple { background: #6d28d9 !important; color: #fff !important; }
+.thumb-empty { display: inline-flex; align-items: center; justify-content: center; background: var(--page-bg); color: var(--muted); }
+.news-table .news-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; }
+.min-w-0 { min-width: 0; }
+.chip-sm.flag-breaking, .chip-sm.flag-live { background: var(--brand); color: #fff; border-color: var(--brand); }
+.chip-sm.flag-exclusive { background: #6d28d9; color: #fff; border-color: #6d28d9; }
+.loc-filter { min-width: 170px; }
+.mf-file { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 20px; padding: 4px; text-align: center; }
+.mf-file small { font-size: 10.5px; word-break: break-all; line-height: 1.2; }
+.check-scroll { max-height: 170px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+.flag-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.schedule-box { background: var(--page-bg); border-radius: 8px; padding: 10px; margin-top: 8px; }
+
+/* टैग चिप्स */
+.tag-input { position: relative; }
+.tag-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+.tag-chips:empty { display: none; }
+.tag-chip { display: inline-flex; align-items: center; gap: 4px; background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--ink); border-radius: 999px; padding: 2px 4px 2px 10px; font-size: 13.5px; }
+.tag-chip button { border: 0; background: none; color: var(--muted); font-size: 16px; line-height: 1; padding: 0 4px; border-radius: 50%; }
+.tag-chip button:hover { color: #dc3545; }
+
+/* ख़बर चुनने वाला, मीडिया सूची */
+.news-picker { position: relative; }
+.np-list { list-style: none; padding: 0; margin: 0 0 6px; display: grid; gap: 4px; }
+.np-list:empty { display: none; }
+.np-list li { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 8px; padding: 4px 4px 4px 10px; font-size: 13.5px; }
+.np-list li span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ml-remove { border: 0; background: var(--page-bg); color: var(--muted); width: 24px; height: 24px; border-radius: 50%; line-height: 1; font-size: 16px; flex: 0 0 auto; }
+.ml-remove:hover { background: #dc3545; color: #fff; }
+.media-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.ml-item { position: relative; width: 112px; height: 63px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--page-bg); }
+.ml-item img { width: 100%; height: 100%; object-fit: cover; }
+.ml-item .ml-remove { position: absolute; top: 3px; right: 3px; }
+.ml-file { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 4px; text-align: center; font-size: 18px; color: var(--muted); }
+.ml-file small { font-size: 10.5px; line-height: 1.2; word-break: break-all; }
+.ml-add { width: 112px; height: 63px; border: 2px dashed var(--line); border-radius: 8px; background: none; color: var(--muted); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; }
+.ml-add:hover { border-color: var(--brand); color: var(--brand); }
+
+/* टिप्पणियाँ */
+.remark-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.remark-list li { border-left: 3px solid var(--line); padding: 2px 0 2px 10px; }
+.remark-list li.rm-note { border-left-color: #6d28d9; }
+.remark-list li.rm-feedback { border-left-color: var(--brand); }
+.remark-list p { margin: 4px 0 0; font-size: 14px; white-space: normal; }
+.rm-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 14px; }
+.wf-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.wf-form { margin-top: 12px; padding: 12px; background: var(--page-bg); border-radius: 8px; }
+
+/* diff */
+.diff-view del { background: #ffd7d5; color: #82071e; text-decoration: line-through; }
+.diff-view ins { background: #ccffd8; color: #055d20; text-decoration: none; }
+[data-bs-theme="dark"] .diff-view del { background: #5a1e22; color: #ffb3ad; }
+[data-bs-theme="dark"] .diff-view ins { background: #16432a; color: #a6f0bb; }
+.diff-body p { margin: 0 0 6px; padding: 4px 8px; border-radius: 6px; }
+.diff-body .diff-same { color: var(--muted); }
+.diff-body .diff-del { background: #ffebe9; text-decoration: line-through; }
+.diff-body .diff-ins { background: #e6ffec; }
+[data-bs-theme="dark"] .diff-body .diff-del { background: #3b1c1e; }
+[data-bs-theme="dark"] .diff-body .diff-ins { background: #13301f; }
+.diff-key { display: inline-block; padding: 0 8px; border-radius: 4px; margin-right: 6px; }
+.diff-key.del { background: #ffd7d5; color: #82071e; }
+.diff-key.ins { background: #ccffd8; color: #055d20; }
+
+/* असाइनमेंट */
+.asg-list { list-style: none; margin: 0; padding: 0; }
+.asg-item { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.asg-item.is-late { box-shadow: inset 3px 0 0 #dc3545; }
+.asg-main { min-width: 0; flex: 1; }
+.asg-title { font-size: 16px; }
+.asg-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 767.98px) {
+  .asg-item { flex-direction: column; }
+  .asg-actions { justify-content: flex-start; }
+}

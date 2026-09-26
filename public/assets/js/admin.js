@@ -704,7 +704,7 @@
       var run = function () {
         var f = files.shift(); if (!f) return;
         status.textContent = f.name + ' अपलोड हो रही है…';
-        uploadFile(mp.dataset.upload, f, { only: state.kind }, function (p) { status.textContent = f.name + ': ' + p + '%'; }).then(function (r) {
+        uploadFile(mp.dataset.upload, f, state.kind ? { only: state.kind } : {}, function (p) { status.textContent = f.name + ': ' + p + '%'; }).then(function (r) {
           if (r.ok) { card(r.item, true); empty.hidden = true; select(r.item.id); status.textContent = r.warning || 'अपलोड हो गई। Alt टेक्स्ट भरें।'; $('[data-mp-alt]', side).focus(); }
           else status.textContent = r.message || 'अपलोड नहीं हुई';
           run();
@@ -715,7 +715,9 @@
 
     window.MediaPicker = {
       open: function (opts) {
-        state.onChoose = opts.onChoose; state.kind = opts.kind || 'image';
+        state.onChoose = opts.onChoose; state.kind = opts.kind == null ? 'image' : opts.kind;
+        if (up) up.accept = { image: 'image/*', video: 'video/*', audio: 'audio/*', document: '.pdf,.docx,.xlsx,.pptx,.txt,.csv' }[state.kind] || '';
+        $('#mediaPickerTitle', mp).lastChild.textContent = { image: 'इमेज चुनें', video: 'वीडियो चुनें', audio: 'ऑडियो चुनें', document: 'दस्तावेज़ चुनें' }[state.kind] || 'फ़ाइल चुनें';
         search.value = ''; state.q = '';
         load(true); modal.show();
       }
@@ -729,7 +731,9 @@
     var changed = function () { box.classList.toggle('has-value', !!input.value); clear.hidden = !input.value; input.dispatchEvent(new Event('input', { bubbles: true })); };
     if (pick && window.MediaPicker) pick.addEventListener('click', function () {
       window.MediaPicker.open({ kind: pick.dataset.kind || 'image', onChoose: function (it) {
-        input.value = it.file; prev.innerHTML = '<img src="' + esc(it.thumb || it.url) + '" alt="">'; changed(); pick.focus();
+        input.value = it.file;
+        prev.innerHTML = it.thumb ? '<img src="' + esc(it.thumb) + '" alt="">' : '<span class="mf-file"><i class="fa-regular fa-file"></i><small>' + esc(it.name || it.file) + '</small></span>';
+        changed(); pick.focus();
       } });
     });
     clear.addEventListener('click', function () { input.value = ''; prev.innerHTML = '<i class="fa-regular fa-image"></i>'; changed(); });
@@ -791,3 +795,131 @@
     });
   });
 })();
+
+/* ==========================================================
+   Phase 4: ख़बर फ़ॉर्म (टैग, संबंधित ख़बरें, गैलरी, शेड्यूल, शब्द गिनती), असाइनमेंट अटैचमेंट
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+  function withQ(url, q) { return url + (url.indexOf('?') === -1 ? '?' : '&') + 'q=' + encodeURIComponent(q); }
+  function getJSON(url) { return fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } }).then(function (r) { return r.json(); }); }
+  function dirty(el) { el.dispatchEvent(new Event('input', { bubbles: true })); }
+
+  /** खोज-सूची (कीबोर्ड के साथ): input + ul.loc-results */
+  function suggest(input, list, fetchRows, render, onPick) {
+    var rows = [], active = -1, timer = null;
+    function draw() {
+      list.innerHTML = '';
+      rows.forEach(function (r, i) {
+        var li = document.createElement('li');
+        li.className = 'list-group-item list-group-item-action' + (i === active ? ' active' : '');
+        li.setAttribute('role', 'option'); li.innerHTML = render(r);
+        li.addEventListener('mousedown', function (e) { e.preventDefault(); onPick(r); list.hidden = true; });
+        list.appendChild(li);
+      });
+      list.hidden = rows.length === 0;
+    }
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if (!q) { rows = []; draw(); return; }
+      timer = setTimeout(function () { fetchRows(q).then(function (r) { rows = r; active = 0; draw(); }); }, 250);
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown' && rows.length) { active = Math.min(active + 1, rows.length - 1); draw(); e.preventDefault(); }
+      else if (e.key === 'ArrowUp' && rows.length) { active = Math.max(active - 1, 0); draw(); e.preventDefault(); }
+      else if (e.key === 'Enter') { if (!list.hidden && rows[active]) { e.preventDefault(); onPick(rows[active]); rows = []; draw(); } }
+      else if (e.key === 'Escape') { list.hidden = true; }
+    });
+    input.addEventListener('blur', function () { setTimeout(function () { list.hidden = true; }, 150); });
+    return { clear: function () { rows = []; draw(); } };
+  }
+
+  /* ---------- टैग इनपुट: चिप्स + सुझाव; hidden में कॉमा से ---------- */
+  $$('[data-tag-input]').forEach(function (box) {
+    var hidden = $('input[type="hidden"]', box), input = $('input[type="text"]', box), list = $('.loc-results', box), max = +box.dataset.max || 15;
+    var tags = hidden.value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+    var wrap = document.createElement('div'); wrap.className = 'tag-chips'; box.insertBefore(wrap, input);
+    function sync() {
+      hidden.value = tags.join(', ');
+      wrap.innerHTML = tags.map(function (t, i) { return '<span class="tag-chip">' + esc(t) + '<button type="button" data-i="' + i + '" aria-label="हटाएँ: ' + esc(t) + '">×</button></span>'; }).join('');
+      input.disabled = tags.length >= max; input.placeholder = tags.length >= max ? 'सीमा पूरी' : 'टैग लिखें, Enter दबाएँ';
+    }
+    function add(t) {
+      t = t.replace(/[,،]/g, ' ').trim().slice(0, 100);
+      if (t && tags.map(function (x) { return x.toLowerCase(); }).indexOf(t.toLowerCase()) === -1 && tags.length < max) { tags.push(t); sync(); dirty(hidden); }
+      input.value = '';
+    }
+    wrap.addEventListener('click', function (e) { var b = e.target.closest('button[data-i]'); if (!b) return; tags.splice(+b.dataset.i, 1); sync(); dirty(hidden); input.focus(); });
+    input.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' && list.hidden) || e.key === ',') { e.preventDefault(); add(input.value); }
+      if (e.key === 'Backspace' && !input.value && tags.length) { tags.pop(); sync(); dirty(hidden); }
+    });
+    input.addEventListener('blur', function () { setTimeout(function () { if (input.value.trim()) add(input.value); }, 200); });
+    if (box.dataset.search) suggest(input, list, function (q) { return getJSON(withQ(box.dataset.search, q)).then(function (r) { return r.items; }); },
+      function (r) { return esc(r.name) + ' <small class="text-body-secondary">' + (+r.usage_count || 0) + '</small>'; }, function (r) { add(r.name); });
+    sync();
+  });
+
+  /* ---------- ख़बर चुनने वाला (संबंधित, होमपेज) ---------- */
+  $$('[data-news-picker]').forEach(function (box) {
+    var ul = $('.np-list', box), input = $('input[type="search"]', box), list = $('.loc-results', box), max = +box.dataset.max || 10;
+    function ids() { return $$('li[data-id]', ul).map(function (li) { return +li.dataset.id; }); }
+    function refresh() { input.disabled = ids().length >= max; }
+    ul.addEventListener('click', function (e) { var b = e.target.closest('.ml-remove'); if (!b) return; b.closest('li').remove(); refresh(); dirty(box); });
+    suggest(input, list, function (q) {
+      var u = withQ(box.dataset.search, q) + (box.dataset.exclude ? '&exclude=' + box.dataset.exclude : '');
+      return getJSON(u).then(function (r) { var have = ids(); return r.items.filter(function (x) { return have.indexOf(x.id) === -1; }); });
+    }, function (r) { return '<b>#' + r.id + '</b> ' + esc(r.title) + ' <small class="text-body-secondary">' + esc(r.status) + '</small>'; }, function (r) {
+      if (ids().length >= max) return;
+      var li = document.createElement('li'); li.dataset.id = r.id;
+      li.innerHTML = '<span>#' + r.id + ' ' + esc(r.title) + '</span><input type="hidden" name="' + esc(box.dataset.name) + '" value="' + r.id + '"><button type="button" class="ml-remove" aria-label="हटाएँ">×</button>';
+      ul.appendChild(li); input.value = ''; refresh(); dirty(box);
+    });
+    refresh();
+  });
+
+  /* ---------- मीडिया सूची (गैलरी, अटैचमेंट) ---------- */
+  $$('[data-media-list]').forEach(function (box) {
+    var add = $('[data-ml-add]', box), max = +box.dataset.max || 20;
+    box.addEventListener('click', function (e) { var b = e.target.closest('.ml-remove'); if (!b) return; b.closest('.ml-item').remove(); dirty(box); });
+    if (add && window.MediaPicker) add.addEventListener('click', function () {
+      if ($$('.ml-item', box).length >= max) return;
+      window.MediaPicker.open({ kind: box.dataset.kind, onChoose: function (it) {
+        if ($('.ml-item[data-id="' + it.id + '"]', box)) return;
+        var s = document.createElement('span'); s.className = 'ml-item'; s.dataset.id = it.id;
+        s.innerHTML = (it.thumb ? '<img src="' + esc(it.thumb) + '" alt="">' : '<span class="ml-file"><i class="fa-regular fa-file"></i><small>' + esc(it.name) + '</small></span>') +
+          '<input type="hidden" name="' + esc(box.dataset.name) + '" value="' + it.id + '"><button type="button" class="ml-remove" aria-label="हटाएँ">×</button>';
+        box.insertBefore(s, add); dirty(box); add.focus();
+      } });
+    });
+  });
+
+  /* ---------- फ़ॉर्म के बाहर वाले पिकर बटन (जैसे वीडियो): input में path ---------- */
+  $$('[data-media-pick][data-pick-value]').forEach(function (b) {
+    if (b.closest('[data-media-field]') || !window.MediaPicker) return;
+    b.addEventListener('click', function () {
+      window.MediaPicker.open({ kind: b.dataset.kind, onChoose: function (it) { var i = $(b.dataset.mediaPick); if (i) { i.value = it.file; dirty(i); } } });
+    });
+  });
+
+  /* ---------- ख़बर फ़ॉर्म: शेड्यूल, पुष्टि, शब्द गिनती ---------- */
+  var nf = $('.news-form');
+  if (nf) {
+    var box = $('[data-schedule-box]', nf), sBtn = $('[data-schedule-btn]', nf);
+    if (sBtn && box) sBtn.addEventListener('click', function (e) {
+      var inp = $('input', box);
+      if (box.hidden || !inp.value) { e.preventDefault(); box.hidden = false; inp.focus(); inp.reportValidity && inp.setCustomValidity(''); }
+    });
+    $$('[data-confirm-then]', nf).forEach(function (b) { b.addEventListener('click', function (e) { if (!confirm(b.dataset.confirmThen)) e.preventDefault(); }); });
+    var wc = $('[data-word-count]', nf), area = $('.rte-area', nf);
+    if (wc && area) {
+      var count = function () { var t = (area.innerText || '').trim(); var n = t ? t.split(/\s+/).length : 0; wc.textContent = n + ' शब्द · पढ़ने में लगभग ' + Math.max(1, Math.ceil(n / 200)) + ' मिनट'; };
+      area.addEventListener('input', count); count();
+    }
+  }
+})();
+

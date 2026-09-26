@@ -44,8 +44,8 @@ return [
         'media'        => ['label' => 'मीडिया लाइब्रेरी', 'icon' => 'fa-photo-film', 'group' => 'content', 'phase' => 3, 'route' => 'admin.media.index', 'actions' => [...$crud, 'manage']],
 
         // ---------- Phase 4 ----------
-        'news'         => ['label' => 'ख़बरें', 'icon' => 'fa-newspaper', 'group' => 'newsroom', 'phase' => 4, 'actions' => [...$crud, 'approve', 'publish', 'export', 'manage']],
-        'assignments'  => ['label' => 'असाइनमेंट डेस्क', 'icon' => 'fa-list-check', 'group' => 'newsroom', 'phase' => 4, 'actions' => [...$crud, 'manage']],
+        'news'         => ['label' => 'ख़बरें', 'icon' => 'fa-newspaper', 'group' => 'newsroom', 'phase' => 4, 'route' => 'admin.news.index', 'actions' => [...$crud, 'approve', 'publish', 'export', 'manage']],
+        'assignments'  => ['label' => 'असाइनमेंट डेस्क', 'icon' => 'fa-list-check', 'group' => 'newsroom', 'phase' => 4, 'route' => 'admin.assignments.index', 'actions' => [...$crud, 'manage']],
 
         // ---------- Phase 6 ----------
         'reporters'    => ['label' => 'रिपोर्टर', 'icon' => 'fa-id-card', 'group' => 'reporters', 'phase' => 6, 'actions' => [...$crud, 'approve', 'export', 'manage']],

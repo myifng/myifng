@@ -14,7 +14,8 @@
     <p><?= hindi_date(time(), false, true) ?> · <?= e(user('role_name')) ?></p>
   </div>
   <div class="d-flex gap-2 flex-wrap">
-    <?php if (can('pages.create')): ?><a class="btn btn-brand" href="<?= e(route('admin.pages.create')) ?>"><i class="fa-solid fa-file-circle-plus me-1"></i> नया पेज</a><?php endif; ?>
+    <?php if (can('news.create') && app('router')->has('admin.news.create')): ?><a class="btn btn-brand" href="<?= e(route('admin.news.create')) ?>"><i class="fa-solid fa-pen-nib me-1"></i> नई ख़बर</a><?php endif; ?>
+    <?php if (can('pages.create')): ?><a class="btn btn-outline-secondary" href="<?= e(route('admin.pages.create')) ?>"><i class="fa-solid fa-file-circle-plus me-1"></i> नया पेज</a><?php endif; ?>
     <?php if (can('homepage.view')): ?><a class="btn btn-outline-secondary" href="<?= e(route('admin.homepage')) ?>"><i class="fa-solid fa-table-cells-large me-1"></i> होमपेज</a><?php endif; ?>
   </div>
 </div>

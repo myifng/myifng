@@ -4,6 +4,7 @@
  * हर रूट पर अनुमति middleware: can:मॉड्यूल.action
  * @var App\Core\Router $router
  */
+use App\Controllers\Admin\AssignmentController;
 use App\Controllers\Admin\AuditLogController;
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\CategoryController;
@@ -13,6 +14,8 @@ use App\Controllers\Admin\HomepageController;
 use App\Controllers\Admin\LocationController;
 use App\Controllers\Admin\MediaController;
 use App\Controllers\Admin\MenuController;
+use App\Controllers\Admin\NewsController;
+use App\Controllers\Admin\NewsWorkflowController;
 use App\Controllers\Admin\PageController;
 use App\Controllers\Admin\SettingsController;
 use App\Controllers\Admin\SystemController;
@@ -126,7 +129,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
 
         // टैग
         $r->get('/tags', [TagController::class, 'index'])->name('tags.index')->middleware('can:tags.view');
-        $r->get('/tags/search', [TagController::class, 'search'])->name('tags.search')->middleware('can:tags.view');
+        $r->get('/tags/search', [TagController::class, 'search'])->name('tags.search')->middleware('can:tags.view,news.create');
         $r->post('/tags', [TagController::class, 'store'])->name('tags.store')->middleware('can:tags.create');
         $r->post('/tags/bulk', [TagController::class, 'bulk'])->name('tags.bulk')->middleware('can:tags.delete');
         $r->get('/tags/{id:\d+}/edit', [TagController::class, 'edit'])->name('tags.edit')->middleware('can:tags.edit');
@@ -135,7 +138,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
 
         // लोकेशन
         $r->get('/locations', [LocationController::class, 'index'])->name('locations.index')->middleware('can:locations.view');
-        $r->get('/locations/search', [LocationController::class, 'search'])->name('locations.search')->middleware('can:locations.view');
+        $r->get('/locations/search', [LocationController::class, 'search'])->name('locations.search')->middleware('can:locations.view,news.create,assignments.create');
         $r->get('/locations/create', [LocationController::class, 'create'])->name('locations.create')->middleware('can:locations.create');
         $r->post('/locations', [LocationController::class, 'store'])->name('locations.store')->middleware('can:locations.create');
         $r->get('/locations/import', [LocationController::class, 'importForm'])->name('locations.import')->middleware('can:locations.create');
@@ -162,6 +165,38 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->post('/media/folders', [MediaController::class, 'folderStore'])->name('media.folders.store')->middleware('can:media.manage');
         $r->put('/media/folders/{id:\d+}', [MediaController::class, 'folderUpdate'])->name('media.folders.update')->middleware('can:media.manage');
         $r->delete('/media/folders/{id:\d+}', [MediaController::class, 'folderDestroy'])->name('media.folders.destroy')->middleware('can:media.manage');
+
+        // ---------- Phase 4 ----------
+        // ख़बरें
+        $r->get('/news', [NewsController::class, 'index'])->name('news.index')->middleware('can:news.view');
+        $r->get('/news/search', [NewsController::class, 'search'])->name('news.search')->middleware('can:news.view');
+        $r->get('/news/export', [NewsController::class, 'export'])->name('news.export')->middleware('can:news.export');
+        $r->get('/news/create', [NewsController::class, 'create'])->name('news.create')->middleware('can:news.create');
+        $r->post('/news', [NewsController::class, 'store'])->name('news.store')->middleware('can:news.create');
+        $r->post('/news/bulk', [NewsController::class, 'bulk'])->name('news.bulk')->middleware('can:news.view');
+        $r->get('/news/{id:\d+}/edit', [NewsController::class, 'edit'])->name('news.edit')->middleware('can:news.view');
+        $r->put('/news/{id:\d+}', [NewsController::class, 'update'])->name('news.update')->middleware('can:news.edit');
+        $r->get('/news/{id:\d+}/preview', [NewsController::class, 'preview'])->name('news.preview')->middleware('can:news.view');
+        $r->post('/news/{id:\d+}/duplicate', [NewsController::class, 'duplicate'])->name('news.duplicate')->middleware('can:news.create');
+        $r->post('/news/{id:\d+}/trash', [NewsController::class, 'trash'])->name('news.trash')->middleware('can:news.delete');
+        $r->post('/news/{id:\d+}/restore', [NewsController::class, 'restore'])->name('news.restore')->middleware('can:news.delete');
+        $r->delete('/news/{id:\d+}', [NewsController::class, 'destroy'])->name('news.destroy')->middleware('can:news.delete');
+        // वर्कफ़्लो और हिस्ट्री
+        $r->post('/news/{id:\d+}/transition', [NewsWorkflowController::class, 'transition'])->name('news.transition')->middleware('can:news.view');
+        $r->post('/news/{id:\d+}/remarks', [NewsWorkflowController::class, 'remark'])->name('news.remark')->middleware('can:news.view', 'throttle:60,10');
+        $r->get('/news/{id:\d+}/history', [NewsWorkflowController::class, 'history'])->name('news.history')->middleware('can:news.view');
+        $r->get('/news/{id:\d+}/revisions/{rid:\d+}', [NewsWorkflowController::class, 'revision'])->name('news.revision')->middleware('can:news.view');
+        $r->post('/news/{id:\d+}/revisions/{rid:\d+}/restore', [NewsWorkflowController::class, 'restore'])->name('news.revision.restore')->middleware('can:news.edit');
+
+        // असाइनमेंट डेस्क
+        $r->get('/assignments', [AssignmentController::class, 'index'])->name('assignments.index')->middleware('can:assignments.view');
+        $r->get('/assignments/create', [AssignmentController::class, 'create'])->name('assignments.create')->middleware('can:assignments.create');
+        $r->post('/assignments', [AssignmentController::class, 'store'])->name('assignments.store')->middleware('can:assignments.create');
+        $r->get('/assignments/{id:\d+}/edit', [AssignmentController::class, 'edit'])->name('assignments.edit')->middleware('can:assignments.edit');
+        $r->put('/assignments/{id:\d+}', [AssignmentController::class, 'update'])->name('assignments.update')->middleware('can:assignments.edit');
+        $r->post('/assignments/{id:\d+}/status', [AssignmentController::class, 'status'])->name('assignments.status')->middleware('can:assignments.view');
+        $r->post('/assignments/{id:\d+}/start', [AssignmentController::class, 'start'])->name('assignments.start')->middleware('can:news.create');
+        $r->delete('/assignments/{id:\d+}', [AssignmentController::class, 'destroy'])->name('assignments.destroy')->middleware('can:assignments.delete');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

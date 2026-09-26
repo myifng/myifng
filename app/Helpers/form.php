@@ -168,7 +168,21 @@ function block_field(int $sid, string $name, array $f, mixed $value, array $cate
             }
             return '<div class="col-md-6">' . $label . '<select class="form-select form-select-sm" id="' . $id . '" name="' . $n . '">' . $o . '</select></div>';
         case 'stories':
-            return '<div class="col-12" data-show-when-manual>' . $label . '<input class="form-control form-control-sm" id="' . $id . '" name="' . $n . '" value="' . e(implode(', ', (array) $value)) . '" placeholder="ख़बर IDs, जैसे 12, 45, 7"><div class="form-text">Phase 4 में यहाँ ख़बर खोजकर चुनने का बॉक्स आएगा।</div></div>';
+            $ids = array_values(array_filter(array_map('intval', (array) $value)));
+            if (!app('router')->has('admin.news.search')) {
+                return '<div class="col-12" data-show-when-manual>' . $label . '<input class="form-control form-control-sm" id="' . $id . '" name="' . $n . '" value="' . e(implode(', ', $ids)) . '" placeholder="ख़बर IDs, जैसे 12, 45, 7"></div>';
+            }
+            $rows = $ids ? db()->all('SELECT id, title FROM {p}news WHERE id IN (' . \App\Core\Database::in($ids) . ')', $ids) : [];
+            $titles = array_column($rows, 'title', 'id');
+            $chips = '';
+            foreach ($ids as $sid) {
+                if (isset($titles[$sid])) {
+                    $chips .= '<li data-id="' . $sid . '"><span>#' . $sid . ' ' . e($titles[$sid]) . '</span><input type="hidden" name="' . $n . '[]" value="' . $sid . '"><button type="button" class="ml-remove" aria-label="हटाएँ">×</button></li>';
+                }
+            }
+            return '<div class="col-12" data-show-when-manual><span class="form-label small d-block">' . e($f['label']) . '</span><div class="news-picker" data-news-picker data-search="' . e(route('admin.news.search')) . '?published=1" data-name="' . $n . '[]" data-max="30">'
+                . '<input type="hidden" name="' . $n . '" value=""><ul class="np-list">' . $chips . '</ul><input type="search" class="form-control form-control-sm" id="' . $id . '" autocomplete="off" placeholder="प्रकाशित ख़बर खोजें (शीर्षक या ID)" aria-label="ख़बर खोजें"><ul class="loc-results list-group" hidden></ul></div>'
+                . '<div class="form-text">क्रम वही रहेगा जिस क्रम में जोड़ेंगे।</div></div>';
         case 'code':
         case 'textarea':
             return '<div class="col-12">' . $label . '<textarea class="form-control form-control-sm' . ($f['type'] === 'code' ? ' font-monospace code-area' : '') . '" id="' . $id . '" name="' . $n . '" rows="5" spellcheck="false">' . e($value) . '</textarea></div>';
@@ -186,14 +200,17 @@ function media_field(string $name, string $label, ?string $value, array $o = [])
     $id = 'mf_' . preg_replace('/[^a-z0-9_]/i', '_', $name);
     $val = (string) old($name, $value ?? '');
     $err = error($name);
-    $prev = $val !== '' ? '<img src="' . e(media_url($val, 'thumb')) . '" alt="">' : '<i class="fa-regular fa-image"></i>';
+    $kind = $o['kind'] ?? 'image';
+    $icon = ['image' => 'fa-image', 'audio' => 'fa-file-audio', 'video' => 'fa-file-video', 'document' => 'fa-file-lines'][$kind] ?? 'fa-file';
+    $prev = $val === '' ? '<i class="fa-regular ' . $icon . '"></i>'
+        : ($kind === 'image' ? '<img src="' . e(media_url($val, 'thumb')) . '" alt="">' : '<span class="mf-file"><i class="fa-regular ' . $icon . '"></i><small>' . e(basename($val)) . '</small></span>');
     $canPick = can('media.view');
     $html = '<div class="' . e($o['wrap'] ?? 'mb-3') . '"><span class="form-label d-block">' . e($label) . '</span>'
         . '<div class="media-field' . ($val !== '' ? ' has-value' : '') . '" data-media-field>'
         . '<input type="hidden" name="' . e($name) . '" id="' . $id . '" value="' . e($val) . '">'
         . '<div class="mf-preview' . ($err ? ' is-invalid' : '') . '" data-mf-preview>' . $prev . '</div>'
         . '<div class="mf-actions">'
-        . ($canPick ? '<button type="button" class="btn btn-sm btn-outline-secondary" data-media-pick="#' . $id . '" data-kind="image"><i class="fa-solid fa-photo-film me-1"></i>लाइब्रेरी से चुनें</button>' : '<span class="small text-body-secondary">इमेज चुनने के लिए मीडिया लाइब्रेरी की अनुमति चाहिए।</span>')
+        . ($canPick ? '<button type="button" class="btn btn-sm btn-outline-secondary" data-media-pick="#' . $id . '" data-kind="' . e($kind) . '"><i class="fa-solid fa-photo-film me-1"></i>लाइब्रेरी से चुनें</button>' : '<span class="small text-body-secondary">इमेज चुनने के लिए मीडिया लाइब्रेरी की अनुमति चाहिए।</span>')
         . '<button type="button" class="btn btn-sm btn-link text-danger" data-mf-clear' . ($val === '' ? ' hidden' : '') . '>हटाएँ</button>'
         . '</div></div>';
     if ($err) {

@@ -438,6 +438,18 @@ final class MediaService
         return (bool) db()->value("SELECT id FROM {p}media WHERE file = ? AND kind = 'image' AND deleted_at IS NULL", [$path]);
     }
 
+    /** किसी भी प्रकार की लाइब्रेरी फ़ाइल का path (ऑडियो/वीडियो/दस्तावेज़) */
+    public static function validPath(?string $path, string $kind): bool
+    {
+        if ($path === null || $path === '') {
+            return true;
+        }
+        if (!preg_match('~^media/\d{4}/\d{2}/[a-f0-9]{20}\.[a-z0-9]{2,5}$~', $path)) {
+            return false;
+        }
+        return (bool) db()->value('SELECT id FROM {p}media WHERE file = ? AND kind = ? AND deleted_at IS NULL', [$path, $kind]);
+    }
+
     /** पिकर (JSON) के लिए एक आइटम */
     public static function toJson(array $m): array
     {

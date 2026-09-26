@@ -3,8 +3,8 @@
 $env = is_file(__DIR__ . '/env.php') ? require __DIR__ . '/env.php' : [];
 
 return [
-    'version'      => '1.2.0',
-    'phase'        => 3,                                   // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
+    'version'      => '1.3.0',
+    'phase'        => 4,                                   // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
     'url'          => rtrim((string) ($env['APP_URL'] ?? ''), '/'),
     'key'          => (string) ($env['APP_KEY'] ?? ''),
     'debug'        => (bool) ($env['DEBUG'] ?? false),
@@ -14,7 +14,7 @@ return [
     'cache'        => (bool) ($env['CACHE'] ?? true),
 
     // हर अनुरोध पर चलने वाले middleware
-    'global_middleware' => ['csrf'],
+    'global_middleware' => ['csrf', 'scheduler'],
 
     // middleware के छोटे नाम
     'middleware' => [
@@ -25,5 +25,6 @@ return [
         'maintenance' => App\Middleware\MaintenanceMiddleware::class,
         'throttle'    => App\Middleware\ThrottleMiddleware::class,
         'uptodate'    => App\Middleware\UpToDateMiddleware::class,
+        'scheduler'   => App\Middleware\SchedulerMiddleware::class,
     ],
 ];
