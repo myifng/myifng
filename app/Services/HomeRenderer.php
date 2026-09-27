@@ -166,6 +166,17 @@ final class HomeRenderer
                 }
                 $items = BreakingService::active();
                 return $items ? ['items' => $items, 'banner' => false] : null;
+            case 'epaper':
+                if (!EpaperService::enabled()) {
+                    return null;
+                }
+                $cards = [];
+                foreach (EpaperService::editions() as $e) {
+                    if ($i = EpaperService::latest((int) $e['id'])) {
+                        $cards[] = ['edition' => $e, 'issue' => $i];
+                    }
+                }
+                return $cards ? ['cards' => array_slice($cards, 0, 6)] : null;
             case 'custom_html':
                 return trim((string) ($set['html'] ?? '')) !== '' ? [] : null;
             default:

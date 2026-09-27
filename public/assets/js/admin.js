@@ -1128,3 +1128,216 @@
   }
 })();
 
+
+/* ==========================================================
+   Phase 8: ई-पेपर — PDF → पेज (pdf.js, ब्राउज़र में), पेज अपलोड/क्रम/नाम/हटाना, हॉटस्पॉट
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var csrf = ($('meta[name="csrf-token"]') || {}).content || '';
+  function toast(msg, type) {
+    var wrap = $('.toast-stack');
+    if (!wrap) { wrap = document.createElement('div'); wrap.className = 'toast-stack'; wrap.setAttribute('aria-live', 'polite'); document.body.appendChild(wrap); }
+    var t = document.createElement('div'); t.className = 'toast-msg ' + (type || 'ok'); t.textContent = msg; wrap.appendChild(t);
+    setTimeout(function () { t.remove(); }, 3500);
+  }
+  function send(url, fd) {
+    return fetch(url, { method: 'POST', body: fd, credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+      .then(function (r) { return r.json().catch(function () { return { ok: false, message: 'सर्वर से सही जवाब नहीं मिला (' + r.status + ')' }; }); })
+      .catch(function () { return { ok: false, message: 'नेटवर्क में दिक्कत है।' }; });
+  }
+
+  /* ---------- पेज प्रबंधन ---------- */
+  var ep = $('[data-ep]'), list = $('[data-ep-pages]');
+  if (list) {
+    var empty = $('[data-ep-empty]'), count = $('[data-ep-count]'), tpl = $('[data-ep-template]');
+    var renum = function () {
+      $$('.ep-page', list).forEach(function (li, i) { var n = $('.ep-no', li); if (n) n.textContent = i + 1; });
+      var c = list.children.length; if (count) count.textContent = c; if (empty) empty.hidden = c > 0;
+    };
+    var saveOrder = function () {
+      if (!ep) return; var fd = new FormData();
+      $$('.ep-page', list).forEach(function (li) { fd.append('ids[]', li.dataset.id); });
+      send(ep.dataset.orderUrl, fd).then(function (r) { toast(r.message || (r.ok ? 'क्रम सेव हुआ' : 'क्रम सेव नहीं हुआ'), r.ok ? 'ok' : 'err'); });
+    };
+    list.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return; var li = b.closest('.ep-page');
+      if (b.dataset.epMove) {
+        var d = +b.dataset.epMove;
+        if (d < 0 && li.previousElementSibling) list.insertBefore(li, li.previousElementSibling);
+        else if (d > 0 && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
+        else return;
+        b.focus(); renum(); saveOrder();
+      } else if (b.dataset.epDelete) {
+        if (!confirm('यह पेज हट जाएगा।')) return;
+        var fd = new FormData(); fd.append('_method', 'DELETE');
+        send(b.dataset.epDelete, fd).then(function (r) { if (r.ok) { li.remove(); renum(); } toast(r.message, r.ok ? 'ok' : 'err'); });
+      }
+    });
+    list.addEventListener('change', function (e) {
+      var inp = e.target.closest('[data-ep-label]'); if (!inp || !inp.dataset.epLabel) return;
+      var fd = new FormData(); fd.append('_method', 'PUT'); fd.append('label', inp.value);
+      send(inp.dataset.epLabel, fd).then(function (r) { toast(r.message || 'सेव हुआ', r.ok ? 'ok' : 'err'); });
+    });
+    var addPage = function (p) {
+      var t = document.createElement('div'); t.innerHTML = tpl.innerHTML.trim(); var li = t.firstElementChild;
+      li.dataset.id = p.id; $('.ep-thumb', li).href = p.thumb; $('img', li).src = p.thumb; $('img', li).alt = 'पेज ' + p.page_no;
+      $('[data-ep-label]', li).dataset.epLabel = p.update_url; $('[data-ep-label]', li).value = p.label || '';
+      $('[data-ep-hs]', li).href = p.hotspots_url; $('[data-ep-delete]', li).dataset.epDelete = p.delete_url;
+      list.appendChild(li); renum();
+    };
+
+    if (ep) {
+      var prog = $('[data-ep-progress]', ep), bar = $('[data-ep-bar]', ep), status = $('[data-ep-status]', ep), busy = false;
+      var setProg = function (done, total, msg) { prog.hidden = false; bar.style.width = (total ? Math.round(done * 100 / total) : 0) + '%'; status.textContent = msg; };
+      var leaving = function (e) { if (busy) { e.preventDefault(); e.returnValue = ''; } };
+      window.addEventListener('beforeunload', leaving);
+      var upload = function (file, label) {
+        return window.AdminUpload(ep.dataset.pageUrl, file, label ? { label: label } : {}, null).then(function (r) { if (r.ok) addPage(r.page); return r; });
+      };
+      // सीधे इमेज
+      var imgs = $('[data-ep-images]', ep);
+      imgs.addEventListener('change', function () {
+        var files = Array.prototype.slice.call(imgs.files).sort(function (a, b) { return a.name.localeCompare(b.name, undefined, { numeric: true }); }); imgs.value = '';
+        if (!files.length || busy) return; busy = true;
+        var i = 0, fail = 0;
+        var next = function () {
+          if (i >= files.length) { busy = false; setProg(1, 1, (files.length - fail) + ' पेज जुड़े' + (fail ? ', ' + fail + ' नहीं' : '') + '। अब दाईं ओर से प्रकाशित करें।'); return; }
+          setProg(i, files.length, 'पेज ' + (i + 1) + ' / ' + files.length + ' अपलोड हो रहा है…');
+          upload(files[i]).then(function (r) { if (!r.ok) { fail++; toast(files[i].name + ': ' + r.message, 'err'); } i++; next(); });
+        };
+        next();
+      });
+      // PDF → पेज
+      var pdfIn = $('[data-ep-pdf]', ep), zone = $('[data-ep-pdf-zone]', ep);
+      var loadPdfjs = function () {
+        return new Promise(function (res, rej) {
+          if (window.pdfjsLib) return res(window.pdfjsLib);
+          var s = document.createElement('script'); s.src = ep.dataset.pdfjs;
+          s.onload = function () { window.pdfjsLib.GlobalWorkerOptions.workerSrc = ep.dataset.pdfjsWorker; res(window.pdfjsLib); };
+          s.onerror = function () { rej(new Error('pdf.js लोड नहीं हुआ')); };
+          document.head.appendChild(s);
+        });
+      };
+      var convert = function (file) {
+        if (busy) return;
+        if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { toast('यह PDF फ़ाइल नहीं है।', 'err'); return; }
+        if (file.size > (+ep.dataset.maxPdf || 50) * 1048576) { toast('PDF ' + ep.dataset.maxPdf + ' MB से छोटी हो।', 'err'); return; }
+        busy = true; setProg(0, 1, 'PDF खुल रही है…');
+        loadPdfjs().then(function (pdfjsLib) {
+          return file.arrayBuffer().then(function (buf) { return pdfjsLib.getDocument({ data: buf }).promise; });
+        }).then(function (pdf) {
+          var total = pdf.numPages, n = 0, fail = 0;
+          var step = function () {
+            if (n >= total) return Promise.resolve();
+            n++;
+            setProg(n - 1, total, 'पेज ' + n + ' / ' + total + ': इमेज बन रही है…');
+            return pdf.getPage(n).then(function (page) {
+              var vp1 = page.getViewport({ scale: 1 }), scale = Math.min(3, Math.max(1, 1800 / vp1.width)), vp = page.getViewport({ scale: scale });
+              var c = document.createElement('canvas'); c.width = Math.floor(vp.width); c.height = Math.floor(vp.height);
+              var ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+              return page.render({ canvasContext: ctx, viewport: vp }).promise.then(function () {
+                return new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.85); });
+              }).then(function (blob) {
+                page.cleanup(); c.width = c.height = 0;
+                setProg(n - 1, total, 'पेज ' + n + ' / ' + total + ': अपलोड हो रहा है…');
+                return upload(new File([blob], 'page-' + n + '.jpg', { type: 'image/jpeg' }));
+              }).then(function (r) { if (!r.ok) { fail++; toast('पेज ' + n + ': ' + r.message, 'err'); } });
+            }).then(step);
+          };
+          return step().then(function () {
+            if (!$('[data-ep-keep]', ep).checked) return { total: total, fail: fail };
+            setProg(total, total, 'PDF सेव हो रही है…');
+            return window.AdminUpload(ep.dataset.pdfUrl, file, {}, function (p) { status.textContent = 'PDF सेव हो रही है… ' + p + '%'; })
+              .then(function (r) { if (!r.ok) toast(r.message, 'err'); return { total: total, fail: fail }; });
+          });
+        }).then(function (res) {
+          busy = false; setProg(1, 1, (res.total - res.fail) + ' / ' + res.total + ' पेज बन गए। अब दाईं ओर से प्रकाशित करें।');
+        }).catch(function (err) { busy = false; setProg(0, 1, 'PDF नहीं खुल सकी: ' + (err && err.message ? err.message : err) + '। पासवर्ड वाली या ख़राब PDF हो सकती है; पेज की इमेज अपलोड करें।'); });
+      };
+      pdfIn.addEventListener('change', function () { var f = pdfIn.files[0]; pdfIn.value = ''; if (f) convert(f); });
+      ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('over'); }); });
+      ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function () { zone.classList.remove('over'); }); });
+      zone.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files[0]) convert(e.dataTransfer.files[0]); });
+    }
+  }
+
+  /* ---------- हॉटस्पॉट: पेज पर खींचकर आयत, हर एक को ख़बर/लिंक से जोड़ें ---------- */
+  var hs = $('[data-hs]');
+  if (hs) {
+    var stage = $('[data-hs-stage]', hs), hlist = $('[data-hs-list]', hs), hcount = $('[data-hs-count]', hs), hempty = $('[data-hs-empty]', hs), hstatus = $('[data-hs-status]', hs);
+    var spots = []; try { spots = JSON.parse(hs.dataset.spots || '[]'); } catch (e) {}
+    var active = -1, dirtyFlag = false;
+    var esc = function (s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; };
+    var draw = function () {
+      $$('.hs-box', stage).forEach(function (b) { b.remove(); });
+      spots.forEach(function (s, i) {
+        var b = document.createElement('div'); b.className = 'hs-box' + (i === active ? ' on' : ''); b.dataset.i = i;
+        b.style.left = s.x + '%'; b.style.top = s.y + '%'; b.style.width = s.w + '%'; b.style.height = s.h + '%';
+        b.innerHTML = '<span>' + (i + 1) + '</span>'; stage.appendChild(b);
+      });
+      hlist.innerHTML = spots.map(function (s, i) {
+        return '<li class="' + (i === active ? 'on' : '') + '" data-i="' + i + '"><div class="d-flex justify-content-between align-items-center mb-1"><b>#' + (i + 1) + '</b><button type="button" class="btn btn-sm btn-link text-danger p-0" data-hs-del>हटाएँ</button></div>'
+          + '<input class="form-control form-control-sm mb-1" data-f="label" maxlength="190" placeholder="नाम (जैसे: मुख्य ख़बर)" value="' + esc(s.label) + '">'
+          + '<div class="hs-news"><input class="form-control form-control-sm" data-f="q" placeholder="ख़बर खोजें (शीर्षक/ID)" value="' + esc(s.news_id ? '#' + s.news_id + ' ' + (s.news_title || '') : '') + '"><ul class="list-group hs-results" hidden></ul></div>'
+          + '<input class="form-control form-control-sm mt-1" data-f="url" maxlength="500" placeholder="या लिंक: https://… या /…" value="' + esc(s.url) + '"' + (s.news_id ? ' disabled' : '') + '></li>';
+      }).join('');
+      hcount.textContent = spots.length; hempty.hidden = spots.length > 0;
+    };
+    var pct = function (e) { var r = stage.getBoundingClientRect(); return { x: Math.max(0, Math.min(100, (e.clientX - r.left) / r.width * 100)), y: Math.max(0, Math.min(100, (e.clientY - r.top) / r.height * 100)) }; };
+    var start = null, ghost = null;
+    stage.addEventListener('pointerdown', function (e) {
+      var box = e.target.closest('.hs-box'); if (box) { active = +box.dataset.i; draw(); return; }
+      e.preventDefault(); stage.setPointerCapture(e.pointerId); start = pct(e);
+      ghost = document.createElement('div'); ghost.className = 'hs-box on'; stage.appendChild(ghost);
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (!start) return; var p = pct(e);
+      ghost.style.left = Math.min(start.x, p.x) + '%'; ghost.style.top = Math.min(start.y, p.y) + '%';
+      ghost.style.width = Math.abs(p.x - start.x) + '%'; ghost.style.height = Math.abs(p.y - start.y) + '%';
+    });
+    stage.addEventListener('pointerup', function (e) {
+      if (!start) return; var p = pct(e), s = { x: Math.min(start.x, p.x), y: Math.min(start.y, p.y), w: Math.abs(p.x - start.x), h: Math.abs(p.y - start.y), news_id: null, news_title: '', url: '', label: '' };
+      start = null; ghost.remove();
+      if (s.w < 1.5 || s.h < 1.5) return;
+      spots.push(s); active = spots.length - 1; dirtyFlag = true; draw();
+      var q = $('li[data-i="' + active + '"] [data-f="q"]', hlist); if (q) q.focus();
+    });
+    var timer = null;
+    hlist.addEventListener('input', function (e) {
+      var li = e.target.closest('li'); if (!li) return; var i = +li.dataset.i, f = e.target.dataset.f; dirtyFlag = true;
+      if (f === 'label' || f === 'url') { spots[i][f] = e.target.value; return; }
+      if (f === 'q') {
+        spots[i].news_id = null; spots[i].news_title = ''; $('[data-f="url"]', li).disabled = false;
+        var res = $('.hs-results', li), q = e.target.value.trim(); clearTimeout(timer);
+        if (q.length < 2) { res.hidden = true; return; }
+        timer = setTimeout(function () {
+          fetch(hs.dataset.search + (hs.dataset.search.indexOf('?') > -1 ? '&' : '?') + 'q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json(); }).then(function (r) {
+              res.innerHTML = (r.items || []).slice(0, 8).map(function (n) { return '<li class="list-group-item list-group-item-action small" data-id="' + n.id + '" data-title="' + esc(n.title) + '">#' + n.id + ' ' + esc(n.title) + '</li>'; }).join('') || '<li class="list-group-item small">कुछ नहीं मिला</li>';
+              res.hidden = false;
+            });
+        }, 250);
+      }
+    });
+    hlist.addEventListener('mousedown', function (e) {
+      var opt = e.target.closest('.hs-results li[data-id]'); if (!opt) return; e.preventDefault();
+      var li = opt.closest('li[data-i]'), i = +li.dataset.i;
+      spots[i].news_id = +opt.dataset.id; spots[i].news_title = opt.dataset.title; spots[i].url = ''; dirtyFlag = true; draw();
+    });
+    hlist.addEventListener('click', function (e) {
+      var li = e.target.closest('li[data-i]'); if (!li) return;
+      if (e.target.closest('[data-hs-del]')) { spots.splice(+li.dataset.i, 1); active = -1; dirtyFlag = true; draw(); return; }
+      if (active !== +li.dataset.i) { active = +li.dataset.i; $$('.hs-box', stage).forEach(function (b) { b.classList.toggle('on', +b.dataset.i === active); }); $$('li[data-i]', hlist).forEach(function (x) { x.classList.toggle('on', x === li); }); }
+    });
+    $('[data-hs-save]', hs).addEventListener('click', function () {
+      var fd = new FormData(); fd.append('spots', JSON.stringify(spots.map(function (s) { return { x: s.x, y: s.y, w: s.w, h: s.h, news_id: s.news_id, url: s.url, label: s.label }; })));
+      hstatus.textContent = 'सेव हो रहा है…';
+      send(hs.dataset.save, fd).then(function (r) { hstatus.textContent = r.message || ''; if (r.ok) dirtyFlag = false; toast(r.message, r.ok ? 'ok' : 'err'); });
+    });
+    window.addEventListener('beforeunload', function (e) { if (dirtyFlag) { e.preventDefault(); e.returnValue = ''; } });
+    draw();
+  }
+})();

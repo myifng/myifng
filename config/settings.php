@@ -95,6 +95,9 @@ return [
         'fields' => [
             'live_tv_url' => ['label' => 'लाइव टीवी (YouTube लाइव लिंक)', 'type' => 'url', 'rules' => 'nullable|url|max:500', 'help' => 'सिर्फ़ तब इस्तेमाल होता है जब "लाइव टीवी" मॉड्यूल में कोई चालू चैनल न हो'],
             'epaper_enabled' => ['label' => 'ई-पेपर दिखाएँ', 'type' => 'switch', 'default' => '1'],
+            'epaper_pdf_download' => ['label' => 'ई-पेपर: पाठक PDF डाउनलोड कर सकें (सिर्फ़ मुफ़्त अंक)', 'type' => 'switch', 'default' => '1'],
+            'epaper_free_pages' => ['label' => 'प्रीमियम अंक में सबके लिए खुले पेज', 'type' => 'number', 'default' => '2', 'rules' => 'required|integer|min:0|max:50', 'width' => 6, 'help' => 'बाकी पेज स्टाफ़ को; पाठक सदस्यता Phase 11 में'],
+            'epaper_max_pdf_mb' => ['label' => 'PDF की अधिकतम साइज़ (MB)', 'type' => 'number', 'default' => '50', 'rules' => 'required|integer|min:1|max:500', 'width' => 6, 'help' => 'सर्वर की अपलोड सीमा से ज़्यादा नहीं हो सकती'],
         ],
     ],
     'images' => [

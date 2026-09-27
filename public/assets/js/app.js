@@ -335,6 +335,89 @@
     go(0);
   }
 
+  /* ई-पेपर रीडर: एक पेज, थंबनेल, ज़ूम (बटन/डबल-टैप/पिंच/Ctrl+स्क्रॉल), खींचकर देखें, स्वाइप, कीबोर्ड, फ़ुलस्क्रीन */
+  var epr = $('[data-epr]');
+  if (epr) {
+    epr.classList.add('js');
+    var stage = $('[data-epr-stage]', epr), pgs = $$('[data-epr-page]', epr), thumbs = $$('[data-epr-thumb]', epr), sel = $('[data-epr-select]', epr), zl = $('[data-epr-zl]', epr);
+    var cur = +epr.dataset.page || 1, z = 1, total = pgs.length;
+    var pageEl = function (n) { return pgs[n - 1]; };
+    var load = function (n) { var p = pageEl(n); if (!p) return; var img = $('img[data-src]', p); if (img) { img.src = img.dataset.src; img.removeAttribute('data-src'); } };
+    var ratio = function (p) { var sh = $('.epr-sheet', p); if (!sh) return 0.75; var a = (sh.style.aspectRatio || '3 / 4').split('/'); return (+a[0] || 3) / (+a[1] || 4); };
+    var fit = function () {
+      var p = pageEl(cur); if (!p) return;
+      var mobile = innerWidth <= 760, sw = stage.clientWidth - (mobile ? 12 : 28), sh = stage.clientHeight - 28;
+      var base = mobile || !sh ? sw : Math.min(sw, sh * ratio(p));
+      p.style.width = Math.max(200, Math.round(base * z)) + 'px';
+      epr.classList.toggle('zoomed', z > 1.01); zl.textContent = Math.round(z * 100) + '%';
+      stage.style.touchAction = z > 1.01 ? 'pan-x pan-y' : 'pan-y'; // ज़ूम नहीं: आड़ा स्वाइप JS को (पेज बदले)
+    };
+    var zoomTo = function (nz, cx, cy) {
+      nz = Math.max(1, Math.min(4, nz)); if (Math.abs(nz - z) < 0.01) return;
+      var r = stage.getBoundingClientRect(), ox = (cx == null ? r.width / 2 : cx - r.left), oy = (cy == null ? r.height / 2 : cy - r.top);
+      var fx = (stage.scrollLeft + ox) / stage.scrollWidth, fy = (stage.scrollTop + oy) / stage.scrollHeight;
+      z = nz; fit();
+      stage.scrollLeft = fx * stage.scrollWidth - ox; stage.scrollTop = fy * stage.scrollHeight - oy;
+    };
+    var go = function (n, push) {
+      n = Math.max(1, Math.min(total, n)); if (!pageEl(n)) return;
+      pgs.forEach(function (p) { p.classList.remove('on'); p.style.width = ''; });
+      cur = n; pageEl(n).classList.add('on'); [n, n + 1, n - 1].forEach(load);
+      z = 1; fit(); stage.scrollTop = 0; stage.scrollLeft = 0;
+      thumbs.forEach(function (t) { var on = +t.dataset.eprThumb === n; if (on) { t.setAttribute('aria-current', 'page'); t.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } else t.removeAttribute('aria-current'); });
+      if (sel) sel.value = n;
+      if (push !== false && history.replaceState) history.replaceState(null, '', epr.dataset.base + (n > 1 ? '?page=' + n : ''));
+    };
+    thumbs.forEach(function (t) { t.addEventListener('click', function (e) { e.preventDefault(); go(+t.dataset.eprThumb); stage.focus({ preventScroll: true }); }); });
+    $$('[data-epr-prev]', epr).forEach(function (b) { b.addEventListener('click', function () { go(cur - 1); }); });
+    $$('[data-epr-next]', epr).forEach(function (b) { b.addEventListener('click', function () { go(cur + 1); }); });
+    if (sel) sel.addEventListener('change', function () { go(+sel.value); });
+    $$('[data-epr-zoom]', epr).forEach(function (b) { b.addEventListener('click', function () { var d = +b.dataset.eprZoom; if (!d) { z = 1; fit(); } else zoomTo(z + d * 0.5); }); });
+    var full = $('[data-epr-full]', epr);
+    if (full) {
+      if (!document.fullscreenEnabled) full.hidden = true;
+      full.addEventListener('click', function () { if (document.fullscreenElement) document.exitFullscreen(); else epr.requestFullscreen().catch(function () {}); });
+      document.addEventListener('fullscreenchange', function () { full.innerHTML = '<i class="fa-solid fa-' + (document.fullscreenElement ? 'compress' : 'expand') + '"></i>'; setTimeout(fit, 50); });
+    }
+    var pick = $('[data-epr-pick]', epr);
+    if (pick) $$('select, input', pick).forEach(function (i) { i.addEventListener('change', function () { pick.submit(); }); });
+    document.addEventListener('keydown', function (e) {
+      if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+      if (e.key === 'ArrowRight') go(cur + 1); else if (e.key === 'ArrowLeft') go(cur - 1);
+      else if (e.key === '+' || e.key === '=') zoomTo(z + 0.5); else if (e.key === '-') zoomTo(z - 0.5); else if (e.key === '0') { z = 1; fit(); }
+      else if (e.key === 'f' && full && !full.hidden) full.click();
+    });
+    stage.addEventListener('dblclick', function (e) { if (e.target.closest('.epr-hs')) return; if (z > 1) { z = 1; fit(); } else zoomTo(2.5, e.clientX, e.clientY); });
+    stage.addEventListener('wheel', function (e) { if (!e.ctrlKey) return; e.preventDefault(); zoomTo(z * (e.deltaY < 0 ? 1.15 : 0.87), e.clientX, e.clientY); }, { passive: false });
+    // पॉइंटर: एक उँगली/माउस = स्वाइप (ज़ूम नहीं) या खींचना (ज़ूम में); दो उँगली = पिंच
+    var pts = {}, start = null, pinch = null, lastTap = 0;
+    stage.addEventListener('pointerdown', function (e) {
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(pts);
+      if (ids.length === 2) { var a = pts[ids[0]], b = pts[ids[1]]; pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: z }; start = null; return; }
+      start = { x: e.clientX, y: e.clientY, sl: stage.scrollLeft, st: stage.scrollTop, t: Date.now(), touch: e.pointerType === 'touch' };
+      if (z > 1 && e.pointerType === 'mouse') stage.classList.add('drag');
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (!pts[e.pointerId]) return; pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var ids = Object.keys(pts);
+      if (pinch && ids.length === 2) { var a = pts[ids[0]], b = pts[ids[1]]; zoomTo(pinch.z * Math.hypot(a.x - b.x, a.y - b.y) / pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2); return; }
+      if (start && z > 1 && !start.touch) { stage.scrollLeft = start.sl - (e.clientX - start.x); stage.scrollTop = start.st - (e.clientY - start.y); }
+    });
+    var end = function (e) {
+      if (start && z <= 1.01 && !pinch) {
+        var dx = e.clientX - start.x, dy = e.clientY - start.y;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && Date.now() - start.t < 800) go(cur + (dx < 0 ? 1 : -1));
+        else if (start.touch && Math.abs(dx) < 10 && Math.abs(dy) < 10 && !e.target.closest('.epr-hs')) { var now = Date.now(); if (now - lastTap < 300) zoomTo(2.5, e.clientX, e.clientY); lastTap = now; }
+      }
+      delete pts[e.pointerId]; if (Object.keys(pts).length < 2) pinch = null; start = null; stage.classList.remove('drag');
+    };
+    stage.addEventListener('pointerup', end); stage.addEventListener('pointercancel', end);
+    stage.addEventListener('touchmove', function (e) { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+    addEventListener('resize', fit);
+    go(cur, false);
+  }
+
   /* Google Analytics (सेटिंग में ID हो तो) */
   var ga = document.body.dataset.ga;
   if (ga) {

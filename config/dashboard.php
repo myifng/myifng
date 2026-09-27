@@ -12,6 +12,8 @@ return [
         'news_mine'       => ['label' => 'मेरी ख़बरें', 'icon' => 'fa-pen-nib', 'module' => 'news', 'permission' => 'news.create', 'provider' => 'newsMine', 'route' => 'admin.news.index', 'query' => 'mine=1'],
         'news_scheduled'  => ['label' => 'शेड्यूल', 'icon' => 'fa-calendar-check', 'module' => 'news', 'permission' => 'news.publish', 'provider' => 'newsScheduled', 'route' => 'admin.news.index', 'query' => 'status=scheduled'],
         'my_assignments'  => ['label' => 'मेरे असाइनमेंट', 'icon' => 'fa-list-check', 'module' => 'assignments', 'permission' => 'assignments.view', 'provider' => 'myAssignments', 'route' => 'admin.assignments.index', 'query' => 'mine=1'],
+        // Phase 8
+        'epaper_today'    => ['label' => 'आज का ई-पेपर', 'icon' => 'fa-book-open', 'module' => 'epaper', 'permission' => 'epaper.view', 'provider' => 'epaperToday', 'route' => 'admin.epaper.index'],
         // Phase 7
         'breaking'        => ['label' => 'चल रहे ब्रेकिंग', 'icon' => 'fa-bolt', 'module' => 'breaking', 'permission' => 'breaking.view', 'provider' => 'breaking', 'route' => 'admin.breaking.index'],
         'live_blogs'      => ['label' => 'लाइव ब्लॉग', 'icon' => 'fa-tower-broadcast', 'module' => 'live_blogs', 'permission' => 'live_blogs.view', 'provider' => 'liveBlogs', 'route' => 'admin.live_blogs.index'],

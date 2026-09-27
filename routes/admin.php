@@ -14,6 +14,8 @@ use App\Controllers\Admin\BureauController;
 use App\Controllers\Admin\CategoryController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
+use App\Controllers\Admin\EpaperController;
+use App\Controllers\Admin\EpaperEditionController;
 use App\Controllers\Admin\GalleryController;
 use App\Controllers\Admin\HomepageController;
 use App\Controllers\Admin\LiveBlogController;
@@ -302,6 +304,28 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/podcasts/{id:\d+}/edit', [PodcastController::class, 'edit'])->name('podcasts.edit')->middleware('can:audio.edit');
         $r->put('/podcasts/{id:\d+}', [PodcastController::class, 'update'])->name('podcasts.update')->middleware('can:audio.edit');
         $r->delete('/podcasts/{id:\d+}', [PodcastController::class, 'destroy'])->name('podcasts.destroy')->middleware('can:audio.delete');
+
+        // ---------- Phase 8: ई-पेपर ----------
+        $r->get('/epaper', [EpaperController::class, 'index'])->name('epaper.index')->middleware('can:epaper.view');
+        $r->get('/epaper/create', [EpaperController::class, 'create'])->name('epaper.create')->middleware('can:epaper.create');
+        $r->post('/epaper', [EpaperController::class, 'store'])->name('epaper.store')->middleware('can:epaper.create');
+        $r->get('/epaper/{id:\d+}', [EpaperController::class, 'edit'])->name('epaper.edit')->middleware('can:epaper.view');
+        $r->put('/epaper/{id:\d+}', [EpaperController::class, 'update'])->name('epaper.update')->middleware('can:epaper.edit');
+        $r->delete('/epaper/{id:\d+}', [EpaperController::class, 'destroy'])->name('epaper.destroy')->middleware('can:epaper.delete');
+        $r->post('/epaper/{id:\d+}/pages', [EpaperController::class, 'uploadPage'])->name('epaper.pages.store')->middleware('can:epaper.edit', 'throttle:600,10');
+        $r->post('/epaper/{id:\d+}/pages/order', [EpaperController::class, 'order'])->name('epaper.pages.order')->middleware('can:epaper.edit');
+        $r->post('/epaper/{id:\d+}/pages/clear', [EpaperController::class, 'clearPages'])->name('epaper.pages.clear')->middleware('can:epaper.edit');
+        $r->put('/epaper/{id:\d+}/pages/{pid:\d+}', [EpaperController::class, 'updatePage'])->name('epaper.pages.update')->middleware('can:epaper.edit');
+        $r->delete('/epaper/{id:\d+}/pages/{pid:\d+}', [EpaperController::class, 'deletePage'])->name('epaper.pages.destroy')->middleware('can:epaper.edit');
+        $r->get('/epaper/{id:\d+}/pages/{pid:\d+}/hotspots', [EpaperController::class, 'hotspots'])->name('epaper.hotspots')->middleware('can:epaper.edit');
+        $r->post('/epaper/{id:\d+}/pages/{pid:\d+}/hotspots', [EpaperController::class, 'saveHotspots'])->name('epaper.hotspots.save')->middleware('can:epaper.edit');
+        $r->post('/epaper/{id:\d+}/pdf', [EpaperController::class, 'uploadPdf'])->name('epaper.pdf')->middleware('can:epaper.edit', 'throttle:30,10');
+        $r->delete('/epaper/{id:\d+}/pdf', [EpaperController::class, 'deletePdf'])->name('epaper.pdf.destroy')->middleware('can:epaper.edit');
+        $r->get('/epaper/editions', [EpaperEditionController::class, 'index'])->name('epaper.editions')->middleware('can:epaper.edit');
+        $r->post('/epaper/editions', [EpaperEditionController::class, 'store'])->name('epaper.editions.store')->middleware('can:epaper.edit');
+        $r->get('/epaper/editions/{id:\d+}/edit', [EpaperEditionController::class, 'edit'])->name('epaper.editions.edit')->middleware('can:epaper.edit');
+        $r->put('/epaper/editions/{id:\d+}', [EpaperEditionController::class, 'update'])->name('epaper.editions.update')->middleware('can:epaper.edit');
+        $r->delete('/epaper/editions/{id:\d+}', [EpaperEditionController::class, 'destroy'])->name('epaper.editions.destroy')->middleware('can:epaper.delete');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

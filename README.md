@@ -94,6 +94,15 @@ Core PHP 8.1+ पर बना, अपने Custom MVC वाला न्य�
 - **ऑडियो / पॉडकास्ट** `/audio`: ऑडियो न्यूज़, पॉडकास्ट सीरीज़ और एपिसोड, ट्रांसक्रिप्ट, RSS फ़ीड; Text-to-Speech के लिए ढाँचा (`config/tts.php`)
 - होमपेज बिल्डर में वीडियो, गैलरी, वेब स्टोरी, ऑडियो, लाइव टीवी और ब्रेकिंग ब्लॉक
 
+## Phase 8 में क्या है
+
+- **ई-पेपर** `/epaper`: संस्करण (मुख्य/राज्य/ज़िला/शहर), रोज़ का अंक, प्रकाशन का समय (शेड्यूल)
+- **PDF से पेज अपने आप**: एडमिन PDF चुनता है, उसके ब्राउज़र में हर पेज इमेज बनता है (सर्वर पर Imagick/Ghostscript नहीं चाहिए); या सीधे पेज की इमेज
+- पेज का क्रम, नाम, हटाना; **हॉटस्पॉट** (पेज का हिस्सा किसी ख़बर/लिंक से)
+- **रीडर**: थंबनेल, आगे-पीछे, ज़ूम (बटन, डबल-टैप, पिंच, Ctrl+स्क्रॉल), खींचकर देखें, फ़ुलस्क्रीन, मोबाइल स्वाइप, कीबोर्ड, संस्करण और तारीख़ चुनें, कैलेंडर आर्काइव, PDF डाउनलोड
+- **प्रीमियम का ढाँचा**: प्रीमियम अंक में पहले कुछ पेज सबको, बाकी सदस्यों के लिए (पाठक सदस्यता Phase 11 में)
+- होमपेज "आज का ई-पेपर" ब्लॉक, डैशबोर्ड कार्ड
+
 ## अपडेट कैसे करें (पहले से इंस्टॉल साइट)
 
 1. डेटाबेस और फ़ाइलों का बैकअप लें।
@@ -107,7 +116,7 @@ index.php          Front Controller
 app/               Core, Controllers, Models, Services, Repositories, Validators, Middleware, Helpers, Views
 config/            app.php, database.php, modules.php (मॉड्यूल रजिस्ट्री), roles.php, env.php (इंस्टॉलर बनाता है)
 routes/            web.php, admin.php
-public/assets/     css, js, vendor (Bootstrap 5, Font Awesome 6, Chart.js 4, QR, hls.js: सब लोकल)
+public/assets/     css, js, vendor (Bootstrap 5, Font Awesome 6, Chart.js 4, QR, hls.js, pdf.js: सब लोकल)
 public/uploads/    अपलोड (PHP चलना बंद)
 storage/           cache, logs, sessions, private, backups
 database/          migrations, seeds
@@ -131,3 +140,4 @@ demo/              शुरुआती HTML डिज़ाइन डेमो
 - Chart.js 4.4.4 (MIT)
 - qrcode-generator 1.4.4, Kazuhiko Arase (MIT): रिपोर्टर ID कार्ड का QR
 - hls.js 1.5.17 light (Apache-2.0, `public/assets/vendor/hls/LICENSE`): लाइव टीवी की HLS स्ट्रीम
+- pdf.js (pdfjs-dist 3.11.174, Apache-2.0, `public/assets/vendor/pdfjs/LICENSE`): ई-पेपर की PDF से पेज बनाना (सिर्फ़ एडमिन)

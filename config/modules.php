@@ -63,7 +63,7 @@ return [
         'audio'        => ['label' => 'ऑडियो / पॉडकास्ट', 'icon' => 'fa-podcast', 'group' => 'media', 'phase' => 7, 'route' => 'admin.audio.index', 'actions' => [...$crud, 'publish']],
 
         // ---------- Phase 8-9 ----------
-        'epaper'       => ['label' => 'ई-पेपर', 'icon' => 'fa-book-open', 'group' => 'media', 'phase' => 8, 'actions' => [...$crud, 'publish']],
+        'epaper'       => ['label' => 'ई-पेपर', 'icon' => 'fa-book-open', 'group' => 'media', 'phase' => 8, 'route' => 'admin.epaper.index', 'actions' => [...$crud, 'publish']],
         'ads'          => ['label' => 'विज्ञापन', 'icon' => 'fa-rectangle-ad', 'group' => 'revenue', 'phase' => 9, 'actions' => [...$crud, 'export']],
         'advertisers'  => ['label' => 'विज्ञापनदाता CRM', 'icon' => 'fa-handshake', 'group' => 'revenue', 'phase' => 9, 'actions' => [...$crud, 'export', 'manage']],
 

@@ -270,7 +270,8 @@ return new class {
         if ($menuId) {
             $order = (int) $db->value('SELECT COALESCE(MAX(sort_order), 0) FROM {p}menu_items WHERE menu_id = ?', [$menuId]);
             foreach (['वीडियो' => 'videos', 'फ़ोटो गैलरी' => 'photos', 'वेब स्टोरी' => 'web-stories', 'पॉडकास्ट' => 'audio', 'लाइव टीवी' => 'live-tv'] as $title => $u) {
-                if (!$db->value("SELECT id FROM {p}menu_items WHERE menu_id = ? AND type = 'custom' AND url = ?", [$menuId, $u])) {
+                // पहले से वैसा लिंक (custom या मेनू-प्रकार, जैसे live_tv) हो तो दोबारा नहीं
+                if (!$db->value("SELECT id FROM {p}menu_items WHERE menu_id = ? AND ((type = 'custom' AND url = ?) OR type = ?)", [$menuId, $u, str_replace('-', '_', $u)])) {
                     $db->insert('menu_items', ['menu_id' => $menuId, 'title' => $title, 'type' => 'custom', 'url' => $u, 'sort_order' => ++$order]);
                 }
             }

@@ -128,6 +128,14 @@ final class DashboardService
         return ['value' => (int) $r['v'], 'sub' => 'गैलरी ' . num($r['g']) . ' · स्टोरी ' . num($r['s']) . ' · ऑडियो ' . num($r['a']), 'alert' => false];
     }
 
+    private static function epaperToday(): array
+    {
+        $r = db()->first("SELECT COUNT(*) editions, SUM(i.status = 'published' AND i.publish_at <= NOW()) live, SUM(i.status = 'published' AND i.publish_at > NOW()) sched
+                          FROM {p}epaper_editions e LEFT JOIN {p}epaper_issues i ON i.edition_id = e.id AND i.issue_date = CURDATE() WHERE e.status = 'active'");
+        $left = (int) $r['editions'] - (int) $r['live'] - (int) $r['sched'];
+        return ['value' => (int) $r['live'], 'sub' => num($r['editions']) . ' संस्करण में से प्रकाशित' . ($left > 0 ? ' · बाकी: ' . num($left) : ((int) $r['sched'] ? ' · शेड्यूल: ' . num($r['sched']) : '')), 'alert' => $left > 0];
+    }
+
     private static function media(): array
     {
         $r = db()->first("SELECT COUNT(*) total, SUM(kind = 'image') images, COALESCE(SUM(size), 0) bytes FROM {p}media WHERE deleted_at IS NULL");
