@@ -51,6 +51,7 @@ final class HomepageService
                 'select' => isset($f['options'][(string) $v]) ? (string) $v : (string) ($f['default'] ?? array_key_first($f['options'])),
                 'switch' => in_array($v, ['1', 1, 'on', true], true) ? 1 : 0,
                 'category', 'location' => ctype_digit((string) $v) ? (int) $v : null,
+                'adslot' => preg_match('/^[a-z0-9_-]{1,60}$/', (string) $v) ? (string) $v : (string) ($f['default'] ?? ''),
                 'stories' => array_slice(array_values(array_filter(array_map('intval', is_array($v) ? $v : preg_split('/[\s,]+/', (string) $v)))), 0, 30),
                 'code' => mb_substr((string) $v, 0, 20000),
                 default => mb_substr(trim(strip_tags((string) $v)), 0, 300),

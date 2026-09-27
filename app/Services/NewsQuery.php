@@ -180,8 +180,7 @@ final class NewsQuery
     /** किसी भी टेबल (ख़बर, वीडियो, गैलरी, स्टोरी, ऑडियो) का व्यू: एक सत्र में एक बार, बॉट नहीं */
     public static function hit(string $table, int $id): void
     {
-        $ua = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
-        if ($ua === '' || preg_match('/bot|crawl|spider|slurp|facebookexternalhit|whatsapp|preview|curl|wget|python|headless/', $ua)) {
+        if (self::isBot()) {
             return;
         }
         $key = $table === 'news' ? 'viewed_news' : 'viewed_' . $table;
@@ -192,5 +191,12 @@ final class NewsQuery
         $seen[] = $id;
         app('session')->set($key, array_slice($seen, -200));
         db()->query("UPDATE {p}$table SET views = views + 1 WHERE id = ?", [$id]);
+    }
+
+    /** सर्च इंजन, प्रीव्यू बॉट, स्क्रिप्ट (व्यू/विज्ञापन गिनती में नहीं) */
+    public static function isBot(): bool
+    {
+        $ua = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+        return $ua === '' || (bool) preg_match('/bot|crawl|spider|slurp|facebookexternalhit|whatsapp|preview|curl|wget|python|headless|lighthouse/', $ua);
     }
 }

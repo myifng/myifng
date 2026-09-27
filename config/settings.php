@@ -100,6 +100,21 @@ return [
             'epaper_max_pdf_mb' => ['label' => 'PDF की अधिकतम साइज़ (MB)', 'type' => 'number', 'default' => '50', 'rules' => 'required|integer|min:1|max:500', 'width' => 6, 'help' => 'सर्वर की अपलोड सीमा से ज़्यादा नहीं हो सकती'],
         ],
     ],
+    'ads' => [
+        'label' => 'विज्ञापन और बिलिंग', 'icon' => 'fa-rectangle-ad', 'permission' => 'edit',
+        'fields' => [
+            'ads_enabled' => ['label' => 'वेबसाइट पर विज्ञापन दिखाएँ', 'type' => 'switch', 'default' => '1'],
+            'ads_label' => ['label' => 'विज्ञापन के ऊपर लेबल', 'type' => 'text', 'default' => 'विज्ञापन', 'rules' => 'nullable|max:30', 'width' => 6],
+            'ads_inline_after' => ['label' => 'ख़बर में कितने पैराग्राफ़ बाद "बीच का" विज्ञापन', 'type' => 'number', 'default' => '3', 'rules' => 'required|integer|min:1|max:20', 'width' => 6],
+            'ads_popup_hours' => ['label' => 'पॉपअप एक पाठक को कितने घंटे में एक बार', 'type' => 'number', 'default' => '24', 'rules' => 'required|integer|min:1|max:720', 'width' => 6],
+            'ads_popup_delay' => ['label' => 'पॉपअप कितने सेकंड बाद खुले', 'type' => 'number', 'default' => '5', 'rules' => 'required|integer|min:0|max:120', 'width' => 6],
+            'billing_name' => ['label' => 'इनवॉइस पर कंपनी का नाम', 'type' => 'text', 'rules' => 'nullable|max:190', 'help' => 'ख़ाली = साइट का नाम'],
+            'billing_address' => ['label' => 'इनवॉइस पर पता', 'type' => 'textarea', 'rules' => 'nullable|max:500'],
+            'billing_gstin' => ['label' => 'GSTIN', 'type' => 'text', 'rules' => 'nullable|max:20', 'width' => 6],
+            'billing_tax_rate' => ['label' => 'डिफ़ॉल्ट GST (%)', 'type' => 'number', 'default' => '18', 'rules' => 'required|numeric|min:0|max:50', 'width' => 6],
+            'billing_terms' => ['label' => 'इनवॉइस के नीचे शर्तें / बैंक विवरण', 'type' => 'textarea', 'rules' => 'nullable|max:1000'],
+        ],
+    ],
     'images' => [
         'label' => 'इमेज और वॉटरमार्क', 'icon' => 'fa-image', 'permission' => 'edit',
         'fields' => [

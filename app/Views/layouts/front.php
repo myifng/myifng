@@ -39,6 +39,7 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <?php if (setting('search_console')): ?><meta name="google-site-verification" content="<?= e(setting('search_console')) ?>"><?php endif; ?>
 <meta name="theme-color" content="<?= e($brand) ?>">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
+<?php if (app('router')->has('ad.impressions')): ?><meta name="ad-imp" content="<?= e(route('ad.impressions')) ?>"><?php endif; ?>
 <?php if (setting('favicon')): ?><link rel="icon" href="<?= e(upload_url(setting('favicon'))) ?>"><?php endif; ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,15 +55,17 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <a class="skip" href="#main">मुख्य सामग्री पर जाएँ</a>
 <?php if (!empty($isPreview)): ?><div class="preview-bar"><i class="fa-solid fa-eye"></i> प्रीव्यू: यह पेज अभी सिर्फ़ स्टाफ़ को दिख रहा है।</div><?php endif; ?>
 <?php if ($layoutOptions['header']): ?><?= $this->insert('partials/front/header', ['main' => MenuService::tree('main'), 'top' => MenuService::tree('top'), 'mobile' => MenuService::tree('mobile')]) ?>
-<?= $this->insert('partials/front/ticker') ?><?php endif; ?>
+<?= $this->insert('partials/front/ticker') ?>
+<?= ($bh = ad_slot('below_header')) !== '' ? '<div class="wrap ad-row">' . $bh . '</div>' : '' ?><?php endif; ?>
 
 <main id="main" class="site-main">
   <?= $this->insert('partials/front/flash') ?>
   <?= $this->section('content') ?>
 </main>
 
-<?php if ($layoutOptions['footer']): ?><?= $this->insert('partials/front/footer') ?><?php endif; ?>
+<?php if ($layoutOptions['footer']): ?><?= ($fa = ad_slot('footer')) !== '' ? '<div class="wrap ad-row">' . $fa . '</div>' : '' ?><?= $this->insert('partials/front/footer') ?><?php endif; ?>
 <?= $this->insert('partials/front/breaking-alerts', ['where' => 'mobile']) ?>
+<?= ad_slot('mobile_sticky') ?><?= ad_slot('popup') ?>
 <?= $this->insert('partials/front/bottom-nav') ?>
 <script src="<?= asset('js/app.js') ?>" defer></script>
 <?= setting('footer_code') ?>

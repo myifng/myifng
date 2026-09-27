@@ -26,6 +26,7 @@ final class PageController extends Controller
     public function render(array $page, bool $isPreview): Response
     {
         $content = ContentRenderer::render($page['content']);
+        $content = $isPreview ? $content : \App\Services\AdService::shortcodes($content);
         return $this->view('front/page', [
             'page' => $page,
             'content' => $content,

@@ -136,6 +136,20 @@ final class DashboardService
         return ['value' => (int) $r['live'], 'sub' => num($r['editions']) . ' संस्करण में से प्रकाशित' . ($left > 0 ? ' · बाकी: ' . num($left) : ((int) $r['sched'] ? ' · शेड्यूल: ' . num($r['sched']) : '')), 'alert' => $left > 0];
     }
 
+    private static function adsRunning(): array
+    {
+        $n = (int) db()->value("SELECT COUNT(*) FROM {p}ads WHERE status = 'active' AND (start_at IS NULL OR start_at <= NOW()) AND (end_at IS NULL OR end_at > NOW())");
+        $t = db()->first('SELECT COALESCE(SUM(impressions), 0) i, COALESCE(SUM(clicks), 0) c FROM {p}ad_stats_daily WHERE day = CURDATE()');
+        return ['value' => $n, 'sub' => 'आज: ' . num($t['i']) . ' इम्प्रेशन · ' . num($t['c']) . ' क्लिक', 'alert' => false];
+    }
+
+    private static function adRevenue(): array
+    {
+        $r = db()->first("SELECT (SELECT COALESCE(SUM(amount), 0) FROM {p}ad_payments WHERE DATE_FORMAT(paid_on, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')) m,
+            (SELECT COALESCE(SUM(total - paid), 0) FROM {p}ad_invoices WHERE status IN ('sent','partial') AND due_date < CURDATE()) o");
+        return ['value' => (int) round((float) $r['m']), 'sub' => (float) $r['o'] > 0 ? 'देर वाला बकाया: ' . AdvertiserService::money($r['o']) : 'इस महीने की आमदनी (₹)', 'alert' => (float) $r['o'] > 0];
+    }
+
     private static function media(): array
     {
         $r = db()->first("SELECT COUNT(*) total, SUM(kind = 'image') images, COALESCE(SUM(size), 0) bytes FROM {p}media WHERE deleted_at IS NULL");

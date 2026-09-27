@@ -25,7 +25,7 @@ final class HomeRenderer
                 continue; // मॉड्यूल अभी तैयार नहीं
             }
             // पाठक का शहर हर पाठक का अलग; ब्रेकिंग अपने समय पर ख़त्म होती है (उसका अपना 60 सेकंड कैश)
-            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || $s['block_type'] === 'breaking';
+            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || in_array($s['block_type'], ['breaking', 'ads'], true); // विज्ञापन: बारी-बारी, कैश नहीं
             $key = 'home.section.' . $s['id'] . '.' . md5($s['updated_at'] . json_encode($s['settings']));
             $inner = $dynamic ? self::section($s) : cache()->remember($key, self::TTL, static fn() => self::section($s));
             if ($inner === '') {
@@ -166,6 +166,8 @@ final class HomeRenderer
                 }
                 $items = BreakingService::active();
                 return $items ? ['items' => $items, 'banner' => false] : null;
+            case 'ads':
+                return AdService::enabled() && AdService::pick((string) ($set['slot'] ?? '')) ? [] : null;
             case 'epaper':
                 if (!EpaperService::enabled()) {
                     return null;

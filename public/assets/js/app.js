@@ -418,6 +418,38 @@
     go(cur, false);
   }
 
+  /* विज्ञापन: स्क्रीन पर आधा दिखे तब इम्प्रेशन (एक पेज पर एक बार); पॉपअप (तय घंटों में एक बार); मोबाइल स्टिकी बंद करना */
+  (function () {
+    var ads = $$('[data-ad-id]'); if (!ads.length) return;
+    var csrf = ($('meta[name="csrf-token"]') || {}).content || '', impUrl = (document.querySelector('meta[name="ad-imp"]') || {}).content, queue = [], sent = {}, t = null;
+    var flushImp = function () {
+      if (!queue.length || !impUrl) return;
+      var fd = new FormData(); queue.splice(0).forEach(function (id) { fd.append('ids[]', id); }); fd.append('_csrf', csrf);
+      fetch(impUrl, { method: 'POST', body: fd, credentials: 'same-origin', keepalive: true, headers: { 'X-CSRF-Token': csrf, 'Accept': 'application/json' } }).catch(function () {});
+    };
+    var seen = function (el) { var id = el.dataset.adId; if (sent[id]) return; sent[id] = 1; queue.push(id); clearTimeout(t); t = setTimeout(flushImp, 800); };
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting && e.target.offsetParent !== null) { seen(e.target); io.unobserve(e.target); } }); }, { threshold: 0.5 });
+      ads.forEach(function (a) { io.observe(a); });
+    }
+    addEventListener('pagehide', flushImp);
+    var popup = $('[data-ad-popup]');
+    if (popup) {
+      var key = 'adpop', last = +(store.get(key) || 0), hours = +popup.dataset.hours || 24;
+      if (Date.now() - last > hours * 3600000) setTimeout(function () {
+        popup.hidden = false; store.set(key, String(Date.now()));
+        var b = $('[data-ad-close]', popup); b.focus();
+        var close = function () { popup.remove(); };
+        b.addEventListener('click', close); popup.addEventListener('click', function (e) { if (e.target === popup) close(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && popup.parentNode) close(); });
+      }, (+popup.dataset.delay || 0) * 1000);
+      else popup.remove();
+    }
+    var sticky = $('[data-ad-sticky]');
+    if (sticky) { if (sessionStorage && (function () { try { return sessionStorage.getItem('adsticky'); } catch (e) { return null; } })()) sticky.classList.add('closed');
+      $('[data-ad-close]', sticky).addEventListener('click', function () { sticky.classList.add('closed'); try { sessionStorage.setItem('adsticky', '1'); } catch (e) {} }); }
+  })();
+
   /* Google Analytics (सेटिंग में ID हो तो) */
   var ga = document.body.dataset.ga;
   if (ga) {

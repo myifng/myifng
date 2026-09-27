@@ -20,6 +20,7 @@ final class CategoryController extends FrontController
             throw new HttpException(404);
         }
         $parent = $cat['parent_id'] ? Category::find((int) $cat['parent_id']) : null;
+        \App\Services\AdService::setContext([(int) $cat['id'], (int) ($parent['id'] ?? 0)]);
         $siblingsOf = $parent ? (int) $parent['id'] : (int) $cat['id'];
         $subs = db()->all("SELECT name, slug FROM {p}categories WHERE parent_id = ? AND status = 'active' ORDER BY sort_order", [$siblingsOf]);
         [$w, $p] = NewsQuery::categoryWhere((int) $cat['id']);

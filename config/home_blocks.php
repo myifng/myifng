@@ -55,8 +55,8 @@ return [
     'most_read' => ['label' => 'सबसे ज़्यादा पढ़ी गईं', 'icon' => 'fa-ranking-star', 'needs' => 'news', 'desc' => 'नंबर वाली सूची', 'fields' => [
         'count' => $count(5, 10), 'period' => ['label' => 'कितने दिन की', 'type' => 'select', 'options' => ['1' => 'आज', '7' => '7 दिन', '30' => '30 दिन'], 'default' => '7'],
     ]],
-    'ads' => ['label' => 'विज्ञापन', 'icon' => 'fa-rectangle-ad', 'needs' => null, 'desc' => 'विज्ञापन की जगह (Phase 9 से विज्ञापन)', 'fields' => [
-        'slot' => ['label' => 'विज्ञापन स्लॉट', 'type' => 'select', 'options' => ['home_top' => 'होम: ऊपर', 'home_middle' => 'होम: बीच', 'home_bottom' => 'होम: नीचे'], 'default' => 'home_middle'],
+    'ads' => ['label' => 'विज्ञापन', 'icon' => 'fa-rectangle-ad', 'needs' => 'ads', 'desc' => 'विज्ञापन स्लॉट (विज्ञापन → स्लॉट में बने होमपेज/कस्टम स्लॉट)', 'fields' => [
+        'slot' => ['label' => 'विज्ञापन स्लॉट', 'type' => 'adslot', 'default' => 'home_middle'],
     ]],
     'newsletter' => ['label' => 'न्यूज़लेटर', 'icon' => 'fa-envelope-open-text', 'needs' => null, 'desc' => 'ईमेल सब्सक्राइब फ़ॉर्म', 'fields' => [
         'text' => ['label' => 'संदेश', 'type' => 'text', 'default' => 'हर सुबह दिन की बड़ी ख़बरें आपके ईमेल पर'],

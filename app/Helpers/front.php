@@ -154,3 +154,9 @@ function mm_card(array $m, string $variant = 'card', array $o = []): string
         default => '<a class="story card-story ' . $cls . '" href="' . $url . '"><span class="th">' . $img . $badge . '</span>' . $kicker . '<' . $tag . ' class="hd">' . $title . '</' . $tag . '>' . $time . '</a>',
     };
 }
+
+/** Phase 9: विज्ञापन स्लॉट का HTML (विज्ञापन न हो तो ख़ाली) */
+function ad_slot(string $key): string
+{
+    return \App\Services\AdService::slot($key);
+}

@@ -4,6 +4,9 @@
  * हर रूट पर अनुमति middleware: can:मॉड्यूल.action
  * @var App\Core\Router $router
  */
+use App\Controllers\Admin\AdController;
+use App\Controllers\Admin\AdSlotController;
+use App\Controllers\Admin\AdvertiserController;
 use App\Controllers\Admin\ApplicationController;
 use App\Controllers\Admin\AssignmentController;
 use App\Controllers\Admin\AuditLogController;
@@ -11,6 +14,7 @@ use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\AudioController;
 use App\Controllers\Admin\BreakingController;
 use App\Controllers\Admin\BureauController;
+use App\Controllers\Admin\CampaignController;
 use App\Controllers\Admin\CategoryController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
@@ -18,6 +22,7 @@ use App\Controllers\Admin\EpaperController;
 use App\Controllers\Admin\EpaperEditionController;
 use App\Controllers\Admin\GalleryController;
 use App\Controllers\Admin\HomepageController;
+use App\Controllers\Admin\InvoiceController;
 use App\Controllers\Admin\LiveBlogController;
 use App\Controllers\Admin\LiveTvController;
 use App\Controllers\Admin\LocationController;
@@ -326,6 +331,52 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/epaper/editions/{id:\d+}/edit', [EpaperEditionController::class, 'edit'])->name('epaper.editions.edit')->middleware('can:epaper.edit');
         $r->put('/epaper/editions/{id:\d+}', [EpaperEditionController::class, 'update'])->name('epaper.editions.update')->middleware('can:epaper.edit');
         $r->delete('/epaper/editions/{id:\d+}', [EpaperEditionController::class, 'destroy'])->name('epaper.editions.destroy')->middleware('can:epaper.delete');
+
+        // ---------- Phase 9: विज्ञापन और विज्ञापनदाता CRM ----------
+        $r->get('/ads', [AdController::class, 'index'])->name('ads.index')->middleware('can:ads.view');
+        $r->get('/ads/export', [AdController::class, 'export'])->name('ads.export')->middleware('can:ads.export');
+        $r->get('/ads/create', [AdController::class, 'create'])->name('ads.create')->middleware('can:ads.create');
+        $r->post('/ads', [AdController::class, 'store'])->name('ads.store')->middleware('can:ads.create');
+        $r->get('/ads/{id:\d+}/edit', [AdController::class, 'edit'])->name('ads.edit')->middleware('can:ads.view');
+        $r->put('/ads/{id:\d+}', [AdController::class, 'update'])->name('ads.update')->middleware('can:ads.edit');
+        $r->post('/ads/{id:\d+}/toggle', [AdController::class, 'toggle'])->name('ads.toggle')->middleware('can:ads.edit');
+        $r->post('/ads/{id:\d+}/duplicate', [AdController::class, 'duplicate'])->name('ads.duplicate')->middleware('can:ads.create');
+        $r->delete('/ads/{id:\d+}', [AdController::class, 'destroy'])->name('ads.destroy')->middleware('can:ads.delete');
+        $r->get('/ads/slots', [AdSlotController::class, 'index'])->name('ads.slots')->middleware('can:ads.view');
+        $r->post('/ads/slots', [AdSlotController::class, 'store'])->name('ads.slots.store')->middleware('can:ads.create');
+        $r->get('/ads/slots/{id:\d+}/edit', [AdSlotController::class, 'edit'])->name('ads.slots.edit')->middleware('can:ads.edit');
+        $r->put('/ads/slots/{id:\d+}', [AdSlotController::class, 'update'])->name('ads.slots.update')->middleware('can:ads.edit');
+        $r->delete('/ads/slots/{id:\d+}', [AdSlotController::class, 'destroy'])->name('ads.slots.destroy')->middleware('can:ads.delete');
+
+        $r->get('/advertisers', [AdvertiserController::class, 'index'])->name('advertisers.index')->middleware('can:advertisers.view');
+        $r->get('/advertisers/export', [AdvertiserController::class, 'export'])->name('advertisers.export')->middleware('can:advertisers.export');
+        $r->get('/advertisers/create', [AdvertiserController::class, 'create'])->name('advertisers.create')->middleware('can:advertisers.create');
+        $r->post('/advertisers', [AdvertiserController::class, 'store'])->name('advertisers.store')->middleware('can:advertisers.create');
+        $r->get('/advertisers/{id:\d+}', [AdvertiserController::class, 'show'])->name('advertisers.show')->middleware('can:advertisers.view');
+        $r->get('/advertisers/{id:\d+}/edit', [AdvertiserController::class, 'edit'])->name('advertisers.edit')->middleware('can:advertisers.edit');
+        $r->put('/advertisers/{id:\d+}', [AdvertiserController::class, 'update'])->name('advertisers.update')->middleware('can:advertisers.edit');
+        $r->delete('/advertisers/{id:\d+}', [AdvertiserController::class, 'destroy'])->name('advertisers.destroy')->middleware('can:advertisers.delete');
+        $r->get('/revenue', [AdvertiserController::class, 'revenue'])->name('revenue')->middleware('can:advertisers.manage');
+
+        $r->get('/campaigns/create', [CampaignController::class, 'create'])->name('campaigns.create')->middleware('can:advertisers.create');
+        $r->post('/campaigns', [CampaignController::class, 'store'])->name('campaigns.store')->middleware('can:advertisers.create');
+        $r->get('/campaigns/{id:\d+}', [CampaignController::class, 'show'])->name('campaigns.show')->middleware('can:advertisers.view');
+        $r->get('/campaigns/{id:\d+}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit')->middleware('can:advertisers.edit');
+        $r->put('/campaigns/{id:\d+}', [CampaignController::class, 'update'])->name('campaigns.update')->middleware('can:advertisers.edit');
+        $r->delete('/campaigns/{id:\d+}', [CampaignController::class, 'destroy'])->name('campaigns.destroy')->middleware('can:advertisers.delete');
+
+        $r->get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index')->middleware('can:advertisers.manage');
+        $r->get('/invoices/export', [InvoiceController::class, 'export'])->name('invoices.export')->middleware('can:advertisers.manage');
+        $r->get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create')->middleware('can:advertisers.manage');
+        $r->post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store')->middleware('can:advertisers.manage');
+        $r->get('/invoices/{id:\d+}', [InvoiceController::class, 'show'])->name('invoices.show')->middleware('can:advertisers.manage');
+        $r->get('/invoices/{id:\d+}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit')->middleware('can:advertisers.manage');
+        $r->put('/invoices/{id:\d+}', [InvoiceController::class, 'update'])->name('invoices.update')->middleware('can:advertisers.manage');
+        $r->get('/invoices/{id:\d+}/print', [InvoiceController::class, 'print'])->name('invoices.print')->middleware('can:advertisers.manage');
+        $r->post('/invoices/{id:\d+}/status', [InvoiceController::class, 'status'])->name('invoices.status')->middleware('can:advertisers.manage');
+        $r->post('/invoices/{id:\d+}/payments', [InvoiceController::class, 'pay'])->name('invoices.pay')->middleware('can:advertisers.manage');
+        $r->delete('/invoices/{id:\d+}/payments/{pid:\d+}', [InvoiceController::class, 'unpay'])->name('invoices.unpay')->middleware('can:advertisers.manage');
+        $r->delete('/invoices/{id:\d+}', [InvoiceController::class, 'destroy'])->name('invoices.destroy')->middleware('can:advertisers.manage');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

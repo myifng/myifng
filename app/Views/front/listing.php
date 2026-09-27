@@ -25,6 +25,7 @@ $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $color) ? $color : null;
         <nav class="chips" aria-label="<?= e($chipsLabel ?? 'उप-श्रेणियाँ') ?>"><?php foreach ($chips as [$n, $u, $active]): ?><a href="<?= e($u) ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= e($n) ?></a><?php endforeach; ?></nav>
       <?php endif; ?>
     </header>
+    <?= ad_slot('category_top') ?>
 
     <?php if ($items && $items->items): ?>
       <?php if ($lead): ?><div class="box list-lead"><?= news_card($lead, 'wide', ['h' => 'h2']) ?></div><?php endif; ?>

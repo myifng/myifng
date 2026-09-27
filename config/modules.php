@@ -64,8 +64,8 @@ return [
 
         // ---------- Phase 8-9 ----------
         'epaper'       => ['label' => 'ई-पेपर', 'icon' => 'fa-book-open', 'group' => 'media', 'phase' => 8, 'route' => 'admin.epaper.index', 'actions' => [...$crud, 'publish']],
-        'ads'          => ['label' => 'विज्ञापन', 'icon' => 'fa-rectangle-ad', 'group' => 'revenue', 'phase' => 9, 'actions' => [...$crud, 'export']],
-        'advertisers'  => ['label' => 'विज्ञापनदाता CRM', 'icon' => 'fa-handshake', 'group' => 'revenue', 'phase' => 9, 'actions' => [...$crud, 'export', 'manage']],
+        'ads'          => ['label' => 'विज्ञापन', 'icon' => 'fa-rectangle-ad', 'group' => 'revenue', 'phase' => 9, 'route' => 'admin.ads.index', 'actions' => [...$crud, 'export', 'manage']],
+        'advertisers'  => ['label' => 'विज्ञापनदाता CRM', 'icon' => 'fa-handshake', 'group' => 'revenue', 'phase' => 9, 'route' => 'admin.advertisers.index', 'actions' => [...$crud, 'export', 'manage']],
 
         // ---------- Phase 10 ----------
         'seo'          => ['label' => 'SEO कमांड सेंटर', 'icon' => 'fa-magnifying-glass-chart', 'group' => 'insights', 'phase' => 10, 'actions' => ['view', 'edit', 'manage']],

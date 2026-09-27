@@ -25,6 +25,7 @@ final class LocationController extends FrontController
             throw new HttpException(404);
         }
         $chain = array_values(array_filter([...Location::ancestors($loc), $loc], static fn($l) => $l['path'] !== null));
+        \App\Services\AdService::setContext([], array_column([...Location::ancestors($loc), $loc], 'id'));
         $crumbs = [['होम', url()]];
         foreach ($chain as $l) {
             $crumbs[] = [$l['name'], (int) $l['id'] === (int) $loc['id'] ? null : url($l['path'])];

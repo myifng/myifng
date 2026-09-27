@@ -38,6 +38,7 @@ $renderMenu = function (array $items, int $depth = 0) use (&$renderMenu): string
         <?php endif; ?>
       </a>
       <?php if (setting('tagline')): ?><span class="tagline"><?= e(setting('tagline')) ?></span><?php endif; ?>
+      <?= ad_slot('header') ?>
       <?php if (app('router')->has('api.my_city')): $city = my_city(); ?>
       <div class="mycity" data-mycity data-search="<?= e(route('api.locations')) ?>" data-save="<?= e(route('api.my_city')) ?>">
         <button type="button" class="mycity-btn" aria-expanded="false" aria-controls="mycityPanel" data-mycity-toggle>

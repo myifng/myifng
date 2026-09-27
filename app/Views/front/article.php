@@ -41,6 +41,7 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
         </div>
       <?php endif; ?>
     </div>
+    <?php if (!$isPreview): ?><?= ad_slot('article_top') ?><?php endif; ?>
     <?php if ($news['summary']): ?><p class="summary"><?= e($news['summary']) ?></p><?php endif; ?>
     <?php if ($news['featured_image']): ?>
       <figure class="feature"><?= media_img($news['featured_image'], 'large', $news['image_caption'] ?: $news['title'], ['loading' => 'eager', 'fetchpriority' => 'high']) ?>
@@ -57,6 +58,7 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
       <div class="art-gallery"><?php foreach ($rel['gallery'] as $g): ?><figure><a href="<?= e(media_url($g, 'large')) ?>" target="_blank" rel="noopener"><?= media_img($g, 'medium') ?></a><?php if ($g['caption']): ?><figcaption><?= e($g['caption']) ?></figcaption><?php endif; ?></figure><?php endforeach; ?></div>
     <?php endif; ?>
     <?php if ($news['source'] || $news['news_credit']): ?><p class="updated"><?= $news['source'] ? 'स्रोत: ' . e($news['source']) : '' ?><?= $news['news_credit'] ? ($news['source'] ? ' · ' : '') . e($news['news_credit']) : '' ?></p><?php endif; ?>
+    <?php if (!$isPreview): ?><?= ad_slot('article_bottom') ?><?php endif; ?>
     <?php if ($rel['tag_links']): ?><div class="art-tags"><?php foreach ($rel['tag_links'] as $tg): ?><a href="<?= e(route('tag', ['slug' => $tg['slug']])) ?>">#<?= e($tg['name']) ?></a><?php endforeach; ?></div><?php endif; ?>
     <?php if ($reporter && setting('author_box', '1') === '1'): ?>
       <div class="author-box"><?= avatar_html($reporter['avatar'], $reporter['name']) ?><div><b><?= e($reporter['name']) ?></b><?php if ($reporter['bio']): ?><p><?= e($reporter['bio']) ?></p><?php endif; ?></div></div>

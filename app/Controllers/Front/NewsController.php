@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Category;
 use App\Models\Location;
+use App\Services\AdService;
 use App\Services\ContentRenderer;
 use App\Services\LiveBlogService;
 use App\Services\NewsQuery;
@@ -43,6 +44,12 @@ final class NewsController extends FrontController
         }
         $crumbs[] = [\App\Helpers\Str::limit((string) $news['title'], 60), null];
         $related = setting('related_news', '1') === '1' ? NewsQuery::related($news, 6) : [];
+        // विज्ञापन: इस ख़बर की श्रेणी/लोकेशन (ऊपर वाली भी) के हिसाब से; सामग्री में [ad:…] और बीच का विज्ञापन
+        AdService::setContext(array_filter([$cat['id'] ?? null, $parentCat['id'] ?? null]), array_column($chain, 'id'));
+        $plain = \App\Helpers\Str::limit(strip_tags($content), 160); // विज्ञापन जुड़ने से पहले
+        if (!$isPreview) {
+            $content = AdService::inject(AdService::shortcodes($content));
+        }
         $live = LiveBlogService::forNews((int) $news['id']);
         $liveUpdates = $live ? LiveBlogService::updates((int) $live['id']) : [];
         return $this->view('front/article', [
@@ -52,7 +59,7 @@ final class NewsController extends FrontController
             'shareUrl' => NewsService::url($news),
             'seo' => [
                 'title' => $news['meta_title'] ?: $news['title'],
-                'description' => $news['meta_description'] ?: ($news['summary'] ?: \App\Helpers\Str::limit(strip_tags($content), 160)),
+                'description' => $news['meta_description'] ?: ($news['summary'] ?: $plain),
                 'keywords' => $news['meta_keywords'] ?: implode(', ', $rel['tags']),
                 'image' => $news['featured_image'] ? media_url($news['featured_image'], 'large') : null,
                 'robots' => $isPreview ? 'noindex,nofollow' : $news['robots'],

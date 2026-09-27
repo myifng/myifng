@@ -1341,3 +1341,64 @@
     draw();
   }
 })();
+
+/* ==========================================================
+   Phase 9: विज्ञापन (कई लोकेशन चुनना) और इनवॉइस की पंक्तियाँ
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+
+  /* ---------- कई लोकेशन (विज्ञापन टार्गेटिंग) ---------- */
+  $$('[data-loc-multi]').forEach(function (box) {
+    var ul = $('.np-list', box), input = $('input[type="search"]', box), res = $('.loc-results', box), timer = null;
+    var ids = function () { return $$('li[data-id]', ul).map(function (li) { return +li.dataset.id; }); };
+    var dirty = function () { box.dispatchEvent(new Event('input', { bubbles: true })); };
+    ul.addEventListener('click', function (e) { var b = e.target.closest('.ml-remove'); if (b) { b.closest('li').remove(); dirty(); } });
+    input.addEventListener('input', function () {
+      clearTimeout(timer); var q = input.value.trim(); if (q.length < 2) { res.hidden = true; return; }
+      timer = setTimeout(function () {
+        fetch(box.dataset.search + (box.dataset.search.indexOf('?') > -1 ? '&' : '?') + 'q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(function (r) { return r.json(); }).then(function (r) {
+            var have = ids();
+            res.innerHTML = (r.items || []).filter(function (x) { return have.indexOf(+x.id) === -1; }).slice(0, 10).map(function (x) {
+              return '<li class="list-group-item list-group-item-action small" data-id="' + x.id + '" data-name="' + esc(x.name) + '">' + esc(x.label || x.name) + ' <span class="text-body-secondary">' + esc(x.type_label || '') + '</span></li>';
+            }).join('') || '<li class="list-group-item small">कुछ नहीं मिला</li>';
+            res.hidden = false;
+          });
+      }, 250);
+    });
+    res.addEventListener('mousedown', function (e) {
+      var li = e.target.closest('li[data-id]'); if (!li) return; e.preventDefault();
+      var n = document.createElement('li'); n.dataset.id = li.dataset.id;
+      n.innerHTML = '<span>' + esc(li.dataset.name) + '</span><input type="hidden" name="' + esc(box.dataset.name) + '" value="' + (+li.dataset.id) + '"><button type="button" class="ml-remove" aria-label="हटाएँ">×</button>';
+      ul.appendChild(n); input.value = ''; res.hidden = true; dirty();
+    });
+    input.addEventListener('blur', function () { setTimeout(function () { res.hidden = true; }, 200); });
+  });
+
+  /* ---------- इनवॉइस: पंक्तियाँ, जोड़ (अंतिम जोड़ सर्वर पर) ---------- */
+  var inv = $('[data-invoice]');
+  if (inv) {
+    var body = $('[data-lines]', inv), tpl = $('[data-line-template]', inv), rateIn = $('[data-tax-rate]', inv), n = 0;
+    var money = function (x) { return '₹' + (Math.round(x * 100) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var calc = function () {
+      var sub = 0;
+      $$('[data-line]', body).forEach(function (tr) { var a = (parseFloat($('[data-qty]', tr).value) || 0) * (parseFloat($('[data-rate]', tr).value) || 0); a = Math.round(a * 100) / 100; sub += a; $('[data-amount]', tr).textContent = money(a); });
+      var r = parseFloat(rateIn.value) || 0, tax = Math.round(sub * r) / 100;
+      $('[data-sub]', inv).textContent = money(sub); $('[data-rate-show]', inv).textContent = r; $('[data-tax]', inv).textContent = money(tax); $('[data-total]', inv).textContent = money(sub + tax);
+    };
+    inv.addEventListener('input', function (e) { if (e.target.matches('[data-qty], [data-rate], [data-tax-rate]')) calc(); });
+    $('[data-line-add]', inv).addEventListener('click', function () {
+      var t = document.createElement('tbody'); t.innerHTML = tpl.innerHTML.replace(/__i__/g, 'n' + (++n) + '_' + Date.now());
+      var tr = t.firstElementChild; body.appendChild(tr); $('input', tr).focus(); calc();
+    });
+    body.addEventListener('click', function (e) { var b = e.target.closest('[data-line-remove]'); if (!b) return; if ($$('[data-line]', body).length > 1) b.closest('tr').remove(); else $$('input', b.closest('tr')).forEach(function (i) { i.value = i.matches('[data-qty]') ? 1 : ''; }); calc(); });
+    var adv = $('[data-inv-adv]', inv), camp = $('[data-inv-camp]', inv);
+    var filter = function () { $$('option[data-adv]', camp).forEach(function (o) { o.hidden = adv.value && o.dataset.adv !== adv.value; if (o.hidden && o.selected) camp.value = ''; }); };
+    if (adv && camp) { adv.addEventListener('change', filter); filter(); }
+    calc();
+  }
+})();

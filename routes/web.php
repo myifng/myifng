@@ -3,6 +3,7 @@
  * वेबसाइट के रूट। लोकेशन वाला रूट (/{राज्य}/{ज़िला}/…) सबसे आख़िर में, ताकि बाकी रास्ते पहले मिलें।
  * @var App\Core\Router $router
  */
+use App\Controllers\Front\AdController;
 use App\Controllers\Front\AudioController;
 use App\Controllers\Front\CategoryController;
 use App\Controllers\Front\EpaperController;
@@ -73,6 +74,10 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/epaper/{edition:[a-z0-9-]+}/archive', [EpaperController::class, 'archive'])->name('epaper.archive');
     $r->get('/epaper/{edition:[a-z0-9-]+}/{date:[0-9]{4}-[0-9]{2}-[0-9]{2}}', [EpaperController::class, 'show'])->name('epaper.issue');
     $r->get('/epaper/{edition:[a-z0-9-]+}/{date:[0-9]{4}-[0-9]{2}-[0-9]{2}}/pdf', [EpaperController::class, 'pdf'])->name('epaper.pdf')->middleware('throttle:30,10');
+
+    // Phase 9: विज्ञापन की गिनती
+    $r->get('/ad/{id:\d+}/click', [AdController::class, 'click'])->name('ad.click');
+    $r->post('/ad/impressions', [AdController::class, 'impressions'])->name('ad.impressions')->middleware('throttle:120,5');
 
     // लोकेशन: सबसे आख़िर में (slug आरक्षित शब्दों से नहीं टकराते: TaxonomyService::RESERVED)
     $r->get('/{path:[a-z0-9-]+(?:/[a-z0-9-]+)*}', [LocationController::class, 'show'])->name('location');
