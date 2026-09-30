@@ -142,6 +142,8 @@ return [
             'signature_image' => ['label' => 'हस्ताक्षर (पारदर्शी PNG)', 'type' => 'image', 'width' => 6],
             'stamp_image' => ['label' => 'मुहर (पारदर्शी PNG)', 'type' => 'image', 'width' => 6],
             'registration_no' => ['label' => 'पंजीकरण संख्या (पत्रों में)', 'type' => 'text', 'rules' => 'nullable|max:100', 'width' => 6],
+            'id_card_show_mobile' => ['label' => 'ID कार्ड के आगे रिपोर्टर का मोबाइल दिखाएँ', 'type' => 'switch', 'default' => '1', 'width' => 6],
+            'id_card_show_address' => ['label' => 'ID कार्ड के आगे रिपोर्टर का पता दिखाएँ', 'type' => 'switch', 'default' => '1', 'width' => 6],
             'id_card_note' => ['label' => 'ID कार्ड के पीछे का नोट', 'type' => 'textarea', 'rules' => 'nullable|max:300', 'default' => 'यह कार्ड संस्थान की संपत्ति है। मिलने पर ऊपर दिए पते पर लौटाएँ। सत्यापन के लिए QR स्कैन करें।'],
         ],
     ],

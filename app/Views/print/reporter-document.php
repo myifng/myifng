@@ -42,6 +42,7 @@ $bodies = [
 <title><?= e($docName . ' · ' . $name . ' · ' . $doc['doc_no']) ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<?= asset('vendor/fontawesome/css/all.min.css') ?>">
 <style>
 :root { --b: <?= e($brand) ?>; }
 * { box-sizing: border-box; }
@@ -51,27 +52,58 @@ body { margin: 0; background: #e9e9ec; font-family: "Noto Sans Devanagari", "Muk
 .toolbar span { opacity: .8; font-size: 14px; }
 .sheet { margin: 20px auto; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.12); position: relative; overflow: hidden; }
 .revoked::after { content: "रद्द / अमान्य"; position: absolute; inset: 0; display: grid; place-items: center; font: 800 64px Mukta, sans-serif; color: rgba(200,0,0,.28); transform: rotate(-24deg); pointer-events: none; }
-/* ID कार्ड: CR80 */
-.cards { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 20px; }
-.card { width: 85.6mm; height: 54mm; border-radius: 3mm; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.15); position: relative; overflow: hidden; font-family: Mukta, sans-serif; }
-.card .band { background: var(--b); color: #fff; height: 11mm; display: flex; align-items: center; gap: 2mm; padding: 0 3mm; }
-.card .band img { max-height: 8mm; max-width: 30mm; background: #fff; border-radius: 1mm; padding: .5mm; }
-.card .band b { font-size: 4.2mm; line-height: 1; font-weight: 800; }
-.card .band small { margin-left: auto; font-size: 2.6mm; background: #fff; color: var(--b); padding: .4mm 1.5mm; border-radius: 1mm; font-weight: 800; }
-.card .body { display: flex; gap: 3mm; padding: 2.5mm 3mm 0; }
-.card .photo { width: 20mm; height: 25mm; object-fit: cover; border: .5mm solid var(--b); border-radius: 1mm; background: #eee; }
-.card .info { flex: 1; min-width: 0; font-size: 2.7mm; line-height: 1.35; }
-.card .info .nm { font-size: 3.9mm; font-weight: 800; line-height: 1.2; margin-bottom: .6mm; }
-.card .info .ds { color: var(--b); font-weight: 700; font-size: 3mm; margin-bottom: .6mm; }
-.card .info span { color: #666; }
-.card .qr { width: 17mm; height: 17mm; align-self: flex-start; }
-.card .qr svg, .card .qr img { width: 100%; height: 100%; }
-.card .foot { position: absolute; left: 0; right: 0; bottom: 0; background: #1b1b1f; color: #fff; font-size: 2.4mm; padding: 1mm 3mm; display: flex; justify-content: space-between; }
-.card.back { font-size: 2.6mm; }
-.card.back .inner { padding: 3mm 4mm; line-height: 1.45; }
-.card.back h4 { margin: 0 0 1.5mm; font-size: 3.2mm; color: var(--b); }
-.card.back .sig { position: absolute; right: 4mm; bottom: 7mm; text-align: center; font-size: 2.4mm; }
-.card.back .sig img { max-height: 9mm; max-width: 26mm; display: block; margin: 0 auto; }
+/* ID कार्ड: CR80 (85.6 × 54 mm), आगे-पीछे */
+.cards { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; padding: 24px 16px; }
+.card { --bd: color-mix(in srgb, var(--b) 72%, #000); width: 85.6mm; height: 54mm; border-radius: 3.2mm; background: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.18); position: relative; overflow: hidden; font-family: Mukta, "Noto Sans Devanagari", sans-serif; color: #1c1c22; }
+.card .fa-solid, .card .fa-brands { width: 2.8mm; text-align: center; color: var(--b); font-size: 2.3mm; flex: none; }
+/* आगे */
+.card .band { position: relative; height: 12mm; background: linear-gradient(115deg, var(--b) 0%, var(--b) 55%, var(--bd) 100%); color: #fff; display: flex; align-items: center; gap: 2mm; padding: 0 3mm; }
+.card .band::after { content: ""; position: absolute; left: 0; right: 0; bottom: -.9mm; height: .9mm; background: linear-gradient(90deg, #f5b800, #ffd84d, #f5b800); }
+.card .logo { background: #fff; border-radius: 1.4mm; padding: .6mm 1.2mm; height: 9mm; display: flex; align-items: center; box-shadow: 0 .4mm 1.2mm rgba(0,0,0,.18); }
+.card .logo img { max-height: 7.6mm; max-width: 30mm; display: block; }
+.card .band .site { min-width: 0; line-height: 1.05; }
+.card .band .site b { display: block; font-size: 3.5mm; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .band .site small { font-size: 2.1mm; opacity: .9; }
+.card .press { margin-left: auto; background: #fff; color: var(--b); font-weight: 800; font-size: 2.9mm; letter-spacing: .5mm; padding: .9mm 2.2mm; border-radius: 1.2mm; box-shadow: 0 .4mm 1.2mm rgba(0,0,0,.2); line-height: 1; }
+.card .body { display: grid; grid-template-columns: 19.5mm minmax(0, 1fr) 14.5mm; gap: 2.6mm; padding: 3mm 3mm 0; position: relative; z-index: 1; }
+.card .ph { display: grid; gap: 1mm; justify-items: center; align-content: start; }
+.card .photo { width: 19.5mm; height: 24mm; object-fit: cover; border-radius: 1.6mm; border: .6mm solid var(--b); background: #eef0f3; box-shadow: 0 .5mm 1.5mm rgba(0,0,0,.15); display: block; }
+.card .ph-empty { display: grid; place-items: center; } .card .ph-empty .fa-solid { width: auto; font-size: 11mm; color: #c5c9d1; }
+.card .blood { font-size: 2.1mm; font-weight: 800; color: #b40000; background: #ffe9e9; border-radius: 1mm; padding: .2mm 1.2mm; }
+.card .info { min-width: 0; }
+.card .nm { font-size: 3.9mm; font-weight: 800; line-height: 1.1; text-transform: uppercase; letter-spacing: .1mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .ds { display: inline-block; margin: .8mm 0 1.2mm; background: color-mix(in srgb, var(--b) 12%, #fff); color: var(--b); font-weight: 800; font-size: 2.6mm; line-height: 1; padding: .8mm 1.6mm; border-radius: 1mm; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .row { display: flex; gap: 1.1mm; align-items: flex-start; font-size: 2.45mm; line-height: 1.3; margin-bottom: .45mm; min-width: 0; }
+.card .row .v { min-width: 0; overflow: hidden; }
+.card .row b { font-weight: 800; }
+.card .row .clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.card .row .fa-solid { margin-top: .35mm; }
+.card .qrcol { display: grid; justify-items: center; align-content: start; gap: .6mm; }
+.card .qr { width: 14.5mm; height: 14.5mm; padding: .6mm; background: #fff; border: .3mm solid #dfe1e6; border-radius: 1mm; }
+.card .qr svg, .card .qr img { width: 100%; height: 100%; display: block; }
+.card .qrcol small { font-size: 1.8mm; color: #666; text-align: center; line-height: 1.1; }
+.card .wm { position: absolute; right: -9mm; bottom: -12mm; width: 38mm; height: 38mm; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--b) 9%, transparent) 0 60%, transparent 61%); z-index: 0; }
+.card .foot { position: absolute; left: 0; right: 0; bottom: 0; height: 5.2mm; background: #1c1c22; color: #fff; font-size: 2.3mm; padding: 0 3mm; display: flex; align-items: center; justify-content: space-between; gap: 2mm; z-index: 1; }
+.card .foot b { color: #ffd84d; font-weight: 700; }
+.card .foot .fa-solid { color: #ffd84d; }
+/* पीछे */
+.card.back { display: flex; flex-direction: column; }
+.card.back .bk-wm { position: absolute; left: 50%; top: 58%; transform: translate(-50%, -50%); max-width: 46mm; max-height: 22mm; opacity: .07; mix-blend-mode: multiply; pointer-events: none; }
+.card.back .bk-top { height: 2.2mm; background: linear-gradient(90deg, var(--b), var(--bd)); }
+.card.back .bk-head { display: flex; align-items: center; gap: 2.6mm; padding: 2.4mm 3.5mm 1.8mm; border-bottom: .3mm dashed #d9dbe0; }
+.card.back .bk-head img { max-height: 11mm; max-width: 34mm; display: block; }
+.card.back .bk-head .t b { display: block; font-size: 3.6mm; font-weight: 800; color: var(--b); line-height: 1.1; }
+.card.back .bk-head .t small { font-size: 2.2mm; color: #555; }
+.card.back .bk-body { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 23mm; gap: 2.5mm; padding: 2.2mm 3.5mm 6.6mm; position: relative; z-index: 1; }
+.card.back .bk-body > div:first-child { display: flex; flex-direction: column; min-width: 0; }
+.card.back .row { font-size: 2.45mm; margin-bottom: .8mm; }
+.card.back .note { font-size: 2.05mm; color: #555; line-height: 1.3; margin-top: auto; padding: 1mm 1.5mm; background: #f6f7f9; border-left: .6mm solid var(--b); border-radius: .8mm; }
+.card.back .sig { position: relative; text-align: center; font-size: 2.2mm; align-self: end; line-height: 1.2; }
+.card.back .sig img.s { max-height: 9mm; max-width: 23mm; display: block; margin: 0 auto -.5mm; position: relative; z-index: 1; }
+.card.back .sig img.st { position: absolute; left: 50%; top: -6mm; transform: translateX(-50%) rotate(-12deg); max-height: 15mm; opacity: .55; z-index: 0; }
+.card.back .sig b { display: block; font-size: 2.3mm; border-top: .25mm solid #999; padding-top: .5mm; }
+.card.back .foot { background: linear-gradient(90deg, var(--b), var(--bd)); justify-content: center; font-weight: 600; }
+.card.back .foot .fa-solid { color: #fff; }
 /* A4 पत्र */
 .a4 { width: 210mm; min-height: 297mm; padding: 16mm 18mm; }
 .lh { display: flex; align-items: center; gap: 5mm; border-bottom: 1.2mm solid var(--b); padding-bottom: 4mm; }
@@ -103,33 +135,68 @@ body { margin: 0; background: #e9e9ec; font-family: "Noto Sans Devanagari", "Muk
 <body>
 <div class="toolbar"><button type="button" onclick="window.print()">प्रिंट / PDF में सेव</button><span><?= e($docName) ?> · <?= e($doc['doc_no']) ?><?= $revoked ? ' · रद्द' : '' ?></span></div>
 
-<?php if ($type === 'id_card'): ?>
+<?php if ($type === 'id_card'):
+    $host = parse_url(url(), PHP_URL_HOST) ?: '';
+    $mob = preg_replace('/\D/', '', (string) $r['mobile']);
+    $mobTxt = $mob !== '' ? (strlen($mob) === 10 ? '+91 ' . substr($mob, 0, 5) . ' ' . substr($mob, 5) : (string) $r['mobile']) : '';
+    $addr = trim((string) $r['address']);
+    $showMob = setting('id_card_show_mobile', '1') === '1' && $mobTxt !== '';
+    $showAddr = setting('id_card_show_address', '1') === '1' && $addr !== '';
+    $valid = date('d-m-Y', strtotime((string) ($doc['valid_until'] ?: $r['valid_until'])));
+    $phones = array_values(array_unique(array_filter([setting('contact_phone'), setting('whatsapp') && preg_replace('/\D/', '', (string) setting('whatsapp')) !== preg_replace('/\D/', '', (string) setting('contact_phone')) ? setting('whatsapp') : null])));
+?>
 <div class="cards">
-  <div class="card<?= $revoked ? ' revoked' : '' ?>">
-    <div class="band"><?php if ($logo): ?><img src="<?= e($logo) ?>" alt=""><?php else: ?><b><?= e($site) ?></b><?php endif; ?><small>PRESS</small></div>
+  <!-- आगे -->
+  <div class="card front<?= $revoked ? ' revoked' : '' ?>">
+    <div class="band">
+      <?php if ($logo): ?><span class="logo"><img src="<?= e($logo) ?>" alt=""></span><?php endif; ?>
+      <?php if (!$logo): ?><span class="site"><b><?= e($site) ?></b><?php if (setting('tagline')): ?><small><?= e(setting('tagline')) ?></small><?php endif; ?></span><?php endif; ?>
+      <span class="press">PRESS</span>
+    </div>
+    <span class="wm" aria-hidden="true"></span>
     <div class="body">
-      <?php if ($r['photo']): ?><img class="photo" src="<?= e(upload_url($r['photo'])) ?>" alt=""><?php else: ?><div class="photo"></div><?php endif; ?>
+      <div class="ph">
+        <?php if ($r['photo']): ?><img class="photo" src="<?= e(upload_url($r['photo'])) ?>" alt=""><?php else: ?><div class="photo ph-empty"><i class="fa-solid fa-user"></i></div><?php endif; ?>
+        <?php if ($r['blood_group']): ?><span class="blood"><i class="fa-solid fa-droplet" style="color:#b40000"></i> <?= e($r['blood_group']) ?></span><?php endif; ?>
+      </div>
       <div class="info">
         <div class="nm"><?= e($name) ?></div>
         <div class="ds"><?= e($r['designation']) ?></div>
-        <div><span>ID:</span> <b><?= e($r['reporter_code']) ?></b></div>
-        <div><span>क्षेत्र:</span> <?= e(implode(', ', array_filter([$district, $state])) ?: '—') ?></div>
-        <div><span>वैधता:</span> <b><?= e(date('d-m-Y', strtotime((string) ($doc['valid_until'] ?: $r['valid_until'])))) ?></b></div>
+        <div class="row"><i class="fa-solid fa-id-badge"></i><span class="v">ID: <b><?= e($r['reporter_code']) ?></b></span></div>
+        <?php if ($showMob): ?><div class="row"><i class="fa-solid fa-phone"></i><span class="v"><b><?= e($mobTxt) ?></b></span></div><?php endif; ?>
+        <?php if ($areaTxt = implode(', ', array_filter([$area && $area !== $district ? $area : null, $district, $state]))): ?><div class="row"><i class="fa-solid fa-location-dot"></i><span class="v"><?= e($areaTxt) ?></span></div><?php endif; ?>
+        <?php if ($showAddr): ?><div class="row"><i class="fa-solid fa-house"></i><span class="v clamp"><?= e($addr) ?></span></div><?php endif; ?>
+        <div class="row"><i class="fa-solid fa-calendar-check"></i><span class="v">वैधता: <b><?= e($valid) ?></b></span></div>
       </div>
-      <div class="qr" data-qr="<?= e($verifyUrl) ?>"></div>
+      <div class="qrcol"><div class="qr" data-qr="<?= e($verifyUrl) ?>"></div><small>सत्यापन के लिए<br>स्कैन करें</small></div>
     </div>
-    <div class="foot"><span>कार्ड: <?= e($doc['doc_no']) ?></span><span><?= e(parse_url(url(), PHP_URL_HOST) ?: '') ?></span></div>
+    <div class="foot"><span>कार्ड: <b><?= e($doc['doc_no']) ?></b></span><span><i class="fa-solid fa-globe"></i> <?= e($host) ?></span></div>
   </div>
+
+  <!-- पीछे -->
   <div class="card back<?= $revoked ? ' revoked' : '' ?>">
-    <div class="inner">
-      <h4><?= e($site) ?></h4>
-      <?php if (setting('address')): ?><div><?= e(setting('address')) ?></div><?php endif; ?>
-      <div><?= e(implode(' · ', array_filter([setting('contact_phone'), setting('contact_email')]))) ?></div>
-      <?php if ($r['blood_group']): ?><div style="margin-top:1.5mm">ब्लड ग्रुप: <b><?= e($r['blood_group']) ?></b></div><?php endif; ?>
-      <div style="margin-top:1.5mm;color:#555"><?= e(setting('id_card_note')) ?></div>
-      <div style="margin-top:1mm;color:#555">सत्यापन: <?= e(route('verify')) ?></div>
+    <div class="bk-top"></div>
+    <?php if ($logo): ?><img class="bk-wm" src="<?= e($logo) ?>" alt=""><?php endif; ?>
+    <div class="bk-head">
+      <?php if ($logo): ?><img src="<?= e($logo) ?>" alt=""><?php endif; ?>
+      <div class="t"><b><?= e($site) ?></b><?php if (setting('tagline')): ?><small><?= e(setting('tagline')) ?></small><?php elseif (setting('registration_no')): ?><small>पंजीकरण: <?= e(setting('registration_no')) ?></small><?php endif; ?></div>
     </div>
-    <div class="sig"><?php if ($sig): ?><img src="<?= e($sig) ?>" alt=""><?php endif; ?><?= e(setting('signatory_designation', 'प्रधान संपादक')) ?></div>
+    <div class="bk-body">
+      <div>
+        <?php if (setting('address')): ?><div class="row"><i class="fa-solid fa-location-dot"></i><span class="v clamp"><?= e(setting('address')) ?></span></div><?php endif; ?>
+        <?php if ($phones): ?><div class="row"><i class="fa-solid fa-phone"></i><span class="v"><b><?= e(implode(', ', $phones)) ?></b></span></div><?php endif; ?>
+        <?php if (setting('contact_email')): ?><div class="row"><i class="fa-solid fa-envelope"></i><span class="v"><?= e(setting('contact_email')) ?></span></div><?php endif; ?>
+        <div class="row"><i class="fa-solid fa-globe"></i><span class="v"><?= e($host) ?></span></div>
+        <?php if (setting('id_card_note')): ?><div class="note"><?= e(setting('id_card_note')) ?></div><?php endif; ?>
+      </div>
+      <div class="sig">
+        <?php if ($stamp): ?><img class="st" src="<?= e($stamp) ?>" alt=""><?php endif; ?>
+        <?php if ($sig): ?><img class="s" src="<?= e($sig) ?>" alt=""><?php endif; ?>
+        <b><?= e(setting('signatory_designation', 'प्रधान संपादक')) ?></b>
+        <?php if (setting('signatory_name')): ?><span><?= e(setting('signatory_name')) ?></span><?php endif; ?>
+      </div>
+    </div>
+    <div class="foot"><span><i class="fa-solid fa-shield-halved"></i> सत्यापन: <?= e(preg_replace('~^https?://~', '', route('verify'))) ?></span></div>
   </div>
 </div>
 <?php else: ?>
