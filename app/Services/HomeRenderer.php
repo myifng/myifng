@@ -25,7 +25,7 @@ final class HomeRenderer
                 continue; // मॉड्यूल अभी तैयार नहीं
             }
             // पाठक का शहर हर पाठक का अलग; ब्रेकिंग अपने समय पर ख़त्म होती है (उसका अपना 60 सेकंड कैश)
-            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || in_array($s['block_type'], ['breaking', 'ads', 'newsletter', 'poll'], true); // विज्ञापन: बारी-बारी; फ़ॉर्म में हर पाठक का अपना CSRF टोकन/वोट
+            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || in_array($s['block_type'], ['breaking', 'ads', 'newsletter', 'poll', 'election', 'sports'], true); // विज्ञापन: बारी-बारी; फ़ॉर्म में हर पाठक का अपना CSRF टोकन/वोट
             $key = 'home.section.' . $s['id'] . '.' . md5($s['updated_at'] . json_encode($s['settings']));
             $inner = $dynamic ? self::section($s) : cache()->remember($key, self::TTL, static fn() => self::section($s));
             if ($inner === '') {
@@ -192,6 +192,22 @@ final class HomeRenderer
                 $pid = (int) ($set['poll'] ?? 0) ?: (int) db()->value("SELECT id FROM {p}polls WHERE status = 'active' AND (start_at IS NULL OR start_at <= NOW()) AND (end_at IS NULL OR end_at > NOW()) ORDER BY id DESC LIMIT 1");
                 $w = $pid ? PollService::widget($pid) : '';
                 return $w !== '' ? ['widget' => $w] : null;
+            case 'fact_check':
+                $items = FactCheckService::latest($count);
+                return $items ? ['items' => $items] : null;
+            case 'election':
+                $e = !empty($set['election']) ? db()->first("SELECT * FROM {p}elections WHERE id = ? AND status <> 'draft'", [(int) $set['election']]) : ElectionService::featured();
+                return $e ? ['e' => $e, 'tally' => ElectionService::tally((int) $e['id']), 'progress' => ElectionService::progress($e)] : null;
+            case 'sports':
+                $items = SportsService::live($count);
+                if (count($items) < $count) {
+                    $items = array_merge($items, SportsService::upcoming($count - count($items)));
+                }
+                if (count($items) < $count) {
+                    $items = array_merge($items, SportsService::recent($count - count($items)));
+                }
+                return $items ? ['items' => $items] : null;
+            // @phase14-cases
             default:
                 return null; // विज्ञापन (Phase 9), न्यूज़लेटर (Phase 11) आदि
         }

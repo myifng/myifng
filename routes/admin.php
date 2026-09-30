@@ -401,6 +401,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/analytics/{dim:[a-z]+}/export', [AnalyticsController::class, 'export'])->name('analytics.export')->middleware('can:analytics.export');
         $r->get('/my-performance', [ReportController::class, 'mine'])->name('performance')->middleware('can:news.create');
         $r->get('/reports', [ReportController::class, 'index'])->name('reports.index')->middleware('can:reports.view');
+        $r->get('/reports/coverage', [ReportController::class, 'coverage'])->name('reports.coverage')->middleware('can:reports.view');
         $r->get('/reports/export/{kind:[a-z]+}', [ReportController::class, 'export'])->name('reports.export')->middleware('can:reports.export');
 
         // ---------- Phase 10: SEO कमांड सेंटर और रीडायरेक्ट ----------
@@ -506,6 +507,58 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/careers/{id:\d+}/edit', [JobController::class, 'edit'])->name('careers.edit')->middleware('can:careers.view');
         $r->put('/careers/{id:\d+}', [JobController::class, 'update'])->name('careers.update')->middleware('can:careers.edit');
         $r->delete('/careers/{id:\d+}', [JobController::class, 'destroy'])->name('careers.destroy')->middleware('can:careers.delete');
+
+        // ---------- Phase 14: फ़ैक्ट चेक ----------
+        $fc = \App\Controllers\Admin\FactCheckController::class;
+        $r->get('/fact-checks', [$fc, 'index'])->name('fact_checks.index')->middleware('can:fact_checks.view');
+        $r->get('/fact-checks/create', [$fc, 'create'])->name('fact_checks.create')->middleware('can:fact_checks.create');
+        $r->post('/fact-checks', [$fc, 'store'])->name('fact_checks.store')->middleware('can:fact_checks.create');
+        $r->get('/fact-checks/{id:\d+}/edit', [$fc, 'edit'])->name('fact_checks.edit')->middleware('can:fact_checks.view');
+        $r->put('/fact-checks/{id:\d+}', [$fc, 'update'])->name('fact_checks.update')->middleware('can:fact_checks.edit');
+        $r->delete('/fact-checks/{id:\d+}', [$fc, 'destroy'])->name('fact_checks.destroy')->middleware('can:fact_checks.delete');
+        // ---------- Phase 14: चुनाव केंद्र ----------
+        $el = \App\Controllers\Admin\ElectionController::class;
+        $r->get('/elections', [$el, 'index'])->name('elections.index')->middleware('can:elections.view');
+        $r->get('/elections/create', [$el, 'create'])->name('elections.create')->middleware('can:elections.create');
+        $r->post('/elections', [$el, 'store'])->name('elections.store')->middleware('can:elections.create');
+        $r->get('/elections/parties', [$el, 'parties'])->name('elections.parties')->middleware('can:elections.manage');
+        $r->post('/elections/parties', [$el, 'saveParty'])->name('elections.parties.save')->middleware('can:elections.manage');
+        $r->delete('/elections/parties/{id:\d+}', [$el, 'deleteParty'])->name('elections.parties.delete')->middleware('can:elections.manage');
+        $r->get('/elections/{id:\d+}', [$el, 'show'])->name('elections.show')->middleware('can:elections.view');
+        $r->get('/elections/{id:\d+}/edit', [$el, 'edit'])->name('elections.edit')->middleware('can:elections.edit');
+        $r->put('/elections/{id:\d+}', [$el, 'update'])->name('elections.update')->middleware('can:elections.edit');
+        $r->delete('/elections/{id:\d+}', [$el, 'destroy'])->name('elections.destroy')->middleware('can:elections.delete');
+        $r->post('/elections/{id:\d+}/seats', [$el, 'addSeat'])->name('elections.seats.add')->middleware('can:elections.edit');
+        $r->delete('/elections/{id:\d+}/seats/{seat:\d+}', [$el, 'removeSeat'])->name('elections.seats.remove')->middleware('can:elections.delete');
+        $r->get('/elections/{id:\d+}/seats/{seat:\d+}', [$el, 'seat'])->name('elections.seat')->middleware('can:elections.view');
+        $r->post('/elections/{id:\d+}/seats/{seat:\d+}', [$el, 'saveSeat'])->name('elections.seat.save')->middleware('can:elections.edit');
+        $r->post('/elections/{id:\d+}/import', [$el, 'import'])->name('elections.import')->middleware('can:elections.edit');
+        $r->post('/elections/{id:\d+}/import-json', [$el, 'importJson'])->name('elections.import_json')->middleware('can:elections.edit');
+        // ---------- Phase 14: खेल केंद्र ----------
+        $sp = \App\Controllers\Admin\SportsController::class;
+        $r->get('/sports', [$sp, 'index'])->name('sports.index')->middleware('can:sports.view');
+        $r->get('/sports/matches/create', [$sp, 'createMatch'])->name('sports.matches.create')->middleware('can:sports.create');
+        $r->post('/sports/matches', [$sp, 'storeMatch'])->name('sports.matches.store')->middleware('can:sports.create');
+        $r->get('/sports/matches/{id:\d+}/edit', [$sp, 'editMatch'])->name('sports.matches.edit')->middleware('can:sports.edit');
+        $r->put('/sports/matches/{id:\d+}', [$sp, 'updateMatch'])->name('sports.matches.update')->middleware('can:sports.edit');
+        $r->delete('/sports/matches/{id:\d+}', [$sp, 'destroyMatch'])->name('sports.matches.destroy')->middleware('can:sports.delete');
+        $r->get('/sports/matches/{id:\d+}', [$sp, 'console'])->name('sports.console')->middleware('can:sports.view');
+        $r->post('/sports/matches/{id:\d+}/score', [$sp, 'score'])->name('sports.score')->middleware('can:sports.edit');
+        $r->post('/sports/matches/{id:\d+}/commentary', [$sp, 'comment'])->name('sports.comment')->middleware('can:sports.edit');
+        $r->delete('/sports/matches/{id:\d+}/commentary/{cid:\d+}', [$sp, 'deleteComment'])->name('sports.comment.delete')->middleware('can:sports.edit');
+        $r->get('/sports/tournaments', [$sp, 'tournaments'])->name('sports.tournaments')->middleware('can:sports.view');
+        $r->get('/sports/tournaments/create', [$sp, 'createTournament'])->name('sports.tournaments.create')->middleware('can:sports.create');
+        $r->post('/sports/tournaments', [$sp, 'storeTournament'])->name('sports.tournaments.store')->middleware('can:sports.create');
+        $r->get('/sports/tournaments/{id:\d+}/edit', [$sp, 'editTournament'])->name('sports.tournaments.edit')->middleware('can:sports.view');
+        $r->put('/sports/tournaments/{id:\d+}', [$sp, 'updateTournament'])->name('sports.tournaments.update')->middleware('can:sports.edit');
+        $r->delete('/sports/tournaments/{id:\d+}', [$sp, 'destroyTournament'])->name('sports.tournaments.destroy')->middleware('can:sports.delete');
+        $r->post('/sports/tournaments/{id:\d+}/standings', [$sp, 'standings'])->name('sports.standings')->middleware('can:sports.edit');
+        $r->get('/sports/teams', [$sp, 'teams'])->name('sports.teams')->middleware('can:sports.manage');
+        $r->post('/sports/teams', [$sp, 'saveTeam'])->name('sports.teams.save')->middleware('can:sports.manage');
+        $r->delete('/sports/teams/{id:\d+}', [$sp, 'deleteTeam'])->name('sports.teams.delete')->middleware('can:sports.manage');
+        $r->get('/sports/teams/{id:\d+}', [$sp, 'team'])->name('sports.team')->middleware('can:sports.manage');
+        $r->post('/sports/teams/{id:\d+}/players', [$sp, 'savePlayers'])->name('sports.team.players')->middleware('can:sports.manage');
+        // @phase14-routes
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

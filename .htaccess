@@ -8,6 +8,10 @@ AddDefaultCharset UTF-8
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # डेटा API (Phase 14): Authorization हेडर PHP तक पहुँचे
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
   # सब-फ़ोल्डर में इंस्टॉल हो और URL काम न करें, तो यह लाइन चालू करके फ़ोल्डर का नाम लिखें:
   # RewriteBase /news/
 

@@ -251,6 +251,15 @@ return [
             'login_lockout_minutes' => ['label' => 'रोक का समय (मिनट)', 'type' => 'number', 'default' => '15', 'rules' => 'required|integer|min:1|max:1440', 'width' => 4],
         ],
     ],
+    // Phase 14: चुनाव/खेल डेटा API (किसी डेटा एजेंसी या अपने स्क्रिप्ट से नतीजे/स्कोर भेजने के लिए)
+    'data_api' => [
+        'label' => 'डेटा API (चुनाव/खेल)', 'icon' => 'fa-plug', 'permission' => 'manage',
+        'fields' => [
+            'data_api_enabled' => ['label' => 'डेटा API चालू करें', 'type' => 'switch', 'default' => '0', 'help' => 'बंद हो तो /api/v1/… पर हर अनुरोध 404।'],
+            'data_api_token' => ['label' => 'API टोकन (कम से कम 32 अक्षर)', 'type' => 'text', 'rules' => 'nullable|min:32|max:128|regex:/^[A-Za-z0-9_\-]+$/',
+                'help' => 'हेडर में भेजें: Authorization: Bearer <टोकन>। सुझाव (नया बनाने के लिए): ' . bin2hex(random_bytes(24)) . ' · किसी से साझा न करें; लीक हो तो तुरंत बदलें।'],
+        ],
+    ],
     'maintenance' => [
         'label' => 'मेंटेनेंस', 'icon' => 'fa-screwdriver-wrench', 'permission' => 'manage',
         'fields' => [

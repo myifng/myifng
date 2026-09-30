@@ -20,7 +20,7 @@ final class AnalyticsService
     public const TYPES = [
         'home' => 'होमपेज', 'news' => 'ख़बर', 'category' => 'श्रेणी', 'location' => 'लोकेशन', 'topic' => 'टॉपिक', 'tag' => 'टैग',
         'video' => 'वीडियो', 'gallery' => 'फ़ोटो गैलरी', 'story' => 'वेब स्टोरी', 'audio' => 'ऑडियो/पॉडकास्ट', 'live' => 'लाइव', 'epaper' => 'ई-पेपर',
-        'search' => 'खोज', 'page' => 'अन्य पेज',
+        'factcheck' => 'फ़ैक्ट चेक', 'election' => 'चुनाव', 'sports' => 'खेल', 'search' => 'खोज', 'page' => 'अन्य पेज',
     ];
 
     public const DEVICES = ['mobile' => 'मोबाइल', 'desktop' => 'डेस्कटॉप', 'tablet' => 'टैबलेट'];

@@ -25,6 +25,7 @@ $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $color) ? $color : null;
         <nav class="chips" aria-label="<?= e($chipsLabel ?? 'उप-श्रेणियाँ') ?>"><?php foreach ($chips as [$n, $u, $active]): ?><a href="<?= e($u) ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= e($n) ?></a><?php endforeach; ?></nav>
       <?php endif; ?>
     </header>
+    <?php if (!empty($local)): ?><?= $this->insert('front/local/_extras', ['local' => $local]) ?><?php endif; ?>
     <?= ad_slot('category_top') ?>
 
     <?php if ($items && $items->items): ?>
@@ -40,6 +41,7 @@ $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $color) ? $color : null;
     <?php else: ?>
       <div class="box empty"><p><?= e($empty) ?></p><a class="more" href="<?= e(route('latest')) ?>">ताज़ा ख़बरें पढ़ें <i class="fa-solid fa-angle-right"></i></a></div>
     <?php endif; ?>
+    <?php if (!empty($local)): ?><?= $this->insert('front/local/_extras-bottom', ['local' => $local]) ?><?php endif; ?>
   </div>
-  <?= $this->insert('partials/front/sidebar', ['side' => $side]) ?>
+  <?= $this->insert('partials/front/sidebar', ['side' => $side, 'before' => !empty($local['reporters']) ? $this->insert('front/local/_reporters', ['reporters' => $local['reporters']]) : '']) ?>
 </div>

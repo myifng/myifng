@@ -74,6 +74,9 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
       <div class="follow-row"><span>फ़ॉलो करें:</span><?php if ($category): ?><?= follow_button('category', (int) $category['id'], $category['name'], $engage['follows'] ?? []) ?><?php endif; ?>
         <?php if ($locationChain): $lc = end($locationChain); ?><?= follow_button('location', (int) $lc['id'], $lc['name'], $engage['follows'] ?? []) ?><?php endif; ?></div>
     <?php endif; ?>
+    <?php foreach ($engage['factchecks'] ?? [] as $fcx): ?>
+      <a class="fc-inline <?= e(\App\Services\FactCheckService::verdict($fcx['verdict'])[1]) ?>" href="<?= e(\App\Services\FactCheckService::url($fcx)) ?>"><span class="fc-lab">फ़ैक्ट चेक</span><?= \App\Services\FactCheckService::badge($fcx['verdict']) ?><b><?= e($fcx['title']) ?></b></a>
+    <?php endforeach; ?>
     <?php if (!empty($engage['comments']['enabled'])): ?><?= $this->insert('partials/front/comments', ['news' => $news, 'c' => $engage['comments'], 'reader' => $engage['reader']]) ?><?php endif; ?>
     <?php if ($related): ?>
       <section class="related"><?= block_head('ये भी पढ़ें') ?><div class="cgrid cols-3"><?php foreach ($related as $r): ?><?= news_card($r, 'card') ?><?php endforeach; ?></div></section>

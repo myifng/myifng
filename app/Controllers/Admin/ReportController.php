@@ -42,6 +42,23 @@ final class ReportController extends Controller
                 FROM {p}news n WHERE n.reporter_id = ? AND n.deleted_at IS NULL AND n.status IN ('submitted','review','fact_check','rejected') ORDER BY n.updated_at DESC LIMIT 10", [$id])]);
     }
 
+    /** लोकल कवरेज: किन ज़िलों से ख़बरें नहीं आ रहीं, कहाँ रिपोर्टर नहीं */
+    public function coverage(Request $request): Response
+    {
+        $state = $request->int('state') ?: null;
+        $rows = \App\Services\LocalService::coverage($state);
+        $only = $request->str('show') === 'gaps';
+        if ($request->str('export') === 'csv' && can('reports.export')) {
+            AuditService::log('export', 'reports', null, 'लोकल कवरेज CSV');
+            return Response::csv('local-coverage-' . date('Y-m-d') . '.csv', ['ज़िला', 'राज्य', '7 दिन', '30 दिन', 'आख़िरी ख़बर', 'सक्रिय रिपोर्टर', 'समीक्षा में', 'गैप'],
+                array_map(static fn($r) => [$r['name'], $r['state'], $r['d7'], $r['d30'], $r['last'], $r['reporters'], $r['pending'], $r['gap'] ? 'हाँ' : ''], $rows));
+        }
+        $summary = ['districts' => count($rows), 'gaps' => count(array_filter($rows, static fn($r) => $r['gap'])), 'noReporter' => count(array_filter($rows, static fn($r) => !$r['reporters'])),
+            'd7' => array_sum(array_column($rows, 'd7'))];
+        return $this->view('admin/reports/coverage', ['rows' => $only ? array_values(array_filter($rows, static fn($r) => $r['gap'])) : $rows, 'summary' => $summary, 'state' => $state, 'only' => $only,
+            'states' => db()->all("SELECT id, name FROM {p}locations WHERE type = 'state' AND status = 'active' ORDER BY name")]);
+    }
+
     public function export(Request $request, string $kind): Response
     {
         $r = AnalyticsService::range($request);

@@ -15,7 +15,8 @@ final class CsrfMiddleware implements Middleware
     public function handle(Request $request, \Closure $next, string ...$params): Response
     {
         // न्यूज़लेटर का वन-क्लिक अनसब्सक्राइब (RFC 8058): ईमेल ऐप POST करता है; URL का 40 अक्षर का टोकन ही पहचान है
-        if ($request->isPost() && !preg_match('~^/newsletter/unsubscribe/[a-f0-9]{40}$~', $request->path())) {
+        // Phase 14: /api/v1/… डेटा API में कुकी/सत्र नहीं, सिर्फ़ Bearer टोकन (ApiAuth) से पहचान
+        if ($request->isPost() && !preg_match('~^/newsletter/unsubscribe/[a-f0-9]{40}$|^/api/v1/~', $request->path())) {
             $token = $request->post()['_csrf'] ?? $request->header('X-CSRF-Token');
             if (!Csrf::verify(is_string($token) ? $token : null)) {
                 throw new HttpException(419);

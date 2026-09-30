@@ -66,6 +66,13 @@ return [
     'poll' => ['label' => 'पोल', 'icon' => 'fa-square-poll-vertical', 'needs' => 'polls', 'desc' => 'चालू पोल (ख़ाली = सबसे नया चालू पोल)', 'fields' => [
         'poll' => ['label' => 'पोल', 'type' => 'poll', 'default' => ''],
     ]],
+    // Phase 14
+    'fact_check' => ['label' => 'फ़ैक्ट चेक', 'icon' => 'fa-magnifying-glass-plus', 'needs' => 'fact_checks', 'desc' => 'ताज़ा फ़ैक्ट चेक, फ़ैसले के बैज के साथ', 'fields' => ['count' => $count(4, 12)]],
+    'election' => ['label' => 'चुनाव टैली', 'icon' => 'fa-check-to-slot', 'needs' => 'elections', 'desc' => 'मुख्य चुनाव की पार्टी-वार सीटें (मतगणना में लाइव)', 'fields' => [
+        'election' => ['label' => 'चुनाव का ID (ख़ाली = मुख्य/चल रहा चुनाव)', 'type' => 'text', 'default' => ''],
+    ]],
+    'sports' => ['label' => 'खेल स्कोर', 'icon' => 'fa-trophy', 'needs' => 'sports', 'desc' => 'लाइव, आने वाले और हाल के मैच (स्कोर कार्ड)', 'fields' => ['count' => $count(6, 12)]],
+    // @phase14-blocks
     'custom_html' => ['label' => 'कस्टम HTML', 'icon' => 'fa-code', 'needs' => null, 'manage' => true, 'desc' => 'अपना HTML/एम्बेड (सिर्फ़ प्रबंधक)', 'fields' => [
         'html' => ['label' => 'HTML कोड', 'type' => 'code'],
         'boxed' => ['label' => 'सफ़ेद बॉक्स में दिखाएँ', 'type' => 'switch', 'default' => 1],

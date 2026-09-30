@@ -186,7 +186,8 @@ final class AnalyticsController extends Controller
     private function itemNames(array $rows): array
     {
         $tables = ['video' => ['videos', 'title'], 'gallery' => ['galleries', 'title'], 'story' => ['web_stories', 'title'], 'audio' => ['audio_items', 'title'],
-            'epaper' => ['epaper_issues', 'title'], 'category' => ['categories', 'name'], 'location' => ['locations', 'name'], 'topic' => ['topics', 'name'], 'tag' => ['tags', 'name']];
+            'epaper' => ['epaper_issues', 'title'], 'category' => ['categories', 'name'], 'location' => ['locations', 'name'], 'topic' => ['topics', 'name'], 'tag' => ['tags', 'name'],
+            'factcheck' => ['fact_checks', 'title'], 'election' => ['elections', 'name'], 'sports' => ['sports_matches', 'title']];
         $want = [];
         foreach ($rows as $r) {
             [$type, $id] = array_pad(explode(':', (string) $r['k'], 2), 2, '0');

@@ -616,3 +616,85 @@
     });
   }
 })();
+
+/* Phase 14: चुनाव: लाइव टैली (30 सेकंड), सीट खोज/ज़िला फ़िल्टर, सीट पेज रीलोड */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var fmt = function (n) { return Number(n).toLocaleString('hi-IN'); };
+  $$('[data-el-live]').forEach(function (box) {
+    var known = $$('[data-el-party]', box).map(function (r) { return r.dataset.elParty; }).join(',');
+    var tick = function () {
+      if (document.hidden) return;
+      fetch(box.dataset.elLive, { headers: { 'Accept': 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j) return;
+        if (j.election.status !== 'counting') { location.reload(); return; }
+        var t = $('[data-el="trends"]', box), d = $('[data-el="declared"]', box);
+        if (t) t.textContent = fmt(j.progress.trends); if (d) d.textContent = fmt(j.progress.declared);
+        var seats = Math.max(1, j.progress.seats);
+        j.parties.forEach(function (p) {
+          var row = $('[data-el-party="' + p.party + '"]', box);
+          if (row) ['won', 'leading', 'total'].forEach(function (k) { var c = $('[data-k="' + k + '"]', row); if (c) c.textContent = fmt(p[k]); });
+          if (row) { var sh = $('[data-k="share"]', row); if (sh) sh.textContent = p.share + '%'; }
+          var seg = $('[data-el-seg="' + p.party + '"]', box); if (seg) seg.style.width = (p.total * 100 / seats) + '%';
+        });
+        // नई पार्टी को सीट मिली तो पूरा पेज
+        var now = j.parties.filter(function (p) { return p.total > 0; }).map(function (p) { return p.party; });
+        if (now.some(function (p) { return known.indexOf(p) === -1; })) location.reload();
+      }).catch(function () {});
+    };
+    setInterval(tick, 30000);
+  });
+  var search = $('[data-el-search]'), dist = $('[data-el-district]');
+  if (search || dist) {
+    var apply = function () {
+      var q = search ? search.value.trim().toLowerCase() : '', dv = dist ? dist.value : '';
+      $$('[data-el-row]').forEach(function (r) { r.hidden = (q && r.dataset.text.indexOf(q) === -1) || (dv && r.dataset.district !== dv); });
+    };
+    if (search) search.addEventListener('input', apply);
+    if (dist) dist.addEventListener('change', apply);
+  }
+  var rl = $('[data-el-reload]');
+  if (rl) setTimeout(function () { if (!document.hidden) location.reload(); }, (+rl.dataset.elReload || 60) * 1000);
+})();
+
+/* Phase 14: खेल: लाइव मैच (15 सेकंड), नई कमेंट्री ऊपर */
+(function () {
+  'use strict';
+  var box = document.querySelector('[data-sc-match]');
+  if (!box) return;
+  var esc = function (t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+  var set = function (k, v) { var el = box.querySelector('[data-sc="' + k + '"]'); if (el && v != null && el.textContent !== String(v)) el.textContent = v; };
+  var labels = { four: 'चौका', six: 'छक्का', wicket: 'विकेट', goal: 'गोल', yellow: 'पीला कार्ड', red: 'लाल कार्ड', sub: 'बदलाव', highlight: 'अहम' };
+  var cls = { four: 'c-four', six: 'c-six', wicket: 'c-wicket', goal: 'c-goal', yellow: 'c-yellow', red: 'c-red', highlight: 'c-hl' };
+  var tick = function () {
+    if (document.hidden) return;
+    fetch(box.dataset.scMatch + '?after=' + (box.dataset.after || 0), { headers: { 'Accept': 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (!j) return;
+      set('score1', j.score1 || ''); set('score2', j.score2 || ''); set('line', j.result || j.status_text || '');
+      var feed = box.querySelector('[data-sc="comm"]');
+      if (feed && j.commentary.length) {
+        var empty = feed.querySelector('[data-empty]'); if (empty) empty.remove();
+        j.commentary.forEach(function (c) {
+          var li = document.createElement('li');
+          li.className = (cls[c.type] || '') + ' is-new';
+          li.innerHTML = '<span class="cm-mk">' + esc(c.marker || '') + '</span><div>' + (labels[c.type] ? '<b class="cm-tag">' + labels[c.type] + '</b> ' : '') + esc(c.text) + '</div>';
+          feed.insertBefore(li, feed.firstChild);
+          box.dataset.after = c.id;
+        });
+      }
+      if (j.status !== 'live' && j.status !== 'break') { setTimeout(function () { location.reload(); }, 1500); }
+    }).catch(function () {});
+  };
+  setInterval(tick, 15000);
+})();
+
+/* Phase 14: /my-city पर शहर बदलते ही पेज ताज़ा */
+(function () {
+  if (!document.querySelector('[data-mycity-page]')) return;
+  document.addEventListener('mycity', function () { setTimeout(function () { location.reload(); }, 400); });
+  Array.prototype.forEach.call(document.querySelectorAll('.mc-pick [data-set-city]'), function (b) {
+    b.addEventListener('click', function () { setTimeout(function () { location.reload(); }, 900); });
+  });
+})();

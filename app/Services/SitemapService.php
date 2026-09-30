@@ -58,6 +58,14 @@ final class SitemapService
             if ($m = $mm('web_stories')) {
                 $out[] = ['sitemap-stories.xml', $m];
             }
+            // Phase 14: फ़ैक्ट चेक, चुनाव, खेल
+            try {
+                $m = db()->value("SELECT MAX(GREATEST(f.published_at, f.updated_at)) FROM {p}fact_checks f WHERE f.status = 'published'");
+                if ($m || db()->value("SELECT id FROM {p}elections WHERE status <> 'draft' LIMIT 1") || db()->value("SELECT id FROM {p}sports_tournaments WHERE status <> 'draft' LIMIT 1")) {
+                    $out[] = ['sitemap-special.xml', $m];
+                }
+            } catch (\Throwable) {
+            }
             return $out;
         });
     }
@@ -211,6 +219,34 @@ final class SitemapService
             $list = [];
             foreach (db()->all('SELECT x.slug, x.updated_at FROM {p}web_stories x WHERE ' . MultimediaService::published('x') . ' ORDER BY x.published_at DESC LIMIT 5000') as $s) {
                 $list[] = [MultimediaService::url('story', $s), $s['updated_at'], null, null];
+            }
+            return self::urls($list);
+        });
+    }
+
+    /** फ़ैक्ट चेक + चुनाव (सीटें) + खेल (टूर्नामेंट, मैच) */
+    public static function special(): string
+    {
+        return cache()->remember('sitemap.special', 1800, static function (): string {
+            $list = [];
+            foreach (db()->all("SELECT f.slug, f.updated_at FROM {p}fact_checks f WHERE f.status = 'published' AND f.published_at <= NOW() ORDER BY f.published_at DESC LIMIT 5000") as $f) {
+                $list[] = [route('factcheck.show', ['slug' => $f['slug']]), $f['updated_at'], null, null];
+            }
+            if (app('router')->has('elections.show')) {
+                foreach (db()->all("SELECT id, slug, updated_at FROM {p}elections WHERE status <> 'draft' ORDER BY year DESC LIMIT 200") as $e) {
+                    $list[] = [route('elections.show', ['slug' => $e['slug']]), $e['updated_at'], null, null];
+                    foreach (db()->all('SELECT s.slug, r.updated_at FROM {p}election_results r JOIN {p}election_seats s ON s.id = r.seat_id WHERE r.election_id = ? LIMIT 1000', [$e['id']]) as $st) {
+                        $list[] = [route('elections.seat', ['slug' => $e['slug'], 'seat' => $st['slug']]), $st['updated_at'], null, null];
+                    }
+                }
+            }
+            if (app('router')->has('sports.tournament')) {
+                foreach (db()->all("SELECT slug, updated_at FROM {p}sports_tournaments WHERE status <> 'draft' LIMIT 500") as $t) {
+                    $list[] = [route('sports.tournament', ['slug' => $t['slug']]), $t['updated_at'], null, null];
+                }
+                foreach (db()->all('SELECT ' . \App\Services\SportsService::MATCH_COLS . ' FROM ' . \App\Services\SportsService::MATCH_FROM . ' WHERE ' . \App\Services\SportsService::VISIBLE . ' ORDER BY m.start_at DESC LIMIT 2000') as $m) {
+                    $list[] = [\App\Services\SportsService::url($m), $m['updated_at'], null, null];
+                }
             }
             return self::urls($list);
         });

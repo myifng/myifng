@@ -32,7 +32,7 @@ abstract class FrontController extends Controller
     protected function listing(array $d): Response
     {
         return $this->view('front/listing', $d + [
-            'desc' => null, 'crumbs' => [], 'chips' => [], 'banner' => null, 'color' => null, 'actions' => '', 'search' => null,
+            'desc' => null, 'crumbs' => [], 'chips' => [], 'banner' => null, 'color' => null, 'actions' => '', 'search' => null, 'local' => null,
             'empty' => 'अभी यहाँ कोई ख़बर नहीं है।', 'side' => $this->sidebar(),
         ]);
     }

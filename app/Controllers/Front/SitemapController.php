@@ -33,6 +33,7 @@ final class SitemapController extends Controller
             $part === 'videos' => setting('sitemap_videos', '1') === '1' ? SitemapService::videos() : null,
             $part === 'images' => setting('sitemap_images', '1') === '1' ? SitemapService::images() : null,
             $part === 'stories' => SitemapService::stories(),
+            $part === 'special' => SitemapService::special(),
             (bool) preg_match('/^posts-(\d{4}-\d{2})(?:-(\d+))?$/', $part, $m) => SitemapService::posts($m[1], (int) ($m[2] ?? 1)),
             default => null,
         };

@@ -11,6 +11,7 @@ return [
         'dashboard.view', 'news.*', 'assignments.*', 'breaking.*', 'live_blogs.*', 'videos.*', 'galleries.*', 'web_stories.*', 'audio.*',
         'categories.view', 'topics.*', 'tags.*', 'locations.view', 'media.*', 'comments.*', 'fact_checks.*', 'news_tips.*',
         'epaper.view', 'reporters.view', 'applications.view', 'analytics.view', 'reports.view', 'polls.*',
+        'elections.view', 'elections.create', 'elections.edit', 'sports.view', 'sports.create', 'sports.edit',
     ]],
     'reporter'    => ['name' => 'Reporter', 'description' => 'अपनी ख़बरें लिखना, असाइनमेंट देखना, अपना प्रदर्शन देखना।', 'level' => 30, 'permissions' => [
         'dashboard.view', 'news.view', 'news.create', 'news.edit', 'assignments.view', 'media.view', 'media.create',

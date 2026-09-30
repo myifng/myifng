@@ -18,7 +18,8 @@ $csv = static fn(string $k) => can('reports.export') ? '<a class="small" href="'
     <h1>न्यूज़रूम रिपोर्ट</h1>
     <p><?= e($r['label']) ?> · <?= hindi_date($r['from']) ?><?= $r['from'] !== $r['to'] ? ' – ' . hindi_date($r['to']) : '' ?></p>
   </div>
-  <?php if (can('analytics.view')): ?><a class="btn btn-outline-secondary" href="<?= e(route('admin.analytics.index') . $qs) ?>"><i class="fa-solid fa-chart-line me-1"></i> एनालिटिक्स</a><?php endif; ?>
+  <div class="d-flex gap-2 flex-wrap"><a class="btn btn-outline-secondary" href="<?= e(route('admin.reports.coverage')) ?>"><i class="fa-solid fa-map-location-dot me-1"></i> लोकल कवरेज</a>
+  <?php if (can('analytics.view')): ?><a class="btn btn-outline-secondary" href="<?= e(route('admin.analytics.index') . $qs) ?>"><i class="fa-solid fa-chart-line me-1"></i> एनालिटिक्स</a><?php endif; ?></div>
 </div>
 <?= $this->insert('admin/analytics/_range', ['r' => $r, 'action' => route('admin.reports.index')]) ?>
 

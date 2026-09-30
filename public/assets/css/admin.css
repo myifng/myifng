@@ -443,6 +443,7 @@ body.soon-page { margin: 0; min-height: 100vh; display: grid; place-items: cente
 @media (max-width: 1399px) { .hb { grid-template-columns: 220px minmax(0, 1fr); } .hb-preview { display: none; } }
 @media (max-width: 991px) {
   .settings-shell, .menu-builder, .hb { grid-template-columns: 1fr; }
+  .settings-shell > *, .menu-builder > *, .hb > * { min-width: 0; }
   .settings-nav { position: static; display: flex; overflow-x: auto; gap: 4px; }
   .settings-nav a { white-space: nowrap; }
   .mb-add, .hb-palette { position: static; }
@@ -885,3 +886,32 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 .rt-pages li span { min-width: 0; }
 .rank-admin { margin: 0; padding: 8px 16px 12px 34px; display: grid; gap: 6px; font-size: 14px; }
 .min-w-0 { min-width: 0; }
+
+/* ---------- Phase 14: फ़ैक्ट चेक ---------- */
+.fc-false { --fc: #c62828; } .fc-misleading { --fc: #d9730d; } .fc-partly { --fc: #b58a00; } .fc-unverified { --fc: #6b6b78; } .fc-true { --fc: #1b8a4a; }
+.fc-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--fc, #666); color: #fff; font-weight: 700; font-size: 13px; line-height: 1; padding: 5px 9px; border-radius: 4px; white-space: nowrap; }
+.fc-badge.sm { font-size: 12px; padding: 4px 7px; }
+.fc-verdicts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.fc-pick { position: relative; cursor: pointer; }
+.fc-pick input { position: absolute; opacity: 0; }
+.fc-pick span { display: block; border: 2px solid var(--line); border-radius: 8px; padding: 8px 10px; font-weight: 600; color: var(--fc); }
+.fc-pick input:checked + span { border-color: var(--fc); background: color-mix(in srgb, var(--fc) 12%, transparent); }
+.fc-pick input:focus-visible + span { outline: 2px solid var(--fc); outline-offset: 2px; }
+/* चुनाव / खेल */
+.party-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; }
+.cand-table .vote-input { font-variant-numeric: tabular-nums; }
+.cand-table td { vertical-align: top; }
+.comm-type { position: relative; cursor: pointer; }
+.comm-type input { position: absolute; opacity: 0; }
+.comm-type span { display: inline-block; border: 1px solid var(--line); border-radius: 99px; padding: 5px 11px; font-size: 13px; font-weight: 600; }
+.comm-type input:checked + span { background: var(--brand); border-color: var(--brand); color: #fff; }
+.comm-type input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+.comm-list { list-style: none; margin: 0; padding: 0; max-height: 620px; overflow-y: auto; }
+.comm-list li { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 8px; padding: 9px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.comm-list .cm-mk { font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.comm-list small { display: block; color: var(--muted); font-size: 11px; }
+.comm-list li.c-four { border-left: 4px solid #1d6fd6; } .comm-list li.c-six { border-left: 4px solid #7b3fe4; } .comm-list li.c-wicket, .comm-list li.c-red { border-left: 4px solid #c62828; }
+.comm-list li.c-goal { border-left: 4px solid #13803f; } .comm-list li.c-yellow { border-left: 4px solid #e0a100; } .comm-list li.c-hl { border-left: 4px solid var(--brand); }
+.form-text { overflow-wrap: anywhere; }
+/* होमपेज बिल्डर: छोटे फ़ोन पर सेक्शन की पंक्ति टूटे (पहले साइडवेज़ स्क्रोल होता था) */
+@media (max-width: 575px) { .hb-head { flex-wrap: wrap; } .hb-name { flex-basis: calc(100% - 90px); } .hb-devices { display: none; } .hb-actions { margin-left: auto; } }

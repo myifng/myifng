@@ -1607,3 +1607,75 @@
     });
   });
 })();
+
+/* ==========================================================
+   Phase 14: चुनाव (उम्मीदवार की पंक्ति, पार्टी बदलें), खेल (कमेंट्री)
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var add = $('[data-cand-add]'), body = $('[data-cand-body]'), tpl = $('[data-cand-tpl]');
+  if (add && body && tpl) {
+    add.addEventListener('click', function () {
+      var i = 'n' + Date.now().toString(36);
+      body.insertAdjacentHTML('beforeend', tpl.innerHTML.replace(/__i__/g, i));
+      var inp = body.lastElementChild && $('input[name$="[name]"]', body.lastElementChild); if (inp) inp.focus();
+    });
+  }
+  // वोट के खाने में सिर्फ़ अंक (कॉमा/स्पेस हटें)
+  document.addEventListener('input', function (e) {
+    if (e.target.classList && e.target.classList.contains('vote-input')) e.target.value = e.target.value.replace(/[^0-9]/g, '');
+  });
+  var pf = $('[data-party-form]');
+  if (pf) {
+    $$('[data-party-edit]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var d = JSON.parse(b.dataset.partyEdit);
+        ['id', 'name', 'short_name', 'color', 'alliance', 'sort_order', 'sport', 'country'].forEach(function (k) { var el = pf.elements[k]; if (el) el.value = d[k] == null ? '' : d[k]; });
+        var t = $('[data-party-title]'); if (t) t.textContent = 'बदलें: ' + d.short_name;
+        pf.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        pf.elements.name.focus();
+      });
+    });
+    var rs = $('[data-party-reset]', pf);
+    if (rs) rs.addEventListener('click', function () { setTimeout(function () { pf.elements.id.value = ''; var t = $('[data-party-title]'); if (t) t.textContent = t.dataset.newLabel || 'नया'; }, 0); });
+  }
+})();
+
+/* खेल: लाइव कंसोल की कमेंट्री (बिना रीलोड) */
+(function () {
+  'use strict';
+  var box = document.querySelector('[data-comm-console]');
+  if (!box) return;
+  var form = box.querySelector('[data-comm-form]'), list = box.querySelector('[data-comm-list]');
+  var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+  var send = function (url, method, fd) {
+    return fetch(url, { method: method, body: fd, credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } }).then(function (r) { return r.json(); });
+  };
+  var esc = function (t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+  if (form) form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = new FormData(form), btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    send(box.dataset.url, 'POST', fd).then(function (j) {
+      btn.disabled = false;
+      if (!j.ok) { alert(j.message || 'नहीं जुड़ा'); return; }
+      var it = j.item, li = document.createElement('li'), cls = { four: 'c-four', six: 'c-six', wicket: 'c-wicket', goal: 'c-goal', yellow: 'c-yellow', red: 'c-red', highlight: 'c-hl' }[it.type];
+      if (cls) li.className = cls;
+      li.dataset.id = it.id;
+      li.innerHTML = '<span class="cm-mk">' + esc(it.marker || '') + '</span><div>' + (it.type !== 'info' ? '<b>' + esc(it.label) + '</b> ' : '') + esc(it.text) + '<small>' + esc(it.created_at.slice(11, 16)) + '</small></div><button type="button" class="btn btn-sm btn-link text-danger p-0" data-comm-del aria-label="हटाएँ" title="हटाएँ"><i class="fa-solid fa-xmark"></i></button>';
+      var empty = list.querySelector('[data-empty]'); if (empty) empty.remove();
+      list.insertBefore(li, list.firstChild);
+      form.elements.text.value = '';
+      form.elements.text.focus();
+    }).catch(function () { btn.disabled = false; alert('नेटवर्क की दिक्कत'); });
+  });
+  list.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-comm-del]');
+    if (!b || !confirm('यह कमेंट्री हटाएँ?')) return;
+    var li = b.closest('li'), fd = new FormData();
+    fd.append('_method', 'DELETE');
+    send(box.dataset.del.replace(/0$/, li.dataset.id), 'POST', fd).then(function (j) { if (j.ok) li.remove(); });
+  });
+})();

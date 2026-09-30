@@ -47,6 +47,9 @@ final class LocationController extends FrontController
         $parentName = count($chain) > 1 ? $chain[count($chain) - 2]['name'] : '';
         return $this->listing([
             'side' => $this->sidebar(null, (int) $loc['id'], $loc['name'] . ' में लोकप्रिय'),
+            // Phase 14: इलाक़े की बड़ी ख़बर, वीडियो/फ़ोटो, आसपास, रिपोर्टर (सिर्फ़ पहले पेज पर)
+            'local' => $items->page === 1 ? ['top' => \App\Services\LocalService::topStory((int) $loc['id']), 'media' => \App\Services\LocalService::media((int) $loc['id'], 6),
+                'nearby' => \App\Services\LocalService::nearby($loc, 12), 'reporters' => \App\Services\LocalService::reporters((int) $loc['id'], 6)] : null,
             'heading' => $loc['name'] . ' समाचार', 'desc' => $parentName ? $parentName . ' · ' . ($loc['name_en'] ?? '') : ($loc['name_en'] ?? null),
             'crumbs' => $crumbs, 'chips' => $chips, 'chipsLabel' => 'यहाँ के इलाक़े', 'items' => $items, 'actions' => $actions,
             'empty' => $loc['name'] . ' की अभी कोई ख़बर नहीं है।',

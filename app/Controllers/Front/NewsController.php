@@ -63,6 +63,7 @@ final class NewsController extends FrontController
         }
         [$cOpen, $cWhy] = \App\Services\CommentService::open($news);
         [$cThread, $cCount] = $isPreview ? [[], 0] : \App\Services\CommentService::thread((int) $news['id']);
+        $engage['factchecks'] = $isPreview ? [] : \App\Services\FactCheckService::forNews((int) $news['id']); // Phase 14
         $engage['comments'] = ['open' => $cOpen && !$isPreview, 'why' => $cWhy, 'thread' => $cThread, 'count' => $cCount, 'enabled' => setting('comments_enabled', '1') === '1' && (int) ($news['allow_comments'] ?? 1)];
         $faq = SeoService::faqItems($news['faq'] ?? null);
         $live = LiveBlogService::forNews((int) $news['id']);

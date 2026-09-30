@@ -86,9 +86,9 @@ return [
         // ---------- Phase 13-14 ----------
         'analytics'    => ['label' => 'एनालिटिक्स', 'icon' => 'fa-chart-line', 'group' => 'insights', 'phase' => 13, 'route' => 'admin.analytics.index', 'actions' => ['view', 'export']],
         'reports'      => ['label' => 'न्यूज़रूम रिपोर्ट', 'icon' => 'fa-chart-pie', 'group' => 'insights', 'phase' => 13, 'route' => 'admin.reports.index', 'actions' => ['view', 'export']],
-        'fact_checks'  => ['label' => 'फ़ैक्ट चेक', 'icon' => 'fa-circle-check', 'group' => 'special', 'phase' => 14, 'actions' => [...$crud, 'approve', 'publish']],
-        'elections'    => ['label' => 'चुनाव केंद्र', 'icon' => 'fa-check-to-slot', 'group' => 'special', 'phase' => 14, 'actions' => [...$crud, 'manage']],
-        'sports'       => ['label' => 'खेल केंद्र', 'icon' => 'fa-trophy', 'group' => 'special', 'phase' => 14, 'actions' => [...$crud, 'manage']],
+        'fact_checks'  => ['label' => 'फ़ैक्ट चेक', 'icon' => 'fa-circle-check', 'group' => 'special', 'phase' => 14, 'route' => 'admin.fact_checks.index', 'actions' => [...$crud, 'approve', 'publish']],
+        'elections'    => ['label' => 'चुनाव केंद्र', 'icon' => 'fa-check-to-slot', 'group' => 'special', 'phase' => 14, 'route' => 'admin.elections.index', 'actions' => [...$crud, 'manage']],
+        'sports'       => ['label' => 'खेल केंद्र', 'icon' => 'fa-trophy', 'group' => 'special', 'phase' => 14, 'route' => 'admin.sports.index', 'actions' => [...$crud, 'manage']],
 
         // ---------- Phase 15 ----------
         'backups'      => ['label' => 'बैकअप', 'icon' => 'fa-database', 'group' => 'system', 'phase' => 15, 'actions' => ['view', 'create', 'delete', 'manage']],

@@ -135,6 +135,25 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->post('/form/{slug:[a-z0-9-]+}', [FormController::class, 'submit'])->name('form.submit')->middleware('throttle:8,10');
     $r->get('/form/{slug:[a-z0-9-]+}/done', [FormController::class, 'done'])->name('form.done');
     $r->get('/send-news', [FormController::class, 'sendNews'])->name('send_news');
+    // Phase 14: फ़ैक्ट चेक, चुनाव, खेल, लोकल
+    $r->get('/fact-check', [\App\Controllers\Front\FactCheckController::class, 'index'])->name('factcheck.index');
+    $r->get('/fact-check/{slug:[a-z0-9-]+}', [\App\Controllers\Front\FactCheckController::class, 'show'])->name('factcheck.show');
+    $r->get('/elections', [\App\Controllers\Front\ElectionController::class, 'index'])->name('elections.index');
+    $r->get('/elections/{slug:[a-z0-9-]+}', [\App\Controllers\Front\ElectionController::class, 'show'])->name('elections.show');
+    $r->get('/elections/{slug:[a-z0-9-]+}/live', [\App\Controllers\Front\ElectionController::class, 'live'])->name('elections.live');
+    $r->get('/elections/{slug:[a-z0-9-]+}/{seat:[a-z0-9-]+}', [\App\Controllers\Front\ElectionController::class, 'seat'])->name('elections.seat');
+    $r->post('/api/v1/elections/{slug:[a-z0-9-]+}/results', [\App\Controllers\Api\DataController::class, 'electionResults'])->name('api.elections.results')->middleware('throttle:120,5');
+    $r->post('/api/v1/matches/{id:\d+}', [\App\Controllers\Api\DataController::class, 'matchUpdate'])->name('api.matches.update')->middleware('throttle:600,5');
+    $spc = \App\Controllers\Front\SportsController::class;
+    $r->get('/sports', [$spc, 'index'])->name('sports.index');
+    $r->get('/sports/series/{slug:[a-z0-9-]+}', [$spc, 'tournament'])->name('sports.tournament');
+    $r->get('/sports/team/{slug:[a-z0-9-]+}', [$spc, 'team'])->name('sports.team');
+    $r->get('/sports/match/{id:\d+}/live', [$spc, 'live'])->name('sports.live');
+    $r->get('/sports/match/{id:\d+}/{slug:[a-z0-9-]+}', [$spc, 'match'])->name('sports.match');
+    $r->get('/sports/match/{id:\d+}', [$spc, 'match'])->name('sports.match.short');
+    $r->get('/local', [\App\Controllers\Front\LocalController::class, 'index'])->name('local');
+    $r->get('/my-city', [\App\Controllers\Front\LocalController::class, 'myCity'])->name('my_city');
+    // @phase14-web
     $r->get('/complaint', [FormController::class, 'complaint'])->name('complaint');
     $r->get('/complaint/track', [FormController::class, 'track'])->name('complaint.track');
     $r->post('/complaint/track', [FormController::class, 'track'])->name('complaint.track.post')->middleware('throttle:10,15');
