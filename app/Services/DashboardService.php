@@ -32,6 +32,32 @@ final class DashboardService
 
     /* ---------- कार्ड के मान ---------- */
 
+    private static function viewsToday(): array
+    {
+        AnalyticsService::fresh();
+        $t = AnalyticsService::totals(date('Y-m-d'), date('Y-m-d'));
+        $y = AnalyticsService::totals(date('Y-m-d', strtotime('-1 day')), date('Y-m-d', strtotime('-1 day')));
+        return ['value' => $t['views'], 'sub' => 'विज़िटर ' . num($t['visitors']) . ' · कल ' . num($y['views'])];
+    }
+
+    private static function readersNow(): array
+    {
+        $r = AnalyticsService::realtime(5);
+        return ['value' => $r['readers'], 'sub' => 'पिछले 5 मिनट · ' . num($r['views']) . ' व्यू'];
+    }
+
+    /** रिपोर्टर: अपनी ख़बरों के व्यू (सिर्फ़ जिनकी ख़बरें हैं) */
+    private static function myPerformance(): array
+    {
+        $id = (int) auth()->id();
+        if (!db()->value('SELECT 1 FROM {p}news WHERE reporter_id = ? LIMIT 1', [$id]) || can('analytics.view')) {
+            return ['skip' => true];
+        }
+        $v = (int) db()->value("SELECT COALESCE(SUM(views),0) FROM {p}analytics_daily WHERE dim = 'reporter' AND dim_key = ? AND day >= ?", [(string) $id, date('Y-m-d', strtotime('-6 days'))]);
+        $p = (int) db()->value("SELECT COUNT(*) FROM {p}news WHERE reporter_id = ? AND status = 'published' AND published_at >= NOW() - INTERVAL 7 DAY", [$id]);
+        return ['value' => $v, 'sub' => 'इस हफ़्ते प्रकाशित: ' . num($p)];
+    }
+
     private static function users(): array
     {
         $r = db()->first("SELECT COUNT(*) total, SUM(status = 'active') active FROM {p}users WHERE deleted_at IS NULL");

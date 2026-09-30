@@ -84,8 +84,8 @@ return [
         'careers'      => ['label' => 'करियर / इंटर्नशिप', 'icon' => 'fa-briefcase', 'group' => 'audience', 'phase' => 12, 'route' => 'admin.careers.index', 'actions' => [...$crud, 'export']],
 
         // ---------- Phase 13-14 ----------
-        'analytics'    => ['label' => 'एनालिटिक्स', 'icon' => 'fa-chart-line', 'group' => 'insights', 'phase' => 13, 'actions' => ['view', 'export']],
-        'reports'      => ['label' => 'न्यूज़रूम रिपोर्ट', 'icon' => 'fa-chart-pie', 'group' => 'insights', 'phase' => 13, 'actions' => ['view', 'export']],
+        'analytics'    => ['label' => 'एनालिटिक्स', 'icon' => 'fa-chart-line', 'group' => 'insights', 'phase' => 13, 'route' => 'admin.analytics.index', 'actions' => ['view', 'export']],
+        'reports'      => ['label' => 'न्यूज़रूम रिपोर्ट', 'icon' => 'fa-chart-pie', 'group' => 'insights', 'phase' => 13, 'route' => 'admin.reports.index', 'actions' => ['view', 'export']],
         'fact_checks'  => ['label' => 'फ़ैक्ट चेक', 'icon' => 'fa-circle-check', 'group' => 'special', 'phase' => 14, 'actions' => [...$crud, 'approve', 'publish']],
         'elections'    => ['label' => 'चुनाव केंद्र', 'icon' => 'fa-check-to-slot', 'group' => 'special', 'phase' => 14, 'actions' => [...$crud, 'manage']],
         'sports'       => ['label' => 'खेल केंद्र', 'icon' => 'fa-trophy', 'group' => 'special', 'phase' => 14, 'actions' => [...$crud, 'manage']],

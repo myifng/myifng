@@ -48,6 +48,11 @@ class Response
         return $this;
     }
 
+    public function getHeader(string $name): ?string
+    {
+        return $this->headers[$name] ?? null;
+    }
+
     public function status(): int
     {
         return $this->status;

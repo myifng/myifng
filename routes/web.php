@@ -119,6 +119,8 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     // Phase 11: टिप्पणी, पोल, न्यूज़लेटर, वेब पुश
     $r->post('/news/{slug:[a-z0-9-]+}/comments', [EngageController::class, 'comment'])->name('comments.store')->middleware('throttle:5,10');
     $r->get('/poll/{id:\d+}', [EngageController::class, 'poll'])->name('poll');
+    $r->post('/api/share', [EngageController::class, 'share'])->name('api.share')->middleware('throttle:60,10');
+    $r->get('/trending', [\App\Controllers\Front\TrendingController::class, 'index'])->name('trending');
     $r->post('/poll/{id:\d+}/vote', [EngageController::class, 'vote'])->name('poll.vote')->middleware('throttle:20,10');
     $r->post('/newsletter', [EngageController::class, 'subscribe'])->name('newsletter.subscribe')->middleware('throttle:5,30');
     $r->get('/newsletter/confirm/{token:[a-f0-9]{40}}', [EngageController::class, 'confirm'])->name('newsletter.confirm');

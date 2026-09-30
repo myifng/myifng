@@ -21,6 +21,7 @@ final class CategoryController extends FrontController
         }
         $parent = $cat['parent_id'] ? Category::find((int) $cat['parent_id']) : null;
         \App\Services\AdService::setContext([(int) $cat['id'], (int) ($parent['id'] ?? 0)]);
+        \App\Services\AnalyticsService::context(['type' => 'category', 'id' => $cat['id'], 'category_id' => $cat['id']]);
         $siblingsOf = $parent ? (int) $parent['id'] : (int) $cat['id'];
         $subs = db()->all("SELECT name, slug FROM {p}categories WHERE parent_id = ? AND status = 'active' ORDER BY sort_order", [$siblingsOf]);
         [$w, $p] = NewsQuery::categoryWhere((int) $cat['id']);
@@ -40,6 +41,7 @@ final class CategoryController extends FrontController
         }
         $canonical = route('category', ['slug' => $cat['slug']]) . ($items->page > 1 ? '?page=' . $items->page : '');
         return $this->listing([
+            'side' => $this->sidebar((int) $cat['id'], null, $cat['name'] . ' में लोकप्रिय'),
             'heading' => $cat['name'], 'desc' => $cat['description'], 'crumbs' => $crumbs, 'chips' => $chips, 'items' => $items,
             'banner' => $cat['image'], 'color' => $cat['color'], 'icon' => $cat['icon'],
             'seo' => [

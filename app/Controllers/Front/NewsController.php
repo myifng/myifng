@@ -26,6 +26,7 @@ final class NewsController extends FrontController
             throw new HttpException(404);
         }
         NewsQuery::countView($news);
+        \App\Services\AnalyticsService::context(['type' => 'news', 'id' => $news['id'], 'category_id' => $news['category_id'], 'location_id' => $news['location_id'], 'reporter_id' => $news['reporter_id']]);
         return $this->render($news, false);
     }
 

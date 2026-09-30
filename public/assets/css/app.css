@@ -979,3 +979,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .job-type { background: var(--brand); color: #fff; border-radius: 3px; padding: 0 8px; font-weight: 700; font-family: var(--head); }
 .job-type.t-internship { background: #1f6feb; }
 .job-apply { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+/* Phase 13: ट्रेंडिंग पेज */
+.tr-filter { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+.tr-filter select { flex: 1 1 140px; min-width: 0; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: inherit; padding: 7px 10px; border-radius: 4px; }
+.tr-tags a { font-weight: 500; }
+.ranked-list { list-style: none; margin: 0; padding: 0 16px; }
+.ranked-list > li { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 6px 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ranked-list > li:last-child { border-bottom: 0; }
+.ranked-list .rk { font-family: var(--head); font-weight: 800; font-size: 28px; line-height: 1.1; color: color-mix(in srgb, var(--brand) 60%, var(--muted)); }
+.ranked-list .rk-note { grid-column: 2; font-size: 13px; color: var(--muted); }
+.ranked-list .card { border: 0; padding: 0; margin: 0; }
+@media (max-width: 480px) { .ranked-list > li { grid-template-columns: 28px minmax(0, 1fr); } .ranked-list .rk { font-size: 22px; } }

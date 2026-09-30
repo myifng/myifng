@@ -28,6 +28,7 @@ final class GalleryController extends FrontController
     {
         $g = MultimediaService::find('gallery', $slug) ?? throw new HttpException(404);
         NewsQuery::hit('galleries', (int) $g['id']);
+        \App\Services\AnalyticsService::context(['type' => 'gallery', 'id' => $g['id']]);
         $photos = db()->all('SELECT * FROM {p}gallery_photos WHERE gallery_id = ? ORDER BY sort_order, id', [$g['id']]);
         $loc = $g['location_id'] ? db()->first('SELECT name, path FROM {p}locations WHERE id = ?', [$g['location_id']]) : null;
         $related = MultimediaService::list('gallery', 'x.id <> ?', [$g['id']], 4);

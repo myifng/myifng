@@ -6,6 +6,10 @@
  */
 return [
     'cards' => [
+        // Phase 13
+        'views_today'     => ['label' => 'आज के पेज व्यू', 'icon' => 'fa-chart-line', 'module' => 'analytics', 'permission' => 'analytics.view', 'provider' => 'viewsToday', 'route' => 'admin.analytics.index', 'query' => 'range=today'],
+        'readers_now'     => ['label' => 'अभी पढ़ रहे', 'icon' => 'fa-bolt', 'module' => 'analytics', 'permission' => 'analytics.view', 'provider' => 'readersNow', 'route' => 'admin.analytics.index'],
+        'my_performance'  => ['label' => 'मेरी ख़बरों के व्यू (7 दिन)', 'icon' => 'fa-chart-simple', 'module' => 'reports', 'permission' => 'news.create', 'provider' => 'myPerformance', 'route' => 'admin.performance'],
         // Phase 4
         'news_today'      => ['label' => 'आज की ख़बरें', 'icon' => 'fa-newspaper', 'module' => 'news', 'permission' => 'news.view', 'provider' => 'newsToday', 'route' => 'admin.news.index'],
         'news_pending'    => ['label' => 'मंज़ूरी बाकी', 'icon' => 'fa-hourglass-half', 'module' => 'news', 'permission' => 'news.approve', 'provider' => 'newsPending', 'route' => 'admin.news.index', 'query' => 'status=desk'],

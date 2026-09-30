@@ -153,7 +153,13 @@
     var palette = { brand: brand, muted: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#5b5762' : '#c9c5cc' };
     $$('canvas[data-chart]').forEach(function (cv) {
       var cfg; try { cfg = JSON.parse(cv.dataset.chart); } catch (e) { return; }
-      charts.push(new Chart(cv, {
+      if (cfg.type === 'doughnut') { // Phase 13: हिस्सेदारी (डिवाइस, स्रोत)
+        var pal = [brand, '#2f7de1', '#1f9d55', '#e0a100', '#8e5bd6', '#0fa3b1', palette.muted];
+        var dc = new Chart(cv, { type: 'doughnut', data: { labels: cfg.labels, datasets: cfg.datasets.map(function (d) { return { label: d.label, data: d.data, backgroundColor: pal, borderWidth: 0 }; }) },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'right', labels: { color: ink, usePointStyle: true, boxWidth: 8, font: { family: 'Mukta' } } } } } });
+        cv._chart = dc; charts.push(dc); return;
+      }
+      charts.push(cv._chart = new Chart(cv, {
         type: cfg.type || 'bar',
         data: {
           labels: cfg.labels,
@@ -176,6 +182,26 @@
   }
   drawCharts();
   document.addEventListener('themechange', drawCharts);
+
+  /* Phase 13: रियलटाइम पाठक (हर 15 सेकंड; टैब छुपा हो तो नहीं) */
+  var rt = $('[data-realtime]');
+  if (rt) {
+    var esc = function (t) { var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; };
+    var fmt = function (n) { return Number(n).toLocaleString('hi-IN'); };
+    var tick = function () {
+      if (document.hidden) return;
+      fetch(rt.dataset.realtime, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+        if (!j || !j.ok) return;
+        $$('[data-rt="readers"]').forEach(function (el) { el.textContent = fmt(j.readers); });
+        $$('[data-rt="at"]').forEach(function (el) { el.textContent = j.at; });
+        var ol = $('[data-rt="pages"]');
+        if (ol) ol.innerHTML = j.pages.length ? j.pages.map(function (p) { return '<li><span class="text-truncate" title="' + esc(p.path) + '">' + esc(p.title) + '</span><b>' + fmt(p.readers) + '</b></li>'; }).join('') : '<li class="text-body-secondary">अभी कोई पाठक नहीं।</li>';
+        var cv = $('[data-rt-chart]');
+        if (cv && cv._chart) { cv._chart.data.labels = j.series.map(function (x) { return x.m; }); cv._chart.data.datasets[0].data = j.series.map(function (x) { return x.c; }); cv._chart.update('none'); }
+      }).catch(function () {});
+    };
+    setInterval(tick, 15000);
+  }
 })();
 
 /* ==========================================================

@@ -865,3 +865,23 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 .sub-meta dt { color: var(--muted); font-weight: 400; }
 .sub-meta dd { margin-bottom: 6px; overflow-wrap: anywhere; }
 @media (max-width: 575.98px) { .sub-data { grid-template-columns: 1fr; } .sub-data dt { border-bottom: 0; padding-bottom: 0; } .fb-row { flex-direction: column; } .fb-grip { flex-direction: row; } }
+
+/* ---------- Phase 13: एनालिटिक्स ---------- */
+.range-form { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 16px; }
+.range-custom { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.range-custom input { width: 150px; }
+.chart-box.xs { height: 170px; }
+.stat-list { list-style: none; margin: 0; padding: 4px 16px 12px; display: grid; gap: 8px; }
+.stat-list > li { display: block; min-width: 0; }
+.bl-row { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; min-width: 0; }
+.bl-row span { min-width: 0; }
+.bl-bar { height: 6px; background: color-mix(in srgb, var(--line) 70%, transparent); border-radius: 99px; overflow: hidden; margin-top: 3px; }
+.bl-bar i { display: block; height: 100%; background: var(--brand); border-radius: 99px; }
+.rt-dot { color: #1f9d55; font-size: 9px; vertical-align: middle; animation: rtpulse 1.6s infinite; }
+@keyframes rtpulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .rt-dot { animation: none; } }
+.rt-pages { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.rt-pages li { display: flex; justify-content: space-between; gap: 8px; min-width: 0; }
+.rt-pages li span { min-width: 0; }
+.rank-admin { margin: 0; padding: 8px 16px 12px 34px; display: grid; gap: 6px; font-size: 14px; }
+.min-w-0 { min-width: 0; }

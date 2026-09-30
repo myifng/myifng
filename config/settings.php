@@ -153,6 +153,12 @@ return [
             'search_console' => ['label' => 'Google Search Console verification', 'type' => 'text', 'rules' => 'nullable|max:120', 'help' => 'सिर्फ़ content="…" वाला मान'],
             'header_code' => ['label' => '<head> में अतिरिक्त कोड', 'type' => 'code', 'help' => 'सिर्फ़ भरोसेमंद कोड (जैसे AdSense)। हर बदलाव ऑडिट लॉग में दर्ज होता है।'],
             'footer_code' => ['label' => '</body> से पहले अतिरिक्त कोड', 'type' => 'code'],
+            // Phase 13: अपना एनालिटिक्स और ट्रेंडिंग
+            'analytics_enabled' => ['label' => 'साइट का अपना एनालिटिक्स (पेज व्यू, विज़िटर, रियलटाइम)', 'type' => 'switch', 'default' => '1', 'width' => 6, 'help' => 'कुकी के बिना; IP सेव नहीं होता।'],
+            'analytics_exclude_staff' => ['label' => 'लॉग-इन स्टाफ़ के व्यू न गिनें', 'type' => 'switch', 'default' => '1', 'width' => 6],
+            'analytics_raw_days' => ['label' => 'हर व्यू का ब्योरा कितने दिन रखें', 'type' => 'number', 'rules' => 'required|integer|min:3|max:365', 'default' => '35', 'width' => 4, 'help' => 'उसके बाद सिर्फ़ रोज़ का सारांश रहता है।'],
+            'trending_hours' => ['label' => 'ट्रेंडिंग: कितने घंटे के व्यू/शेयर', 'type' => 'number', 'rules' => 'required|integer|min:3|max:168', 'default' => '24', 'width' => 4],
+            'trending_max_days' => ['label' => 'ट्रेंडिंग: ख़बर अधिकतम कितने दिन पुरानी', 'type' => 'number', 'rules' => 'required|integer|min:1|max:60', 'default' => '7', 'width' => 4],
         ],
     ],
     'seo' => [

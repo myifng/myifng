@@ -50,6 +50,7 @@
       <ul class="dropdown-menu dropdown-menu-end shadow">
         <li><a class="dropdown-item" href="<?= e(route('admin.profile')) ?>"><i class="fa-regular fa-user fa-fw me-2"></i>मेरी प्रोफ़ाइल</a></li>
         <?php if (app('router')->has('admin.portal') && \App\Services\ReporterService::forUser((int) auth()->id())): ?><li><a class="dropdown-item" href="<?= e(route('admin.portal')) ?>"><i class="fa-regular fa-address-card fa-fw me-2"></i>मेरा रिपोर्टर प्रोफ़ाइल</a></li><?php endif; ?>
+        <?php if (app('router')->has('admin.performance') && can('news.create')): ?><li><a class="dropdown-item" href="<?= e(route('admin.performance')) ?>"><i class="fa-solid fa-chart-simple fa-fw me-2"></i>मेरा प्रदर्शन</a></li><?php endif; ?>
         <li><hr class="dropdown-divider"></li>
         <li><form method="post" action="<?= e(route('admin.logout')) ?>"><?= csrf_field() ?><button class="dropdown-item text-danger" type="submit"><i class="fa-solid fa-arrow-right-from-bracket fa-fw me-2"></i>लॉगआउट</button></form></li>
       </ul>

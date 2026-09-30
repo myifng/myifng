@@ -87,6 +87,13 @@ final class App
         }
         $this->securityHeaders($response);
         $response->send();
+        // Phase 13: पेज-व्यू जवाब भेजने के बाद दर्ज हो (पाठक को इंतज़ार नहीं)
+        if ($request->method() === 'GET' && $response->status() === 200) {
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+            \App\Services\AnalyticsService::record($request, $response);
+        }
     }
 
     /** सभी सेवाएँ तैयार करें */

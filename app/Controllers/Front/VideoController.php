@@ -62,6 +62,7 @@ final class VideoController extends FrontController
     {
         $v = MultimediaService::find('video', $slug) ?? throw new HttpException(404);
         NewsQuery::hit('videos', (int) $v['id']);
+        \App\Services\AnalyticsService::context(['type' => 'video', 'id' => $v['id']]);
         $player = match ($v['source']) {
             'youtube' => ($s = EmbedService::youtubeEmbed($v['source_url'])) ? ['type' => 'iframe', 'src' => $s] : null,
             'embed' => ($s = EmbedService::iframeSrc($v['source_url'])) ? ['type' => 'iframe', 'src' => $s, 'sandbox' => true] : null,

@@ -13,6 +13,7 @@ final class SearchController extends FrontController
 {
     public function search(Request $request): Response
     {
+        \App\Services\AnalyticsService::context(['type' => 'search']);
         $q = trim(mb_substr(preg_replace('/\s+/u', ' ', strip_tags($request->str('q'))), 0, 100));
         $cat = max(0, $request->int('category'));
         $items = null;

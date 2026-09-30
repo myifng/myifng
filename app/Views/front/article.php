@@ -34,7 +34,7 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
         <?php if (setting('show_views') === '1'): ?><span><i class="fa-regular fa-eye"></i> <?= num($news['views']) ?></span><?php endif; ?>
       </div>
       <?php if ($share && !$isPreview): ?>
-        <div class="share" aria-label="शेयर करें">
+        <div class="share" aria-label="शेयर करें" data-share-id="<?= (int) $news['id'] ?>" data-share-url="<?= e(route('api.share')) ?>">
           <?php foreach ($share as $k): if (isset($shareLinks[$k])): [$href, $ic, $lab, $cls] = $shareLinks[$k]; ?><a class="<?= e($cls) ?>" href="<?= e($href) ?>" target="_blank" rel="noopener" aria-label="<?= e($lab) ?> पर शेयर करें"><i class="<?= e($ic) ?>"></i></a><?php endif; endforeach; ?>
           <?php if (in_array('copy', $share, true)): ?><button type="button" class="s-cp" data-copy-link="<?= e($shareUrl) ?>" aria-label="लिंक कॉपी करें"><i class="fa-solid fa-link"></i></button><?php endif; ?>
           <?php if (in_array('native', $share, true)): ?><button type="button" class="s-native" data-native-share data-title="<?= e($news['title']) ?>" data-url="<?= e($shareUrl) ?>" aria-label="शेयर करें" hidden><i class="fa-solid fa-share-nodes"></i></button><?php endif; ?>

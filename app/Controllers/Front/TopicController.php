@@ -21,6 +21,7 @@ final class TopicController extends FrontController
             throw new HttpException(404);
         }
         [$w, $p] = NewsQuery::topicWhere((int) $t['id']);
+        \App\Services\AnalyticsService::context(['type' => 'topic', 'id' => $t['id']]);
         $items = NewsQuery::page($w, $p, $this->page($request->int('page', 1)));
         $crumbs = [['होम', url()], [$t['name'], null]];
         return $this->listing([
@@ -42,6 +43,7 @@ final class TopicController extends FrontController
             throw new HttpException(404);
         }
         [$w, $p] = NewsQuery::tagWhere((int) $t['id']);
+        \App\Services\AnalyticsService::context(['type' => 'tag', 'id' => $t['id']]);
         $items = NewsQuery::page($w, $p, $this->page($request->int('page', 1)));
         if ($items->total === 0 && $items->page === 1) {
             throw new HttpException(404); // ख़ाली टैग पेज सर्च इंजन में न जाएँ

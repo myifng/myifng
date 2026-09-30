@@ -161,6 +161,20 @@
     b.hidden = false;
     b.addEventListener('click', function () { navigator.share({ title: b.dataset.title, url: b.dataset.url }).catch(function () {}); });
   });
+  /* शेयर की गिनती (ट्रेंडिंग / सबसे ज़्यादा शेयर): बीकन, पेज नहीं रुकता; GA हो तो इवेंट भी */
+  $$('[data-share-id]').forEach(function (box) {
+    var nets = { 's-wa': 'whatsapp', 's-fb': 'facebook', 's-x': 'x', 's-tg': 'telegram', 's-in': 'linkedin', 's-cp': 'copy', 's-native': 'native' };
+    box.addEventListener('click', function (ev) {
+      var b = ev.target.closest('a, button'), net = null;
+      if (!b) return;
+      Object.keys(nets).forEach(function (c) { if (b.classList.contains(c)) net = nets[c]; });
+      if (!net) return;
+      var fd = new FormData();
+      fd.append('_csrf', ($('meta[name="csrf-token"]') || {}).content || ''); fd.append('news_id', box.dataset.shareId); fd.append('network', net);
+      if (!(navigator.sendBeacon && navigator.sendBeacon(box.dataset.shareUrl, fd))) fetch(box.dataset.shareUrl, { method: 'POST', body: fd, credentials: 'same-origin', keepalive: true }).catch(function () {});
+      if (typeof window.gtag === 'function') window.gtag('event', 'share', { method: net, item_id: box.dataset.shareId, content_type: 'article' });
+    });
+  });
 
   /* रिपोर्टर फ़ॉर्म: चरण (बिना JS पूरा फ़ॉर्म एक साथ), राज्य → ज़िले */
   var sf = $('[data-steps]');

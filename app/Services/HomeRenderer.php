@@ -133,11 +133,16 @@ final class HomeRenderer
             case 'location':
                 return self::locationData($set, $count, $title);
             case 'trending':
-                $items = NewsQuery::flagged('is_trending', $count);
+                $items = TrendingService::trending($count);
                 $tags = NewsQuery::trending(12);
                 return ($items || $tags) ? ['items' => $items, 'tags' => $tags] : null;
             case 'most_read':
-                $items = NewsQuery::mostRead((int) ($set['period'] ?? 7), $count);
+                // Phase 13: पढ़ी/शेयर, श्रेणी या शहर के हिसाब से लोकप्रिय
+                $cat = !empty($set['category']) ? (int) $set['category'] : null;
+                $loc = !empty($set['location']) ? (int) $set['location'] : null;
+                $items = ($set['metric'] ?? 'read') === 'shared'
+                    ? TrendingService::mostShared((int) ($set['period'] ?? 7), $count, $cat, $loc)
+                    : TrendingService::mostRead((int) ($set['period'] ?? 7), $count, $cat, $loc);
                 return $items ? ['items' => $items] : null;
             case 'live_tv':
                 $ch = LiveTvService::main();

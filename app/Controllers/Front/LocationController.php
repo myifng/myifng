@@ -26,6 +26,7 @@ final class LocationController extends FrontController
         }
         $chain = array_values(array_filter([...Location::ancestors($loc), $loc], static fn($l) => $l['path'] !== null));
         \App\Services\AdService::setContext([], array_column([...Location::ancestors($loc), $loc], 'id'));
+        \App\Services\AnalyticsService::context(['type' => 'location', 'id' => $loc['id'], 'location_id' => $loc['id']]);
         $crumbs = [['होम', url()]];
         foreach ($chain as $l) {
             $crumbs[] = [$l['name'], (int) $l['id'] === (int) $loc['id'] ? null : url($l['path'])];
@@ -45,6 +46,7 @@ final class LocationController extends FrontController
         $actions = $canSet ? '<button type="button" class="btn-outline" data-set-city="' . (int) $loc['id'] . '" data-city-name="' . e($loc['name']) . '"' . ($mine ? ' disabled' : '') . '><i class="fa-solid fa-location-dot"></i> ' . ($mine ? 'यह आपका शहर है' : 'इसे मेरा शहर बनाएँ') . '</button>' : '';
         $parentName = count($chain) > 1 ? $chain[count($chain) - 2]['name'] : '';
         return $this->listing([
+            'side' => $this->sidebar(null, (int) $loc['id'], $loc['name'] . ' में लोकप्रिय'),
             'heading' => $loc['name'] . ' समाचार', 'desc' => $parentName ? $parentName . ' · ' . ($loc['name_en'] ?? '') : ($loc['name_en'] ?? null),
             'crumbs' => $crumbs, 'chips' => $chips, 'chipsLabel' => 'यहाँ के इलाक़े', 'items' => $items, 'actions' => $actions,
             'empty' => $loc['name'] . ' की अभी कोई ख़बर नहीं है।',

@@ -87,7 +87,7 @@ $tabs = $desk
             <td><?= $trash ? '<span class="badge-status text-bg-danger"><i class="dot"></i>ट्रैश</span>' : NewsWorkflow::badge($n['status']) ?></td>
             <td class="small text-nowrap">
               <?php if ($n['status'] === 'scheduled' && $n['scheduled_at']): ?><i class="fa-regular fa-clock"></i> <?= hindi_date($n['scheduled_at'], true) ?>
-              <?php elseif ($n['status'] === 'published' && $n['published_at']): ?><?= hindi_date($n['published_at'], true) ?><span class="d-block text-body-secondary"><?= num($n['views']) ?> व्यूज़</span>
+              <?php elseif ($n['status'] === 'published' && $n['published_at']): ?><?= hindi_date($n['published_at'], true) ?><?php if (can('analytics.view')): ?><a class="d-block text-body-secondary" href="<?= e(route('admin.analytics.news', ['id' => $n['id']])) ?>" title="एनालिटिक्स"><i class="fa-solid fa-chart-line"></i> <?= num($n['views']) ?> व्यूज़</a><?php else: ?><span class="d-block text-body-secondary"><?= num($n['views']) ?> व्यूज़</span><?php endif; ?>
               <?php else: ?><?= time_ago($n['updated_at']) ?><?php endif; ?>
             </td>
             <td class="text-end text-nowrap">

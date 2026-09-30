@@ -26,7 +26,10 @@ final class SchedulerMiddleware implements Middleware
                 \App\Services\NotifyEvents::tick();
                 \App\Services\NotificationService::process(50, 15);
                 \App\Services\NewsletterService::process(null, 15);
-                if (cache()->get('scheduler.daily') === null) {
+                $hourly = cache()->get('scheduler.daily') === null;
+                // Phase 13: एनालिटिक्स का सारांश (आज: ~10 मिनट; कल + सफ़ाई: घंटे में एक बार)
+                \App\Services\AnalyticsService::tick($hourly);
+                if ($hourly) {
                     cache()->set('scheduler.daily', time(), 3600);
                     \App\Services\ReporterService::expireDue(); // वैधता ख़त्म हुए रिपोर्टर
                     \App\Services\OtpService::prune();

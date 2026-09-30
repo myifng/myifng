@@ -63,6 +63,7 @@ final class EpaperController extends FrontController
         $e = EpaperService::edition($edition) ?? throw new HttpException(404);
         $issue = EpaperService::issue((int) $e['id'], $date) ?? throw new HttpException(404);
         NewsQuery::hit('epaper_issues', (int) $issue['id']);
+        \App\Services\AnalyticsService::context(['type' => 'epaper', 'id' => $issue['id']]);
         $free = EpaperService::freePages($issue);
         $pages = EpaperService::pages((int) $issue['id']);
         $open = array_values(array_filter($pages, static fn($p) => $p['page_no'] <= $free));

@@ -147,4 +147,11 @@ final class EngageController extends FrontController
         }
         return $this->json(['ok' => true]);
     }
+
+    /** शेयर बटन दबाने की गिनती (Phase 13): ट्रेंडिंग और "सबसे ज़्यादा शेयर" के लिए */
+    public function share(Request $request): Response
+    {
+        $ok = \App\Services\AnalyticsService::share($request->int('news_id'), (string) $request->input('network', ''));
+        return $this->json(['ok' => $ok])->header('Cache-Control', 'no-store');
+    }
 }

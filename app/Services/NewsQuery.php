@@ -130,9 +130,10 @@ final class NewsQuery
     }
 
     /** सबसे ज़्यादा पढ़ी (पिछले X दिन में प्रकाशित ख़बरों के व्यूज़ से) */
+    /** Phase 13: एनालिटिक्स से (पिछले N दिन के असली व्यू), ट्रेंडिंग इंजन के ज़रिए */
     public static function mostRead(int $days = 7, int $limit = 5): array
     {
-        return self::list('n.published_at >= NOW() - INTERVAL ? DAY', [max(1, $days)], $limit, 0, 'n.views DESC, n.published_at DESC');
+        return TrendingService::mostRead($days, $limit);
     }
 
     /** संबंधित: हाथ से चुनी पहले, फिर उसी श्रेणी/टैग की */
@@ -158,17 +159,10 @@ final class NewsQuery
         });
     }
 
-    /** ट्रेंडिंग पट्टी: फ़ीचर्ड टॉपिक + पिछले 7 दिन के सबसे ज़्यादा इस्तेमाल हुए टैग */
+    /** ट्रेंडिंग पट्टी: फ़ीचर्ड टॉपिक + ट्रेंडिंग ख़बरों के टैग */
     public static function trending(int $limit = 10): array
     {
-        return cache()->remember('home.trending', 600, static function () use ($limit): array {
-            $topics = db()->all("SELECT name, slug, 'topic' AS kind FROM {p}topics WHERE status = 'active' AND is_featured = 1 ORDER BY sort_order, name LIMIT 5");
-            $tags = db()->all(
-                "SELECT t.name, t.slug, 'tag' AS kind, COUNT(*) c FROM {p}news_tags nt JOIN {p}tags t ON t.id = nt.tag_id JOIN {p}news n ON n.id = nt.news_id
-                 WHERE " . self::PUBLISHED . ' AND n.published_at >= NOW() - INTERVAL 7 DAY GROUP BY t.id ORDER BY c DESC LIMIT ' . max(1, $limit - count($topics))
-            );
-            return array_merge($topics, $tags);
-        });
+        return TrendingService::tags($limit);
     }
 
     /** एक सत्र में एक ख़बर का एक व्यू; बॉट नहीं */

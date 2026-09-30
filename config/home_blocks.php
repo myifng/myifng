@@ -51,9 +51,11 @@ return [
     'breaking' => ['label' => 'ब्रेकिंग', 'icon' => 'fa-bolt', 'needs' => 'breaking', 'desc' => 'कंट्रोल रूम के चालू आइटम (सूची या बैनर)', 'fields' => [
         'style' => ['label' => 'शैली', 'type' => 'select', 'options' => ['banner' => 'लाल अलर्ट बैनर (होमपेज अलर्ट वाले आइटम)', 'list' => 'समय वाली सूची (सभी चालू आइटम)'], 'default' => 'banner'],
     ]],
-    'trending' => ['label' => 'ट्रेंडिंग', 'icon' => 'fa-fire', 'needs' => 'news', 'desc' => 'ट्रेंडिंग टैग और ख़बरें', 'fields' => ['count' => $count(6)]],
+    'trending' => ['label' => 'ट्रेंडिंग', 'icon' => 'fa-fire', 'needs' => 'news', 'desc' => 'ट्रेंडिंग टैग और ख़बरें (व्यू + शेयर से; एडमिन पिन)', 'fields' => ['count' => $count(6)]],
     'most_read' => ['label' => 'सबसे ज़्यादा पढ़ी गईं', 'icon' => 'fa-ranking-star', 'needs' => 'news', 'desc' => 'नंबर वाली सूची', 'fields' => [
         'count' => $count(5, 10), 'period' => ['label' => 'कितने दिन की', 'type' => 'select', 'options' => ['1' => 'आज', '7' => '7 दिन', '30' => '30 दिन'], 'default' => '7'],
+        'metric' => ['label' => 'किस आधार पर', 'type' => 'select', 'options' => ['read' => 'सबसे ज़्यादा पढ़ी', 'shared' => 'सबसे ज़्यादा शेयर'], 'default' => 'read'],
+        'category' => ['label' => 'श्रेणी (ख़ाली = सभी)', 'type' => 'category'], 'location' => ['label' => 'शहर/लोकेशन (ख़ाली = सभी)', 'type' => 'location'],
     ]],
     'ads' => ['label' => 'विज्ञापन', 'icon' => 'fa-rectangle-ad', 'needs' => 'ads', 'desc' => 'विज्ञापन स्लॉट (विज्ञापन → स्लॉट में बने होमपेज/कस्टम स्लॉट)', 'fields' => [
         'slot' => ['label' => 'विज्ञापन स्लॉट', 'type' => 'adslot', 'default' => 'home_middle'],

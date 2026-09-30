@@ -50,6 +50,8 @@ use App\Controllers\Admin\ReaderController;
 use App\Controllers\Admin\RedirectController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\SeoController;
+use App\Controllers\Admin\AnalyticsController;
+use App\Controllers\Admin\ReportController;
 use App\Controllers\Admin\SubmissionController;
 use App\Controllers\Admin\UserController;
 use App\Controllers\Admin\VideoController;
@@ -387,6 +389,19 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->post('/invoices/{id:\d+}/payments', [InvoiceController::class, 'pay'])->name('invoices.pay')->middleware('can:advertisers.manage');
         $r->delete('/invoices/{id:\d+}/payments/{pid:\d+}', [InvoiceController::class, 'unpay'])->name('invoices.unpay')->middleware('can:advertisers.manage');
         $r->delete('/invoices/{id:\d+}', [InvoiceController::class, 'destroy'])->name('invoices.destroy')->middleware('can:advertisers.manage');
+
+        // ---------- Phase 13: एनालिटिक्स, ट्रेंडिंग, न्यूज़रूम रिपोर्ट ----------
+        $r->get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index')->middleware('can:analytics.view');
+        $r->get('/analytics/realtime', [AnalyticsController::class, 'realtime'])->name('analytics.realtime')->middleware('can:analytics.view');
+        $r->get('/analytics/trending', [AnalyticsController::class, 'trending'])->name('analytics.trending')->middleware('can:analytics.view');
+        $r->post('/analytics/trending', [AnalyticsController::class, 'override'])->name('analytics.trending.override')->middleware('can:analytics.view');
+        $r->post('/analytics/trending/{id:\d+}/remove', [AnalyticsController::class, 'removeOverride'])->name('analytics.trending.remove')->middleware('can:analytics.view');
+        $r->get('/analytics/news/{id:\d+}', [AnalyticsController::class, 'news'])->name('analytics.news')->middleware('can:analytics.view');
+        $r->get('/analytics/{dim:[a-z]+}', [AnalyticsController::class, 'content'])->name('analytics.content')->middleware('can:analytics.view');
+        $r->get('/analytics/{dim:[a-z]+}/export', [AnalyticsController::class, 'export'])->name('analytics.export')->middleware('can:analytics.export');
+        $r->get('/my-performance', [ReportController::class, 'mine'])->name('performance')->middleware('can:news.create');
+        $r->get('/reports', [ReportController::class, 'index'])->name('reports.index')->middleware('can:reports.view');
+        $r->get('/reports/export/{kind:[a-z]+}', [ReportController::class, 'export'])->name('reports.export')->middleware('can:reports.export');
 
         // ---------- Phase 10: SEO कमांड सेंटर और रीडायरेक्ट ----------
         $r->get('/seo', [SeoController::class, 'index'])->name('seo.index')->middleware('can:seo.view');

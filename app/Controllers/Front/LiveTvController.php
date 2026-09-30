@@ -29,6 +29,7 @@ final class LiveTvController extends FrontController
         }
         $canonical = $channel && $slug !== null ? route('live_tv.channel', ['slug' => $channel['slug']]) : route('live_tv');
         $title = $channel ? $channel['name'] . ($channel['is_live'] ? ' · लाइव' : '') : 'लाइव टीवी';
+        \App\Services\AnalyticsService::context(['type' => 'live']);
         return $this->view('front/live-tv', [
             'channel' => $channel, 'player' => $player, 'today' => $today, 'now' => $now, 'channels' => LiveTvService::channels(),
             'videos' => MultimediaService::list('video', '1=1', [], 8),

@@ -11,9 +11,18 @@ use App\Services\NewsQuery;
 abstract class FrontController extends Controller
 {
     /** साइडबार: ताज़ा + सबसे ज़्यादा पढ़ी (5 मिनट कैश) */
-    protected function sidebar(): array
+    /** Phase 13: श्रेणी/शहर के पेज पर "यहाँ लोकप्रिय" भी */
+    protected function sidebar(?int $categoryId = null, ?int $locationId = null, string $hereTitle = ''): array
     {
-        return cache()->remember('home.sidebar', 300, static fn() => ['latest' => NewsQuery::latest(8), 'popular' => NewsQuery::mostRead(7, 5)]);
+        $side = cache()->remember('home.sidebar', 300, static fn() => ['latest' => NewsQuery::latest(8), 'popular' => NewsQuery::mostRead(7, 5)]);
+        if ($categoryId || $locationId) {
+            $here = \App\Services\TrendingService::mostRead(7, 5, $categoryId, $locationId);
+            if ($here) {
+                $side['here'] = ['title' => $hereTitle ?: 'यहाँ लोकप्रिय', 'items' => $here,
+                    'url' => route('trending') . '?' . http_build_query(array_filter(['tab' => 'read', 'cat' => $categoryId, 'loc' => $locationId]))];
+            }
+        }
+        return $side;
     }
 
     /**

@@ -29,6 +29,7 @@ final class WebStoryController extends FrontController
     {
         [$s, $slides] = $this->load($slug);
         NewsQuery::hit('web_stories', (int) $s['id']);
+        \App\Services\AnalyticsService::context(['type' => 'story', 'id' => $s['id']]);
         $url = MultimediaService::url('story', $s);
         $next = MultimediaService::list('story', 'x.id <> ?', [$s['id']], 6);
         return $this->view('front/web-story', ['s' => $s, 'slides' => $slides, 'url' => $url, 'next' => $next, 'poster' => $this->poster($s),

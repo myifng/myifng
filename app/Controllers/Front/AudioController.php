@@ -39,6 +39,7 @@ final class AudioController extends FrontController
     {
         $a = MultimediaService::find('audio', $slug) ?? throw new HttpException(404);
         NewsQuery::hit('audio_items', (int) $a['id']);
+        \App\Services\AnalyticsService::context(['type' => 'audio', 'id' => $a['id']]);
         $src = $a['file'] ? upload_url($a['file']) : EmbedService::safeLink($a['external_url']);
         $more = $a['series_id'] ? MultimediaService::list('audio', 'x.series_id = ? AND x.id <> ?', [$a['series_id'], $a['id']], 8, 0, 'x.episode_no DESC, x.published_at DESC')
             : MultimediaService::list('audio', "x.type = 'news' AND x.id <> ?", [$a['id']], 8);
