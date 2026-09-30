@@ -1533,3 +1533,51 @@
     });
   }
 })();
+
+/* ==========================================================
+   Phase 12: फ़ॉर्म बिल्डर (खाने जोड़ना/हटाना/क्रम), बटन पर पुष्टि
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+
+  // data-confirm-then: ख़बर फ़ॉर्म का अपना हैंडलर है; बाकी जगह यहाँ से
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-confirm-then]');
+    if (!b || b.closest('.news-form')) return;
+    if (!confirm(b.dataset.confirmThen)) e.preventDefault();
+  });
+
+  var list = $('[data-fb-list]');
+  if (!list) return;
+  var tpl = $('[data-fb-template]'), seq = 1000;
+  var sync = function (row) {
+    var t = $('[data-fb-type]', row).value;
+    $$('[data-fb-when]', row).forEach(function (el) { el.hidden = el.dataset.fbWhen.split(',').indexOf(t) === -1; });
+    var req = $('input[name$="[required]"]', row); if (req) req.closest('label').hidden = t === 'heading';
+  };
+  $$('[data-fb-row]', list).forEach(sync);
+  list.addEventListener('change', function (e) { if (e.target.matches('[data-fb-type]')) sync(e.target.closest('[data-fb-row]')); });
+  list.addEventListener('click', function (e) {
+    var row = e.target.closest('[data-fb-row]'); if (!row) return;
+    if (e.target.closest('[data-fb-del]')) {
+      if ($$('[data-fb-row]', list).length <= 1) { alert('कम से कम एक खाना रहना चाहिए।'); return; }
+      if (confirm('यह खाना हटाएँ? (पुराने जमा फ़ॉर्म में इसका डेटा बना रहेगा)')) row.remove();
+    } else if (e.target.closest('[data-fb-up]') && row.previousElementSibling) {
+      list.insertBefore(row, row.previousElementSibling);
+    } else if (e.target.closest('[data-fb-down]') && row.nextElementSibling) {
+      list.insertBefore(row.nextElementSibling, row);
+    }
+  });
+  $('[data-fb-add]').addEventListener('click', function () {
+    var d = document.createElement('div'); d.innerHTML = tpl.innerHTML.replace(/__i__/g, 'n' + (seq++));
+    var row = d.firstElementChild; list.appendChild(row); sync(row); $('input[name$="[label]"]', row).focus();
+  });
+  // सेव से पहले क्रम: DOM का क्रम ही सर्वर का क्रम (fields[...] नाम में इंडेक्स अलग हो सकते हैं)
+  list.closest('form').addEventListener('submit', function () {
+    $$('[data-fb-row]', list).forEach(function (row, i) {
+      $$('[name^="fields["]', row).forEach(function (inp) { inp.name = inp.name.replace(/^fields\[[^\]]+\]/, 'fields[' + i + ']'); });
+    });
+  });
+})();

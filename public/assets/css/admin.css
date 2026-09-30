@@ -844,3 +844,24 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 .cm-a-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
 .cm-a.spam, .cm-a.rejected { opacity: .75; }
 .nl-preview { width: 100%; height: 720px; border: 0; background: #f2f2f2; display: block; }
+
+/* ---------- Phase 12 ---------- */
+.fb-list { display: grid; gap: 10px; margin-bottom: 12px; }
+.fb-row { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--panel-bg); }
+.fb-grip { display: flex; flex-direction: column; gap: 4px; }
+.fb-main { flex: 1; min-width: 0; }
+.fb-del { flex: none; }
+.sub-data { display: grid; grid-template-columns: minmax(120px, 220px) 1fr; margin: 0; }
+.sub-data dt, .sub-data dd { padding: 9px 16px; border-bottom: 1px solid var(--line); margin: 0; }
+.sub-data dt { color: var(--muted); font-weight: 600; font-size: .88rem; }
+.sub-data dd { overflow-wrap: anywhere; }
+.sub-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.sub-file img, .sub-file video { width: 100%; max-height: 180px; object-fit: cover; border-radius: 6px; background: #000; display: block; margin-bottom: 6px; }
+.sub-doc { display: grid; place-items: center; height: 110px; border: 1px dashed var(--line); border-radius: 6px; font-size: 40px; color: var(--muted); margin-bottom: 6px; }
+.sub-timeline { list-style: none; margin: 0; padding: 0; }
+.sub-timeline li { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.sub-timeline li > i { width: 26px; height: 26px; border-radius: 50%; background: var(--line); display: grid; place-items: center; font-size: .75rem; flex: none; }
+.sub-timeline li.t-reply > i { background: var(--brand); color: #fff; }
+.sub-meta dt { color: var(--muted); font-weight: 400; }
+.sub-meta dd { margin-bottom: 6px; overflow-wrap: anywhere; }
+@media (max-width: 575.98px) { .sub-data { grid-template-columns: 1fr; } .sub-data dt { border-bottom: 0; padding-bottom: 0; } .fb-row { flex-direction: column; } .fb-grip { flex-direction: row; } }

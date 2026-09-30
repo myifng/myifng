@@ -21,9 +21,11 @@ use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
 use App\Controllers\Admin\EpaperController;
 use App\Controllers\Admin\EpaperEditionController;
+use App\Controllers\Admin\FormBuilderController;
 use App\Controllers\Admin\GalleryController;
 use App\Controllers\Admin\HomepageController;
 use App\Controllers\Admin\InvoiceController;
+use App\Controllers\Admin\JobController;
 use App\Controllers\Admin\LiveBlogController;
 use App\Controllers\Admin\LiveTvController;
 use App\Controllers\Admin\LocationController;
@@ -48,6 +50,7 @@ use App\Controllers\Admin\ReaderController;
 use App\Controllers\Admin\RedirectController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\SeoController;
+use App\Controllers\Admin\SubmissionController;
 use App\Controllers\Admin\UserController;
 use App\Controllers\Admin\VideoController;
 use App\Controllers\Admin\WebStoryController;
@@ -459,6 +462,35 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->post('/notifications/send', [NotificationController::class, 'send'])->name('notifications.send')->middleware('can:notifications.create');
         $r->post('/notifications/process', [NotificationController::class, 'process'])->name('notifications.process')->middleware('can:notifications.manage');
         $r->post('/notifications/retry', [NotificationController::class, 'retry'])->name('notifications.retry')->middleware('can:notifications.manage');
+
+        // ---------- Phase 12: फ़ॉर्म बिल्डर, इनबॉक्स (अनुमति प्रकार के हिसाब से कंट्रोलर में), करियर ----------
+        $r->get('/forms', [FormBuilderController::class, 'index'])->name('forms.index')->middleware('can:forms.view');
+        $r->get('/forms/create', [FormBuilderController::class, 'create'])->name('forms.create')->middleware('can:forms.create');
+        $r->post('/forms', [FormBuilderController::class, 'store'])->name('forms.store')->middleware('can:forms.create');
+        $r->get('/forms/{id:\d+}/edit', [FormBuilderController::class, 'edit'])->name('forms.edit')->middleware('can:forms.view');
+        $r->put('/forms/{id:\d+}', [FormBuilderController::class, 'update'])->name('forms.update')->middleware('can:forms.edit');
+        $r->post('/forms/{id:\d+}/duplicate', [FormBuilderController::class, 'duplicate'])->name('forms.duplicate')->middleware('can:forms.create');
+        $r->delete('/forms/{id:\d+}', [FormBuilderController::class, 'destroy'])->name('forms.destroy')->middleware('can:forms.delete');
+
+        $r->get('/tips', [SubmissionController::class, 'tips'])->name('tips');
+        $r->get('/complaints', [SubmissionController::class, 'complaints'])->name('complaints');
+        $r->get('/contacts', [SubmissionController::class, 'contacts'])->name('contacts');
+        $r->get('/inbox/{type:[a-z_]+}', [SubmissionController::class, 'inbox'])->name('inbox');
+        $r->get('/inbox/{type:[a-z_]+}/export', [SubmissionController::class, 'export'])->name('inbox.export');
+        $r->post('/inbox/{type:[a-z_]+}/bulk', [SubmissionController::class, 'bulk'])->name('inbox.bulk');
+        $r->get('/submissions/{id:\d+}', [SubmissionController::class, 'show'])->name('submissions.show');
+        $r->post('/submissions/{id:\d+}', [SubmissionController::class, 'update'])->name('submissions.update');
+        $r->post('/submissions/{id:\d+}/note', [SubmissionController::class, 'note'])->name('submissions.note');
+        $r->post('/submissions/{id:\d+}/reply', [SubmissionController::class, 'reply'])->name('submissions.reply');
+        $r->post('/submissions/{id:\d+}/convert', [SubmissionController::class, 'convert'])->name('submissions.convert');
+        $r->get('/submissions/{id:\d+}/file/{key:[a-z0-9_]+}', [SubmissionController::class, 'file'])->name('submissions.file');
+
+        $r->get('/careers', [JobController::class, 'index'])->name('careers.index')->middleware('can:careers.view');
+        $r->get('/careers/create', [JobController::class, 'create'])->name('careers.create')->middleware('can:careers.create');
+        $r->post('/careers', [JobController::class, 'store'])->name('careers.store')->middleware('can:careers.create');
+        $r->get('/careers/{id:\d+}/edit', [JobController::class, 'edit'])->name('careers.edit')->middleware('can:careers.view');
+        $r->put('/careers/{id:\d+}', [JobController::class, 'update'])->name('careers.update')->middleware('can:careers.edit');
+        $r->delete('/careers/{id:\d+}', [JobController::class, 'destroy'])->name('careers.destroy')->middleware('can:careers.delete');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

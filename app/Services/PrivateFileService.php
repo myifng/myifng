@@ -11,7 +11,34 @@ use App\Core\Response;
  */
 final class PrivateFileService
 {
-    public const TYPES = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'application/pdf' => 'pdf'];
+    public const TYPES = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'application/pdf' => 'pdf', 'video/mp4' => 'mp4', 'application/msword' => 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx'];
+
+    /** फ़ॉर्म के "फ़ाइल" खाने के समूह → MIME */
+    public const GROUPS = [
+        'image' => ['image/jpeg', 'image/png'],
+        'document' => ['application/pdf'],
+        'video' => ['video/mp4'],
+        'cv' => ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    ];
+
+    /** Word फ़ाइलें: कुछ सर्वर इन्हें zip/OLE बताते हैं; अंदर देखकर पक्का करें */
+    private static function sniffOffice(string $mime, string $tmp, string $name): string
+    {
+        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        if ($ext === 'docx' && in_array($mime, ['application/zip', 'application/octet-stream'], true) && class_exists('ZipArchive')) {
+            $z = new \ZipArchive();
+            if ($z->open($tmp) === true) {
+                $ok = $z->locateName('word/document.xml') !== false;
+                $z->close();
+                return $ok ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : $mime;
+            }
+        }
+        if ($ext === 'doc' && in_array($mime, ['application/x-ole-storage', 'application/CDFV2', 'application/vnd.ms-office'], true)) {
+            return 'application/msword';
+        }
+        return $mime;
+    }
 
     public static function root(): string
     {
@@ -34,7 +61,7 @@ final class PrivateFileService
         if ((int) $file['size'] > $maxMb * 1048576) {
             return ['ok' => false, 'error' => "फ़ाइल {$maxMb} MB से छोटी हो।"];
         }
-        $mime = (string) (new \finfo(FILEINFO_MIME_TYPE))->file((string) $file['tmp_name']);
+        $mime = self::sniffOffice((string) (new \finfo(FILEINFO_MIME_TYPE))->file((string) $file['tmp_name']), (string) $file['tmp_name'], (string) ($file['name'] ?? ''));
         if (!in_array($mime, $allowed, true) || !isset(self::TYPES[$mime])) {
             return ['ok' => false, 'error' => 'सिर्फ़ ' . strtoupper(implode(', ', array_map(static fn($m) => self::TYPES[$m], $allowed))) . ' फ़ाइल।'];
         }
@@ -57,7 +84,7 @@ final class PrivateFileService
     /** path सुरक्षित है (.. नहीं, private के अंदर) तो पूरा रास्ता */
     public static function absolute(?string $rel): ?string
     {
-        if (!$rel || !preg_match('~^[a-z0-9/_-]+\.(jpg|png|pdf)$~', $rel) || str_contains($rel, '..')) {
+        if (!$rel || !preg_match('~^[a-z0-9/_-]+\.(jpg|png|pdf|mp4|doc|docx)$~', $rel) || str_contains($rel, '..')) {
             return null;
         }
         $abs = self::root() . '/' . $rel;

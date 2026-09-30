@@ -77,11 +77,11 @@ return [
         'newsletter'   => ['label' => 'न्यूज़लेटर', 'icon' => 'fa-envelope-open-text', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.newsletter.index', 'actions' => [...$crud, 'export', 'manage']],
         'readers'      => ['label' => 'पाठक खाते', 'icon' => 'fa-user-group', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.readers.index', 'actions' => ['view', 'edit', 'delete', 'export']],
         'notifications'=> ['label' => 'नोटिफ़िकेशन', 'icon' => 'fa-bell', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.notifications.center', 'actions' => ['view', 'create', 'manage']],
-        'forms'        => ['label' => 'फ़ॉर्म बिल्डर', 'icon' => 'fa-wpforms', 'group' => 'audience', 'phase' => 12, 'actions' => [...$crud, 'export']],
-        'news_tips'    => ['label' => 'न्यूज़ टिप', 'icon' => 'fa-lightbulb', 'group' => 'audience', 'phase' => 12, 'actions' => ['view', 'edit', 'delete', 'approve']],
-        'complaints'   => ['label' => 'शिकायत / ग्रीवांस', 'icon' => 'fa-scale-balanced', 'group' => 'audience', 'phase' => 12, 'actions' => ['view', 'edit', 'delete', 'manage', 'export']],
-        'contacts'     => ['label' => 'संपर्क / पूछताछ', 'icon' => 'fa-address-book', 'group' => 'audience', 'phase' => 12, 'actions' => ['view', 'edit', 'delete', 'export']],
-        'careers'      => ['label' => 'करियर / इंटर्नशिप', 'icon' => 'fa-briefcase', 'group' => 'audience', 'phase' => 12, 'actions' => [...$crud, 'export']],
+        'forms'        => ['label' => 'फ़ॉर्म बिल्डर', 'icon' => 'fa-wpforms', 'group' => 'audience', 'phase' => 12, 'route' => 'admin.forms.index', 'actions' => [...$crud, 'export']],
+        'news_tips'    => ['label' => 'न्यूज़ टिप', 'icon' => 'fa-lightbulb', 'group' => 'audience', 'phase' => 12, 'route' => 'admin.tips', 'actions' => ['view', 'edit', 'delete', 'approve']],
+        'complaints'   => ['label' => 'शिकायत / ग्रीवांस', 'icon' => 'fa-scale-balanced', 'group' => 'audience', 'phase' => 12, 'route' => 'admin.complaints', 'actions' => ['view', 'edit', 'delete', 'manage', 'export']],
+        'contacts'     => ['label' => 'संपर्क / पूछताछ', 'icon' => 'fa-address-book', 'group' => 'audience', 'phase' => 12, 'route' => 'admin.contacts', 'actions' => ['view', 'edit', 'delete', 'export']],
+        'careers'      => ['label' => 'करियर / इंटर्नशिप', 'icon' => 'fa-briefcase', 'group' => 'audience', 'phase' => 12, 'route' => 'admin.careers.index', 'actions' => [...$crud, 'export']],
 
         // ---------- Phase 13-14 ----------
         'analytics'    => ['label' => 'एनालिटिक्स', 'icon' => 'fa-chart-line', 'group' => 'insights', 'phase' => 13, 'actions' => ['view', 'export']],

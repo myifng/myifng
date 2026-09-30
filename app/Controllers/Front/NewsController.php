@@ -51,6 +51,7 @@ final class NewsController extends FrontController
             $content = AdService::inject(AdService::shortcodes($content));
         }
         $content = \App\Services\PollService::shortcodes($content); // Phase 11: [poll:ID]
+        $content = \App\Services\FormService::shortcodes($content); // Phase 12: [form:slug]
         // Phase 11: पाठक (सेव/फ़ॉलो/इतिहास), टिप्पणियाँ
         $reader = \App\Services\ReaderAuth::user();
         $engage = ['reader' => $reader, 'bookmarked' => false, 'follows' => []];

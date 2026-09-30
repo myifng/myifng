@@ -28,6 +28,7 @@ final class PageController extends Controller
         $content = ContentRenderer::render($page['content']);
         $content = $isPreview ? $content : \App\Services\AdService::shortcodes($content);
         $content = \App\Services\PollService::shortcodes($content);
+        $content = \App\Services\FormService::shortcodes($content); // Phase 12: [form:slug]
         return $this->view('front/page', [
             'page' => $page,
             'content' => $content,

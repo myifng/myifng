@@ -9,6 +9,7 @@ use App\Controllers\Front\AudioController;
 use App\Controllers\Front\CategoryController;
 use App\Controllers\Front\EngageController;
 use App\Controllers\Front\EpaperController;
+use App\Controllers\Front\FormController;
 use App\Controllers\Front\GalleryController;
 use App\Controllers\Front\HomeController;
 use App\Controllers\Front\LiveBlogController;
@@ -126,6 +127,17 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/sw.js', [EngageController::class, 'serviceWorker'])->name('push.sw');
     $r->post('/push/subscribe', [EngageController::class, 'pushSubscribe'])->name('push.subscribe')->middleware('throttle:20,10');
     $r->post('/push/unsubscribe', [EngageController::class, 'pushUnsubscribe'])->name('push.unsubscribe')->middleware('throttle:20,10');
+
+    // Phase 12: फ़ॉर्म, न्यूज़ टिप, शिकायत, करियर
+    $r->get('/form/{slug:[a-z0-9-]+}', [FormController::class, 'show'])->name('form.show');
+    $r->post('/form/{slug:[a-z0-9-]+}', [FormController::class, 'submit'])->name('form.submit')->middleware('throttle:8,10');
+    $r->get('/form/{slug:[a-z0-9-]+}/done', [FormController::class, 'done'])->name('form.done');
+    $r->get('/send-news', [FormController::class, 'sendNews'])->name('send_news');
+    $r->get('/complaint', [FormController::class, 'complaint'])->name('complaint');
+    $r->get('/complaint/track', [FormController::class, 'track'])->name('complaint.track');
+    $r->post('/complaint/track', [FormController::class, 'track'])->name('complaint.track.post')->middleware('throttle:10,15');
+    $r->get('/careers', [FormController::class, 'careers'])->name('careers');
+    $r->get('/careers/{slug:[a-z0-9-]+}', [FormController::class, 'job'])->name('careers.show');
 
     // लोकेशन: सबसे आख़िर में (slug आरक्षित शब्दों से नहीं टकराते: TaxonomyService::RESERVED)
     $r->get('/{path:[a-z0-9-]+(?:/[a-z0-9-]+)*}', [LocationController::class, 'show'])->name('location');

@@ -948,3 +948,34 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .cm-body, .cm-reply, .cm-list [data-reply-form] { margin-left: 0; }
   .cm-replies { margin-left: 6px; }
 }
+
+/* ---------- Phase 12: फ़ॉर्म, शिकायत ट्रैकिंग, करियर ---------- */
+.form-page { padding: 20px; }
+.form-embed { margin: 18px 0; padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.dyn-form input[type="file"] { padding: 8px; border: 1.5px dashed var(--line); border-radius: 6px; background: var(--chip); width: 100%; }
+.dyn-choices { border: 0; margin: 0; padding: 0; min-width: 0; }
+.dyn-choices legend { font-weight: 600; margin-bottom: 6px; padding: 0; }
+.dyn-choices .check { margin-bottom: 4px; }
+.dyn-heading h3 { font-family: var(--head); margin: 8px 0 2px; font-size: 18px; border-bottom: 2px solid var(--line); padding-bottom: 4px; }
+.dyn-heading p { margin: 4px 0 0; color: var(--muted); }
+.small-link { font-size: 14px; color: var(--brand); }
+.ref-box { display: inline-flex; flex-direction: column; gap: 2px; border: 2px dashed var(--brand); border-radius: 8px; padding: 12px 22px; margin: 6px auto 16px; }
+.ref-box b { font-size: 26px; letter-spacing: .04em; font-family: var(--head); color: var(--brand); }
+.ref-box small { color: var(--muted); }
+.track-card { border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: 6px; padding: 14px 16px; margin: 12px 0; }
+.track-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--head); font-size: 18px; }
+.track-badge { font-size: 13px; padding: 3px 10px; border-radius: 12px; background: var(--chip); }
+.track-badge.s-resolved { background: #1e7d45; color: #fff; }
+.track-badge.s-in_progress { background: #1f6feb; color: #fff; }
+.track-badge.s-new { background: #f0b400; color: #111; }
+.track-resp { background: var(--chip); border-radius: 6px; padding: 10px 12px; margin-top: 10px; }
+.track-resp p { margin: 4px 0 0; }
+.job-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.job-list li { border: 1px solid var(--line); border-radius: 6px; margin-bottom: 10px; transition: border-color .15s; }
+.job-list li:hover { border-color: var(--brand); }
+.job-list a { display: block; padding: 14px 16px; }
+.job-list h2 { font-family: var(--head); font-size: 20px; margin: 0 0 6px; }
+.job-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+.job-type { background: var(--brand); color: #fff; border-radius: 3px; padding: 0 8px; font-weight: 700; font-family: var(--head); }
+.job-type.t-internship { background: #1f6feb; }
+.job-apply { margin-top: 22px; padding-top: 12px; border-top: 1px solid var(--line); }

@@ -29,6 +29,7 @@ final class NotificationService
         'document_expiry' => ['रिपोर्टर की वैधता ख़त्म होने वाली', 'रिपोर्टर + एडमिन', ['inapp', 'email', 'sms', 'whatsapp'], ['inapp', 'email']],
         'comment' => ['नई टिप्पणी मॉडरेशन के लिए', 'मॉडरेटर', ['inapp'], ['inapp']],
         'comment_reply' => ['टिप्पणी का जवाब / स्वीकृति', 'पाठक', ['inapp', 'email'], ['inapp']],
+        'form' => ['नया फ़ॉर्म (संपर्क/टिप/शिकायत/आवेदन)', 'उस इनबॉक्स की टीम', ['inapp', 'email'], ['inapp']],
         'manual' => ['हाथ से भेजी सूचना', 'चुने हुए', ['push', 'inapp', 'email'], ['push']],
     ];
 
