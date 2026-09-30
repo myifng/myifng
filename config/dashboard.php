@@ -12,6 +12,8 @@ return [
         'news_mine'       => ['label' => 'मेरी ख़बरें', 'icon' => 'fa-pen-nib', 'module' => 'news', 'permission' => 'news.create', 'provider' => 'newsMine', 'route' => 'admin.news.index', 'query' => 'mine=1'],
         'news_scheduled'  => ['label' => 'शेड्यूल', 'icon' => 'fa-calendar-check', 'module' => 'news', 'permission' => 'news.publish', 'provider' => 'newsScheduled', 'route' => 'admin.news.index', 'query' => 'status=scheduled'],
         'my_assignments'  => ['label' => 'मेरे असाइनमेंट', 'icon' => 'fa-list-check', 'module' => 'assignments', 'permission' => 'assignments.view', 'provider' => 'myAssignments', 'route' => 'admin.assignments.index', 'query' => 'mine=1'],
+        // Phase 10
+        'seo_health'      => ['label' => 'SEO स्कोर (100 में)', 'icon' => 'fa-magnifying-glass-chart', 'module' => 'seo', 'permission' => 'seo.view', 'provider' => 'seoHealth', 'route' => 'admin.seo.index'],
         // Phase 9
         'ad_revenue'      => ['label' => 'विज्ञापन आमदनी (महीना)', 'icon' => 'fa-indian-rupee-sign', 'module' => 'advertisers', 'permission' => 'advertisers.manage', 'provider' => 'adRevenue', 'route' => 'admin.revenue'],
         'ads_running'     => ['label' => 'चल रहे विज्ञापन', 'icon' => 'fa-rectangle-ad', 'module' => 'ads', 'permission' => 'ads.view', 'provider' => 'adsRunning', 'route' => 'admin.ads.index'],

@@ -8,9 +8,10 @@ use App\Services\MenuService;
 $seo ??= [];
 $layoutOptions ??= ['header' => true, 'footer' => true];
 $site = (string) setting('site_name');
-$docTitle = !empty($seo['title']) ? $seo['title'] . ' | ' . $site : $site . (setting('tagline') ? ' | ' . setting('tagline') : '');
-$desc = $seo['description'] ?? setting('site_description');
-$img = !empty($seo['image']) ? (preg_match('~^https?://~', $seo['image']) ? $seo['image'] : media_url($seo['image'], 'large')) : (setting('logo') ? upload_url(setting('logo')) : '');
+$head = \App\Services\SeoService::head($seo); // शीर्षक, robots, canonical, OG (SEO सेटिंग के साथ)
+$docTitle = $head['title'];
+$desc = $head['description'];
+$img = $head['image'];
 $brand = preg_match('/^#[0-9a-f]{6}$/i', (string) setting('primary_color')) ? setting('primary_color') : '#d71920';
 $brand2 = preg_match('/^#[0-9a-f]{6}$/i', (string) setting('secondary_color')) ? setting('secondary_color') : '#15161a';
 $fonts = array_unique([setting('font_heading', 'Mukta'), setting('font_body', 'Noto Sans Devanagari')]);
@@ -24,19 +25,28 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <title><?= e($docTitle) ?></title>
 <meta name="description" content="<?= e(\App\Helpers\Str::limit((string) $desc, 170)) ?>">
 <?php if (!empty($seo['keywords'])): ?><meta name="keywords" content="<?= e($seo['keywords']) ?>"><?php endif; ?>
-<meta name="robots" content="<?= e($seo['robots'] ?? 'index,follow') ?>">
-<?php if (!empty($seo['canonical'])): ?><link rel="canonical" href="<?= e($seo['canonical']) ?>"><?php endif; ?>
+<meta name="robots" content="<?= e($head['robots']) ?>">
+<?php if ($head['canonical'] !== ''): ?><link rel="canonical" href="<?= e($head['canonical']) ?>"><?php endif; ?>
+<link rel="alternate" type="application/rss+xml" title="<?= e($site) ?>" href="<?= e(route('feed')) ?>">
 <meta property="og:site_name" content="<?= e($site) ?>">
+<meta property="og:locale" content="<?= e(setting('language', 'hi') === 'en' ? 'en_IN' : 'hi_IN') ?>">
 <meta property="og:type" content="<?= e($seo['og_type'] ?? 'website') ?>">
-<meta property="og:title" content="<?= e($seo['title'] ?? $site) ?>">
-<meta property="og:description" content="<?= e(\App\Helpers\Str::limit((string) $desc, 200)) ?>">
-<?php if (!empty($seo['canonical'])): ?><meta property="og:url" content="<?= e($seo['canonical']) ?>"><?php endif; ?>
+<meta property="og:title" content="<?= e($head['og_title']) ?>">
+<meta property="og:description" content="<?= e(\App\Helpers\Str::limit($head['og_description'], 200)) ?>">
+<?php if ($head['canonical'] !== ''): ?><meta property="og:url" content="<?= e($head['canonical']) ?>"><?php endif; ?>
 <?php if ($img): ?><meta property="og:image" content="<?= e($img) ?>"><?php endif; ?>
+<?php if (setting('seo_fb_app_id')): ?><meta property="fb:app_id" content="<?= e(setting('seo_fb_app_id')) ?>"><?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
+<?php if ($head['twitter']): ?><meta name="twitter:site" content="<?= e($head['twitter']) ?>"><?php endif; ?>
+<meta name="twitter:title" content="<?= e($head['og_title']) ?>">
+<meta name="twitter:description" content="<?= e(\App\Helpers\Str::limit($head['og_description'], 200)) ?>">
+<?php if ($img): ?><meta name="twitter:image" content="<?= e($img) ?>"><?php endif; ?>
 <?php if (!empty($seo['published'])): ?><meta property="article:published_time" content="<?= e(date('c', strtotime($seo['published']))) ?>">
 <meta property="article:modified_time" content="<?= e(date('c', strtotime((string) $seo['modified']))) ?>"><?php if (!empty($seo['section'])): ?><meta property="article:section" content="<?= e($seo['section']) ?>"><?php endif; ?><?php endif; ?>
 <?= $seo['jsonld'] ?? '' /* SeoService: JSON_HEX_TAG के साथ सुरक्षित */ ?>
 <?php if (setting('search_console')): ?><meta name="google-site-verification" content="<?= e(setting('search_console')) ?>"><?php endif; ?>
+<?php if (setting('seo_bing')): ?><meta name="msvalidate.01" content="<?= e(setting('seo_bing')) ?>"><?php endif; ?>
+<?php if (setting('seo_yandex')): ?><meta name="yandex-verification" content="<?= e(setting('seo_yandex')) ?>"><?php endif; ?>
 <meta name="theme-color" content="<?= e($brand) ?>">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <?php if (app('router')->has('ad.impressions')): ?><meta name="ad-imp" content="<?= e(route('ad.impressions')) ?>"><?php endif; ?>

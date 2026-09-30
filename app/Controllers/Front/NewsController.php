@@ -50,24 +50,26 @@ final class NewsController extends FrontController
         if (!$isPreview) {
             $content = AdService::inject(AdService::shortcodes($content));
         }
+        $faq = SeoService::faqItems($news['faq'] ?? null);
         $live = LiveBlogService::forNews((int) $news['id']);
         $liveUpdates = $live ? LiveBlogService::updates((int) $live['id']) : [];
         return $this->view('front/article', [
             'news' => $news, 'content' => $content, 'isPreview' => $isPreview, 'rel' => $rel, 'category' => $cat, 'locationChain' => $chain,
             'reporter' => $reporter, 'crumbs' => $crumbs, 'related' => $related, 'side' => $this->sidebar(), 'live' => $live, 'liveUpdates' => $liveUpdates,
             'previewNote' => $isPreview ? 'प्रीव्यू · स्थिति: ' . NewsWorkflow::label($news['status']) . ($news['deleted_at'] ? ' (ट्रैश में)' : '') : '',
-            'shareUrl' => NewsService::url($news),
+            'shareUrl' => NewsService::url($news), 'faq' => $faq,
             'seo' => [
                 'title' => $news['meta_title'] ?: $news['title'],
                 'description' => $news['meta_description'] ?: ($news['summary'] ?: $plain),
                 'keywords' => $news['meta_keywords'] ?: implode(', ', $rel['tags']),
                 'image' => $news['featured_image'] ? media_url($news['featured_image'], 'large') : null,
+                'og_title' => $news['og_title'] ?? null, 'og_description' => $news['og_description'] ?? null, 'og_image' => ($news['og_image'] ?? '') ?: null,
                 'robots' => $isPreview ? 'noindex,nofollow' : $news['robots'],
                 'canonical' => $news['canonical_url'] ?: NewsService::url($news),
                 'og_type' => 'article',
                 'published' => $news['published_at'], 'modified' => $news['corrected_at'] ?: $news['updated_at'], 'section' => $cat['name'] ?? null,
                 'jsonld' => $isPreview ? '' : SeoService::article($news, $reporter['name'] ?? null, $cat['name'] ?? null, $rel['tags']) . SeoService::breadcrumbs($crumbs, NewsService::url($news))
-                    . ($live ? LiveBlogService::schema($news, $live, $liveUpdates) : ''),
+                    . ($live ? LiveBlogService::schema($news, $live, $liveUpdates) : '') . SeoService::faq($faq),
             ],
         ]);
     }

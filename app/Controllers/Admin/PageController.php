@@ -57,7 +57,11 @@ final class PageController extends Controller
         $data = $this->payload($request, $page);
         Page::update($id, $data);
         MenuService::clearCache();
-        $note = $page['slug'] !== $data['slug'] && $page['status'] === 'published' ? ' URL बदला है; पुराना लिंक अब नहीं चलेगा (रीडायरेक्ट मैनेजर Phase 10 में)।' : '';
+        $note = '';
+        if ($page['slug'] !== $data['slug']) {
+            \App\Services\RedirectService::moved(route('page', ['slug' => $page['slug']]), route('page', ['slug' => $data['slug']]), 'page:' . $id);
+            $note = $page['status'] === 'published' && setting('seo_auto_redirect', '1') === '1' ? ' URL बदला है: पुराने पते से नए पर 301 रीडायरेक्ट अपने आप बन गया।' : '';
+        }
         AuditService::log('update', 'pages', $id, 'पेज बदला: ' . $data['title'], $page, $data);
         return $this->toRoute('admin.pages.edit', ['id' => $id])->with('success', 'बदलाव सेव हो गए।' . $note);
     }

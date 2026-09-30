@@ -1,9 +1,11 @@
-<?php $this->layout('layouts/admin'); $title = 'साइट सेटिंग: ' . $schema['label']; ?>
+<?php $this->layout('layouts/admin'); $title = 'साइट सेटिंग: ' . $schema['label'];
+$tabRoute ??= 'admin.settings'; $saveRoute ??= 'admin.settings.update'; // SEO कमांड सेंटर इसी व्यू को अपने रूट से दिखाता है
+$section ??= ['साइट सेटिंग', route('admin.settings.index'), 'ब्रांड, संपर्क, हेडर-फ़ुटर और फ़ीचर यहीं से बदलें। किसी डेवलपर की ज़रूरत नहीं।']; ?>
 <div class="page-head">
   <div>
-    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="<?= e(route('admin.dashboard')) ?>">डैशबोर्ड</a></li><li class="breadcrumb-item"><a href="<?= e(route('admin.settings.index')) ?>">साइट सेटिंग</a></li><li class="breadcrumb-item active" aria-current="page"><?= e($schema['label']) ?></li></ol></nav>
-    <h1>साइट सेटिंग</h1>
-    <p>ब्रांड, संपर्क, हेडर-फ़ुटर और फ़ीचर यहीं से बदलें। किसी डेवलपर की ज़रूरत नहीं।</p>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="<?= e(route('admin.dashboard')) ?>">डैशबोर्ड</a></li><li class="breadcrumb-item"><a href="<?= e($section[1]) ?>"><?= e($section[0]) ?></a></li><li class="breadcrumb-item active" aria-current="page"><?= e($schema['label']) ?></li></ol></nav>
+    <h1><?= e($section[0]) ?></h1>
+    <p><?= e($section[2]) ?></p>
   </div>
   <a class="btn btn-outline-secondary" href="<?= e(url()) ?>" target="_blank" rel="noopener"><i class="fa-solid fa-globe me-1"></i> वेबसाइट देखें</a>
 </div>
@@ -11,19 +13,19 @@
 <div class="settings-shell">
   <nav class="settings-nav" aria-label="सेटिंग के टैब">
     <?php foreach ($tabs as $key => $t): ?>
-      <a href="<?= e(route('admin.settings', ['tab' => $key])) ?>" class="<?= $key === $active ? 'active' : '' ?>"<?= $key === $active ? ' aria-current="page"' : '' ?>>
+      <a href="<?= e(route($tabRoute, ['tab' => $key])) ?>" class="<?= $key === $active ? 'active' : '' ?>"<?= $key === $active ? ' aria-current="page"' : '' ?>>
         <i class="fa-solid <?= e($t['icon']) ?> fa-fw"></i><span><?= e($t['label']) ?></span>
-        <?php if (($t['permission'] ?? 'edit') === 'manage'): ?><i class="fa-solid fa-lock small ms-auto opacity-50" title="संवेदनशील: सिर्फ़ प्रबंधक"></i><?php endif; ?>
+        <?php if (in_array($t['permission'] ?? 'edit', ['manage', 'seo.manage'], true)): ?><i class="fa-solid fa-lock small ms-auto opacity-50" title="संवेदनशील: सिर्फ़ प्रबंधक"></i><?php endif; ?>
       </a>
     <?php endforeach; ?>
   </nav>
 
-  <form class="panel settings-form" method="post" action="<?= e(route('admin.settings.update', ['tab' => $active])) ?>" enctype="multipart/form-data" novalidate>
+  <form class="panel settings-form" method="post" action="<?= e(route($saveRoute, ['tab' => $active])) ?>" enctype="multipart/form-data" novalidate>
     <?= csrf_field() ?>
     <div class="panel-head"><h2><i class="fa-solid <?= e($schema['icon']) ?> me-2 text-body-secondary"></i><?= e($schema['label']) ?></h2>
       <?php if (!$canEdit): ?><span class="badge text-bg-light"><i class="fa-solid fa-eye me-1"></i> सिर्फ़ देख सकते हैं</span><?php endif; ?></div>
     <div class="panel-body">
-      <?php if (($schema['permission'] ?? '') === 'manage'): ?>
+      <?php if (in_array($schema['permission'] ?? '', ['manage', 'seo.manage'], true)): ?>
         <div class="alert alert-warning small"><i class="fa-solid fa-triangle-exclamation me-1"></i> यह संवेदनशील सेटिंग है। हर बदलाव ऑडिट लॉग में दर्ज होता है।</div>
       <?php endif; ?>
       <?php if ($active === 'layout'): ?>

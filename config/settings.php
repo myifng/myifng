@@ -155,6 +155,35 @@ return [
             'footer_code' => ['label' => '</body> से पहले अतिरिक्त कोड', 'type' => 'code'],
         ],
     ],
+    'seo' => [
+        'label' => 'SEO', 'icon' => 'fa-magnifying-glass-chart', 'permission' => 'seo.edit',
+        'fields' => [
+            'seo_separator' => ['label' => 'शीर्षक का विभाजक', 'type' => 'select', 'options' => ['|' => 'ख़बर | साइट', '-' => 'ख़बर - साइट', '–' => 'ख़बर – साइट', '·' => 'ख़बर · साइट', '' => 'सिर्फ़ ख़बर का शीर्षक'], 'default' => '|', 'rules' => ['nullable', 'in:|,-,–,·'], 'width' => 6],
+            'seo_publication' => ['label' => 'Google News में प्रकाशन का नाम', 'type' => 'text', 'rules' => 'nullable|max:120', 'width' => 6, 'help' => 'ख़ाली = साइट का नाम। Publisher Center वाला नाम ही लिखें।'],
+            'seo_home_title' => ['label' => 'होमपेज का SEO शीर्षक', 'type' => 'text', 'rules' => 'nullable|max:120', 'help' => 'ख़ाली = "साइट का नाम | टैगलाइन"'],
+            'seo_home_description' => ['label' => 'होमपेज का SEO विवरण', 'type' => 'textarea', 'rules' => 'nullable|max:320', 'help' => 'ख़ाली = साइट का विवरण (सामान्य टैब)'],
+            'seo_og_image' => ['label' => 'डिफ़ॉल्ट शेयर इमेज (1200×630)', 'type' => 'image', 'width' => 6, 'help' => 'जिस पेज की अपनी इमेज न हो, उसे WhatsApp/Facebook पर शेयर करने पर यह दिखेगी'],
+            'seo_twitter' => ['label' => 'X (Twitter) हैंडल', 'type' => 'text', 'rules' => ['nullable', 'regex:/^@?[A-Za-z0-9_]{1,15}$/'], 'placeholder' => '@yournews', 'width' => 3],
+            'seo_fb_app_id' => ['label' => 'Facebook App ID', 'type' => 'text', 'rules' => 'nullable|regex:/^[0-9]{5,20}$/', 'width' => 3],
+            'seo_bing' => ['label' => 'Bing verification', 'type' => 'text', 'rules' => 'nullable|max:120', 'width' => 6, 'help' => 'msvalidate.01 का content मान'],
+            'seo_yandex' => ['label' => 'Yandex verification', 'type' => 'text', 'rules' => 'nullable|max:120', 'width' => 6],
+            'seo_canonical_host' => ['label' => 'मुख्य डोमेन (canonical)', 'type' => 'url', 'rules' => 'nullable|url|max:190', 'placeholder' => 'https://www.yournews.com', 'help' => 'ख़ाली = इंस्टॉल वाला पता। www / बिना www में से एक चुनें; canonical, साइटमैप और शेयर लिंक इसी से बनेंगे।'],
+            'seo_image_preview' => ['label' => 'Google Discover के लिए बड़ी इमेज प्रीव्यू (max-image-preview:large)', 'type' => 'switch', 'default' => '1'],
+            'seo_noindex_tags' => ['label' => 'टैग पेज noindex (कम ख़बरों वाले टैग पेज Google में न जाएँ)', 'type' => 'switch', 'default' => '0'],
+            'seo_auto_redirect' => ['label' => 'स्लग बदलने पर पुराने पते से नए पर अपने आप 301 रीडायरेक्ट', 'type' => 'switch', 'default' => '1'],
+            'seo_log_404' => ['label' => '404 (न मिले पेज) दर्ज करें', 'type' => 'switch', 'default' => '1'],
+            'sitemap_news' => ['label' => 'Google News साइटमैप', 'type' => 'switch', 'default' => '1'],
+            'sitemap_videos' => ['label' => 'वीडियो साइटमैप', 'type' => 'switch', 'default' => '1'],
+            'sitemap_images' => ['label' => 'इमेज साइटमैप (गैलरी) और ख़बरों में इमेज', 'type' => 'switch', 'default' => '1'],
+        ],
+    ],
+    'seo_robots' => [
+        'label' => 'robots.txt', 'icon' => 'fa-robot', 'permission' => 'seo.manage',
+        'fields' => [
+            'robots_block_ai' => ['label' => 'AI ट्रेनिंग क्रॉलर रोकें (GPTBot, CCBot, Google-Extended, ClaudeBot आदि)', 'type' => 'switch', 'default' => '0', 'help' => 'Google Search और Google News पर असर नहीं पड़ता।'],
+            'robots_extra' => ['label' => 'robots.txt में अतिरिक्त नियम', 'type' => 'code', 'rules' => 'nullable|max:5000', 'help' => 'जैसे: Disallow: /print/ — सावधान: "Disallow: /" पूरी साइट Google से हटा देगा।'],
+        ],
+    ],
     'mail' => [
         'label' => 'ईमेल', 'icon' => 'fa-envelope', 'permission' => 'manage',
         'fields' => [

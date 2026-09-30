@@ -68,13 +68,22 @@ final class App
         $request = $this->get('request');
 
         try {
-            $response = $this->dispatch($request);
+            // Phase 10: हाथ से बने रीडायरेक्ट (पुराना पता मौजूद हो तब भी) पहले
+            $response = \App\Services\RedirectService::respond($request, false) ?? $this->dispatch($request);
         } catch (ValidationException $e) {
             $response = $request->wantsJson()
                 ? Response::json(['ok' => false, 'message' => 'कुछ जानकारी सही नहीं है।', 'errors' => $e->errors], 422)
                 : Response::redirect(back_url())->withErrors($e->errors)->withInput($e->input);
         } catch (HttpException $e) {
-            $response = $this->get('errors')->render($e->status, $e);
+            $response = null;
+            if ($e->status === 404 && !$request->wantsJson()) {
+                // स्लग बदलने वाले रीडायरेक्ट सिर्फ़ 404 पर; न मिले तो 404 लॉग
+                $response = \App\Services\RedirectService::respond($request, true);
+                if (!$response) {
+                    \App\Services\RedirectService::log404($request);
+                }
+            }
+            $response ??= $this->get('errors')->render($e->status, $e);
         }
         $this->securityHeaders($response);
         $response->send();

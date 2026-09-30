@@ -75,12 +75,17 @@ final class TagController extends Controller
     public function update(Request $request, int $id): Response
     {
         $tag = Tag::find($id) ?? throw new HttpException(404);
-        $v = $this->validate($request, ['name' => 'required|max:100', 'slug' => 'nullable|slug|max:120', 'description' => 'nullable|max:500'], self::LABELS);
+        $v = $this->validate($request, ['name' => 'required|max:100', 'slug' => 'nullable|slug|max:120', 'description' => 'nullable|max:500',
+            'meta_title' => 'nullable|max:190', 'meta_description' => 'nullable|max:320'], self::LABELS + ['meta_title' => 'SEO शीर्षक', 'meta_description' => 'SEO विवरण']);
         if (db()->value('SELECT id FROM {p}tags WHERE name = ? AND id <> ?', [$v['name'], $id])) {
             throw new ValidationException(['name' => 'इस नाम का टैग पहले से है। दोनों को एक करना हो तो सूची में “मर्ज” इस्तेमाल करें।'], $request->post());
         }
-        $data = ['name' => $v['name'], 'slug' => TaxonomyService::slug('tags', (string) $v['slug'], $v['name'], $id, 'tag'), 'description' => $v['description']];
+        $data = ['name' => $v['name'], 'slug' => TaxonomyService::slug('tags', (string) $v['slug'], $v['name'], $id, 'tag'), 'description' => $v['description'],
+            'meta_title' => $v['meta_title'] ? strip_tags((string) $v['meta_title']) : null, 'meta_description' => $v['meta_description'] ? strip_tags((string) $v['meta_description']) : null];
         Tag::update($id, $data);
+        if ($tag['slug'] !== $data['slug']) {
+            \App\Services\RedirectService::moved(route('tag', ['slug' => $tag['slug']]), route('tag', ['slug' => $data['slug']]), 'tag:' . $id);
+        }
         MenuService::clearCache();
         AuditService::log('update', 'tags', $id, 'टैग बदला: ' . $data['name'], $tag, $data);
         return $this->toRoute('admin.tags.index')->with('success', 'टैग “' . $data['name'] . '” सेव हो गया।');

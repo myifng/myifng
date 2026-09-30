@@ -68,8 +68,8 @@ return [
         'advertisers'  => ['label' => 'विज्ञापनदाता CRM', 'icon' => 'fa-handshake', 'group' => 'revenue', 'phase' => 9, 'route' => 'admin.advertisers.index', 'actions' => [...$crud, 'export', 'manage']],
 
         // ---------- Phase 10 ----------
-        'seo'          => ['label' => 'SEO कमांड सेंटर', 'icon' => 'fa-magnifying-glass-chart', 'group' => 'insights', 'phase' => 10, 'actions' => ['view', 'edit', 'manage']],
-        'redirects'    => ['label' => 'रीडायरेक्ट', 'icon' => 'fa-diamond-turn-right', 'group' => 'insights', 'phase' => 10, 'actions' => [...$crud]],
+        'seo'          => ['label' => 'SEO कमांड सेंटर', 'icon' => 'fa-magnifying-glass-chart', 'group' => 'insights', 'phase' => 10, 'route' => 'admin.seo.index', 'actions' => ['view', 'edit', 'manage']],
+        'redirects'    => ['label' => 'रीडायरेक्ट', 'icon' => 'fa-diamond-turn-right', 'group' => 'insights', 'phase' => 10, 'route' => 'admin.redirects.index', 'actions' => [...$crud]],
 
         // ---------- Phase 11-12 ----------
         'comments'     => ['label' => 'टिप्पणियाँ', 'icon' => 'fa-comments', 'group' => 'audience', 'phase' => 11, 'actions' => ['view', 'edit', 'delete', 'approve']],

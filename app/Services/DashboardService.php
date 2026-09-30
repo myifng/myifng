@@ -136,6 +136,14 @@ final class DashboardService
         return ['value' => (int) $r['live'], 'sub' => num($r['editions']) . ' संस्करण में से प्रकाशित' . ($left > 0 ? ' · बाकी: ' . num($left) : ((int) $r['sched'] ? ' · शेड्यूल: ' . num($r['sched']) : '')), 'alert' => $left > 0];
     }
 
+    private static function seoHealth(): array
+    {
+        $c = SeoAudit::counts();
+        $nf = (int) db()->value("SELECT COUNT(*) FROM {p}not_found_log WHERE status = 'new' AND hits > 0 AND last_seen >= NOW() - INTERVAL 7 DAY");
+        $score = SeoAudit::score($c);
+        return ['value' => $score, 'sub' => num($c['total'] - $c['healthy']) . ' ख़बरों में कमी · ' . num($nf) . ' नए 404 (7 दिन)', 'alert' => $score < 50 || $nf > 20];
+    }
+
     private static function adsRunning(): array
     {
         $n = (int) db()->value("SELECT COUNT(*) FROM {p}ads WHERE status = 'active' AND (start_at IS NULL OR start_at <= NOW()) AND (end_at IS NULL OR end_at > NOW())");

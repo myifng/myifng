@@ -91,8 +91,11 @@ final class SettingsController extends Controller
 
         $msg = '“' . $schema['label'] . '” सेटिंग सेव हो गई।';
         if (($data['maintenance_mode'] ?? '0') === '1') {
-            return $this->toRoute('admin.settings', ['tab' => $tab])->with('warning', $msg . ' मेंटेनेंस मोड चालू है: पाठकों को वेबसाइट बंद दिखेगी। आप लॉगिन हैं, इसलिए आपको साइट दिखती रहेगी।');
+            return $this->back()->with('warning', $msg . ' मेंटेनेंस मोड चालू है: पाठकों को वेबसाइट बंद दिखेगी। आप लॉगिन हैं, इसलिए आपको साइट दिखती रहेगी।');
         }
-        return $this->toRoute('admin.settings', ['tab' => $tab])->with('success', $msg);
+        if (str_starts_with($tab, 'seo')) {
+            cache()->flush('sitemap');
+        }
+        return $this->back()->with('success', $msg);
     }
 }

@@ -174,7 +174,7 @@ final class NewsController extends Controller
         if (!isset(News::ROBOTS[$v['robots']])) {
             $errors['robots'] = 'सर्च इंजन का चुना गया मान मान्य नहीं है।';
         }
-        foreach (['featured_image' => 'image', 'audio_file' => 'audio'] as $f => $kind) {
+        foreach (['featured_image' => 'image', 'og_image' => 'image', 'audio_file' => 'audio'] as $f => $kind) {
             $val = $request->str($f);
             if ($val !== ($news[$f] ?? '') && !MediaService::validPath($val, $kind)) {
                 $errors[$f] = $kind === 'image' ? 'मुख्य इमेज मीडिया लाइब्रेरी से चुनें।' : 'ऑडियो मीडिया लाइब्रेरी से चुनें।';
@@ -210,6 +210,12 @@ final class NewsController extends Controller
             'reporter_id' => $reporter, 'source' => $v['source'], 'news_credit' => $v['news_credit'],
             'meta_title' => $v['meta_title'], 'meta_description' => $v['meta_description'], 'meta_keywords' => $v['meta_keywords'],
             'canonical_url' => $v['canonical_url'], 'robots' => $v['robots'],
+            // Phase 10: फ़ोकस कीवर्ड, सोशल शेयर, FAQ
+            'focus_keyword' => $v['focus_keyword'] ? trim(strip_tags((string) $v['focus_keyword'])) : null,
+            'og_title' => $v['og_title'] ? trim(strip_tags((string) $v['og_title'])) : null,
+            'og_description' => $v['og_description'] ? trim(strip_tags((string) $v['og_description'])) : null,
+            'og_image' => $request->str('og_image') ?: null,
+            'faq' => self::faq($request),
         ];
         // फ़्लैग सिर्फ़ डेस्क
         if (can('news.approve')) {
@@ -241,6 +247,29 @@ final class NewsController extends Controller
         return [$data, ['topics' => $topics, 'tags' => $tags, 'related' => $related, 'gallery' => $gallery]];
     }
 
+    /** FAQ पंक्तियाँ (सवाल-जवाब, 10 तक) → JSON या null */
+    private static function faq(Request $request): ?string
+    {
+        $q = (array) $request->input('faq_q', []);
+        $a = (array) $request->input('faq_a', []);
+        $out = [];
+        foreach ($q as $i => $question) {
+            $question = trim(strip_tags((string) $question));
+            $answer = trim(strip_tags((string) ($a[$i] ?? '')));
+            if ($question === '' && $answer === '') {
+                continue;
+            }
+            if ($question === '' || $answer === '') {
+                throw new ValidationException(['faq' => 'FAQ की हर पंक्ति में सवाल और जवाब दोनों लिखें।'], $request->post());
+            }
+            $out[] = ['q' => mb_substr($question, 0, 300), 'a' => mb_substr($answer, 0, 2000)];
+        }
+        if (count($out) > 10) {
+            throw new ValidationException(['faq' => 'ज़्यादा से ज़्यादा 10 सवाल।'], $request->post());
+        }
+        return $out ? json_encode($out, JSON_UNESCAPED_UNICODE) : null;
+    }
+
     /** प्रीव्यू: वेबसाइट के लेआउट में, noindex */
     public function preview(Request $request, int $id): Response
     {
@@ -252,7 +281,7 @@ final class NewsController extends Controller
     {
         $news = self::findVisible($id);
         $copy = array_intersect_key($news, array_flip(['subtitle', 'summary', 'content', 'featured_image', 'image_caption', 'image_credit', 'video_url', 'audio_file',
-            'category_id', 'location_id', 'source', 'news_credit', 'meta_description', 'meta_keywords', 'robots', 'language_id']));
+            'category_id', 'location_id', 'source', 'news_credit', 'meta_description', 'meta_keywords', 'robots', 'language_id', 'focus_keyword', 'og_title', 'og_description', 'og_image', 'faq']));
         $copy['title'] = $news['title'] . ' (कॉपी)';
         $copy['slug'] = NewsService::uniqueSlug($news['slug'] . '-copy');
         $copy['reporter_id'] = auth()->id();

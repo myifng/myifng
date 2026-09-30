@@ -118,7 +118,12 @@ final class LocationController extends Controller
         MenuService::clearCache();
         cache()->flush('locations');
         AuditService::log('update', 'locations', $id, 'लोकेशन बदली: ' . $data['name'], $loc, $data);
-        $note = $loc['path'] !== $data['path'] ? ' URL बदला' . ($changed ? " (नीचे की $changed लोकेशन के भी)" : '') . '; पुराने लिंक के लिए Phase 10 में रीडायरेक्ट मैनेजर।' : '';
+        $note = '';
+        if ($loc['path'] !== $data['path']) {
+            // पूरी शाखा: /old/... → /new/... (प्रीफ़िक्स रीडायरेक्ट)
+            \App\Services\RedirectService::moved('/' . $loc['path'], '/' . $data['path'], 'location:' . $id, true);
+            $note = ' URL बदला' . ($changed ? " (नीचे की $changed लोकेशन के भी)" : '') . (setting('seo_auto_redirect', '1') === '1' ? '; पुराने पतों से 301 रीडायरेक्ट अपने आप बन गया।' : '।');
+        }
         return $this->toRoute('admin.locations.edit', ['id' => $id])->with('success', 'बदलाव सेव हो गए।' . $note);
     }
 

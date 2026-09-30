@@ -9,7 +9,7 @@ final class NewsValidator
         'title' => 'शीर्षक', 'subtitle' => 'उप-शीर्षक', 'slug' => 'URL (स्लग)', 'summary' => 'सार', 'image_caption' => 'इमेज कैप्शन',
         'image_credit' => 'इमेज क्रेडिट', 'video_url' => 'वीडियो', 'category_id' => 'श्रेणी', 'location_id' => 'लोकेशन', 'reporter_id' => 'रिपोर्टर',
         'source' => 'स्रोत', 'news_credit' => 'न्यूज़ क्रेडिट', 'meta_title' => 'SEO शीर्षक', 'meta_description' => 'SEO विवरण',
-        'meta_keywords' => 'कीवर्ड', 'canonical_url' => 'Canonical URL', 'robots' => 'सर्च इंजन', 'change_reason' => 'बदलाव का कारण',
+        'meta_keywords' => 'कीवर्ड', 'focus_keyword' => 'फ़ोकस कीवर्ड', 'og_title' => 'शेयर शीर्षक', 'og_description' => 'शेयर विवरण', 'canonical_url' => 'Canonical URL', 'robots' => 'सर्च इंजन', 'change_reason' => 'बदलाव का कारण',
         'scheduled_at' => 'शेड्यूल का समय',
     ];
 
@@ -31,6 +31,9 @@ final class NewsValidator
             'meta_title' => 'nullable|max:190',
             'meta_description' => 'nullable|max:320',
             'meta_keywords' => 'nullable|max:255',
+            'focus_keyword' => 'nullable|max:100',
+            'og_title' => 'nullable|max:190',
+            'og_description' => 'nullable|max:320',
             'canonical_url' => 'nullable|url|max:500',
             'robots' => 'required|max:40',
             'change_reason' => 'nullable|max:500',

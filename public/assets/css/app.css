@@ -816,3 +816,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
   .ad-slot-header img, .ad-slot-below_header img, .ad-slot-footer img, .ad-slot-home_top img { max-height: 120px; }
   body:has(.ad-sticky:not(.closed)) .brk-mobile:not([hidden]) { bottom: calc(130px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Phase 10: ख़बर में FAQ */
+.art-faq { margin: 24px 0; border-top: 3px solid var(--brand); padding-top: 12px; }
+.art-faq h2 { font-family: var(--head); font-size: 1.25rem; margin: 0 0 10px; }
+.art-faq details { border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; background: var(--surface); }
+.art-faq summary { cursor: pointer; padding: 10px 40px 10px 14px; font-weight: 700; font-family: var(--head); list-style: none; position: relative; }
+.art-faq summary::-webkit-details-marker { display: none; }
+.art-faq summary::after { content: "+"; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 1.3rem; line-height: 1; color: var(--brand); }
+.art-faq details[open] summary::after { content: "−"; }
+.art-faq details[open] summary { border-bottom: 1px solid var(--line); }
+.art-faq details p { margin: 0; padding: 10px 14px; }

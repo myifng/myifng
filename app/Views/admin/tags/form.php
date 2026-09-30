@@ -15,6 +15,8 @@ $title = 'टैग: ' . $tag['name'];
     <?= field('text', 'name', 'टैग का नाम', $tag['name'], ['required' => true, 'attrs' => ['maxlength' => 100]]) ?>
     <?= field('text', 'slug', 'URL (स्लग)', $tag['slug'], ['prefix' => '/tag/', 'attrs' => ['maxlength' => 120]]) ?>
     <?= field('textarea', 'description', 'विवरण', $tag['description'], ['rows' => 3, 'help' => 'टैग पेज पर (SEO के लिए अच्छा)', 'attrs' => ['maxlength' => 500]]) ?>
+    <?= field('text', 'meta_title', 'SEO शीर्षक', $tag['meta_title'] ?? '', ['help' => 'ख़ाली = "टैग से जुड़ी ख़बरें"', 'attrs' => ['maxlength' => 190, 'data-count' => 60]]) ?>
+    <?= field('textarea', 'meta_description', 'SEO विवरण', $tag['meta_description'] ?? '', ['rows' => 2, 'help' => 'ख़ाली = ऊपर का विवरण', 'attrs' => ['maxlength' => 320, 'data-count' => 160]]) ?>
     <div class="d-flex gap-2">
       <button class="btn btn-brand" type="submit"><i class="fa-solid fa-floppy-disk me-1"></i> सेव करें</button>
       <a class="btn btn-light" href="<?= e(route('admin.tags.index')) ?>">वापस</a>

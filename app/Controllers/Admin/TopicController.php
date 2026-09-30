@@ -77,6 +77,9 @@ final class TopicController extends Controller
         $topic = Topic::find($id) ?? throw new HttpException(404);
         $data = $this->payload($request, $topic);
         Topic::update($id, $data);
+        if ($topic['slug'] !== $data['slug']) {
+            \App\Services\RedirectService::moved(route('topic', ['slug' => $topic['slug']]), route('topic', ['slug' => $data['slug']]), 'topic:' . $id);
+        }
         MenuService::clearCache();
         AuditService::log('update', 'topics', $id, 'टॉपिक बदला: ' . $data['name'], $topic, $data);
         return $this->toRoute('admin.topics.edit', ['id' => $id])->with('success', 'बदलाव सेव हो गए।');

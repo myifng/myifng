@@ -57,6 +57,11 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
     <?php if ($rel['gallery']): ?>
       <div class="art-gallery"><?php foreach ($rel['gallery'] as $g): ?><figure><a href="<?= e(media_url($g, 'large')) ?>" target="_blank" rel="noopener"><?= media_img($g, 'medium') ?></a><?php if ($g['caption']): ?><figcaption><?= e($g['caption']) ?></figcaption><?php endif; ?></figure><?php endforeach; ?></div>
     <?php endif; ?>
+    <?php if (!empty($faq)): ?>
+      <section class="art-faq" aria-labelledby="faqHead"><h2 id="faqHead">अक्सर पूछे जाने वाले सवाल</h2>
+        <?php foreach ($faq as $f): ?><details><summary><?= e($f['q']) ?></summary><p><?= nl2br(e($f['a'])) ?></p></details><?php endforeach; ?>
+      </section>
+    <?php endif; ?>
     <?php if ($news['source'] || $news['news_credit']): ?><p class="updated"><?= $news['source'] ? 'स्रोत: ' . e($news['source']) : '' ?><?= $news['news_credit'] ? ($news['source'] ? ' · ' : '') . e($news['news_credit']) : '' ?></p><?php endif; ?>
     <?php if (!$isPreview): ?><?= ad_slot('article_bottom') ?><?php endif; ?>
     <?php if ($rel['tag_links']): ?><div class="art-tags"><?php foreach ($rel['tag_links'] as $tg): ?><a href="<?= e(route('tag', ['slug' => $tg['slug']])) ?>">#<?= e($tg['name']) ?></a><?php endforeach; ?></div><?php endif; ?>

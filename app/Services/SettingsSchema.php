@@ -33,7 +33,11 @@ final class SettingsSchema
     /** मौजूदा यूज़र यह टैब बदल सकता है? */
     public static function canEdit(array $tab): bool
     {
-        return can('settings.' . (($tab['permission'] ?? 'edit') === 'manage' ? 'manage' : 'edit'));
+        $perm = (string) ($tab['permission'] ?? 'edit');
+        if (str_contains($perm, '.')) {
+            return can($perm); // दूसरे मॉड्यूल का टैब (जैसे seo.edit)
+        }
+        return can('settings.' . ($perm === 'manage' ? 'manage' : 'edit'));
     }
 
     /** वैलिडेशन नियम और लेबल (image/switch/checkboxes अलग से संभाले जाते हैं) */

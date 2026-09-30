@@ -40,7 +40,9 @@ use App\Controllers\Admin\SystemController;
 use App\Controllers\Admin\TagController;
 use App\Controllers\Admin\TopicController;
 use App\Controllers\Admin\ProfileController;
+use App\Controllers\Admin\RedirectController;
 use App\Controllers\Admin\RoleController;
+use App\Controllers\Admin\SeoController;
 use App\Controllers\Admin\UserController;
 use App\Controllers\Admin\VideoController;
 use App\Controllers\Admin\WebStoryController;
@@ -377,6 +379,26 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->post('/invoices/{id:\d+}/payments', [InvoiceController::class, 'pay'])->name('invoices.pay')->middleware('can:advertisers.manage');
         $r->delete('/invoices/{id:\d+}/payments/{pid:\d+}', [InvoiceController::class, 'unpay'])->name('invoices.unpay')->middleware('can:advertisers.manage');
         $r->delete('/invoices/{id:\d+}', [InvoiceController::class, 'destroy'])->name('invoices.destroy')->middleware('can:advertisers.manage');
+
+        // ---------- Phase 10: SEO कमांड सेंटर और रीडायरेक्ट ----------
+        $r->get('/seo', [SeoController::class, 'index'])->name('seo.index')->middleware('can:seo.view');
+        $r->get('/seo/audit', [SeoController::class, 'audit'])->name('seo.audit')->middleware('can:seo.view');
+        $r->get('/seo/settings/{tab:[a-z_]+}', [SeoController::class, 'settings'])->name('seo.settings')->middleware('can:seo.view');
+        $r->post('/seo/settings/{tab:[a-z_]+}', [SeoController::class, 'saveSettings'])->name('seo.settings.update')->middleware('can:seo.edit,seo.manage');
+        $r->get('/seo/404', [SeoController::class, 'notFound'])->name('seo.404')->middleware('can:seo.view');
+        $r->post('/seo/404', [SeoController::class, 'notFoundAction'])->name('seo.404.action')->middleware('can:seo.edit');
+        $r->get('/seo/links', [SeoController::class, 'links'])->name('seo.links')->middleware('can:seo.view');
+        $r->get('/seo/canonical', [SeoController::class, 'canonical'])->name('seo.canonical')->middleware('can:seo.view');
+
+        $r->get('/redirects', [RedirectController::class, 'index'])->name('redirects.index')->middleware('can:redirects.view');
+        $r->get('/redirects/export', [RedirectController::class, 'export'])->name('redirects.export')->middleware('can:redirects.view');
+        $r->post('/redirects/import', [RedirectController::class, 'import'])->name('redirects.import')->middleware('can:redirects.create');
+        $r->get('/redirects/create', [RedirectController::class, 'create'])->name('redirects.create')->middleware('can:redirects.create');
+        $r->post('/redirects', [RedirectController::class, 'store'])->name('redirects.store')->middleware('can:redirects.create');
+        $r->get('/redirects/{id:\d+}/edit', [RedirectController::class, 'edit'])->name('redirects.edit')->middleware('can:redirects.edit');
+        $r->put('/redirects/{id:\d+}', [RedirectController::class, 'update'])->name('redirects.update')->middleware('can:redirects.edit');
+        $r->post('/redirects/{id:\d+}/toggle', [RedirectController::class, 'toggle'])->name('redirects.toggle')->middleware('can:redirects.edit');
+        $r->delete('/redirects/{id:\d+}', [RedirectController::class, 'destroy'])->name('redirects.destroy')->middleware('can:redirects.delete');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

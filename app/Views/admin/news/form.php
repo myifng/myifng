@@ -82,8 +82,12 @@ $thenLabels = ['submit' => 'सेव करके डेस्क को भे
       </section>
 
       <section class="panel mt-3">
-        <div class="panel-head"><h2><i class="fa-brands fa-google me-2 text-body-secondary"></i>SEO</h2></div>
-        <div class="panel-body">
+        <div class="panel-head"><h2><i class="fa-brands fa-google me-2 text-body-secondary"></i>SEO</h2><span class="small text-body-secondary">लिखते-लिखते जाँच</span></div>
+        <div class="panel-body" data-seo-box>
+          <?= field('text', 'focus_keyword', 'फ़ोकस कीवर्ड', $news['focus_keyword'] ?? '', ['placeholder' => 'जैसे: गोरखपुर बाढ़', 'attrs' => ['maxlength' => 100],
+              'help' => 'वह शब्द जिससे लोग यह ख़बर Google पर खोजेंगे। शीर्षक, विवरण और पहले पैराग्राफ़ में आए।']) ?>
+          <div class="seo-meter" aria-live="polite"><span class="small fw-semibold">SEO स्कोर</span><span class="bar"><i data-seo-bar></i></span><b data-seo-score>–</b></div>
+          <ul class="seo-tips" data-seo-tips></ul>
           <div class="serp" aria-hidden="true">
             <span class="serp-url"><?= e(parse_url((string) config('app.url'), PHP_URL_HOST)) ?> › news › <span data-serp-slug><?= e($news['slug'] ?? '') ?></span></span>
             <span class="serp-title" data-serp-title><?= e(($news['meta_title'] ?? '') ?: ($news['title'] ?? 'ख़बर का शीर्षक')) ?></span>
@@ -96,6 +100,30 @@ $thenLabels = ['submit' => 'सेव करके डेस्क को भे
             <div class="col-md-6"><?= field('select', 'robots', 'सर्च इंजन', $news['robots'] ?? 'index,follow', ['options' => News::ROBOTS]) ?></div>
           </div>
           <?= field('url', 'canonical_url', 'Canonical URL (वैकल्पिक)', $news['canonical_url'] ?? '', ['help' => 'सिर्फ़ तब, जब यह ख़बर मूल रूप से किसी और वेबसाइट की हो']) ?>
+          <?php $faqRows = \App\Services\SeoService::faqItems($news['faq'] ?? null);
+          if (is_array(old('faq_q'))) {
+              $faqRows = array_map(static fn($q, $a) => ['q' => $q, 'a' => $a], (array) old('faq_q'), (array) old('faq_a', []));
+          } ?>
+          <details class="mb-3"<?= ($news['og_title'] ?? '') || ($news['og_description'] ?? '') || ($news['og_image'] ?? '') || error('og_image') ? ' open' : '' ?>>
+            <summary class="fw-semibold mb-2"><i class="fa-solid fa-share-nodes me-1 text-body-secondary"></i>सोशल शेयर (WhatsApp / Facebook / X) अलग से</summary>
+            <?= field('text', 'og_title', 'शेयर शीर्षक', $news['og_title'] ?? '', ['help' => 'ख़ाली = SEO शीर्षक', 'attrs' => ['maxlength' => 190]]) ?>
+            <?= field('textarea', 'og_description', 'शेयर विवरण', $news['og_description'] ?? '', ['rows' => 2, 'help' => 'ख़ाली = SEO विवरण', 'attrs' => ['maxlength' => 320]]) ?>
+            <?= media_field('og_image', 'शेयर इमेज (1200×630)', $news['og_image'] ?? '', ['help' => 'ख़ाली = मुख्य इमेज']) ?>
+          </details>
+          <details<?= $faqRows || error('faq') ? ' open' : '' ?>>
+            <summary class="fw-semibold mb-2"><i class="fa-solid fa-circle-question me-1 text-body-secondary"></i>FAQ (सवाल-जवाब) <span class="small fw-normal text-body-secondary">ख़बर के नीचे दिखेंगे + FAQ स्कीमा</span></summary>
+            <?php if (error('faq')): ?><div class="alert alert-danger small py-2"><?= e(error('faq')) ?></div><?php endif; ?>
+            <div class="faq-rows" data-faq-rows>
+              <?php foreach ($faqRows as $f): ?>
+                <div class="faq-row"><button type="button" class="btn-close" data-faq-remove aria-label="यह सवाल हटाएँ"></button>
+                  <input class="form-control mb-2" name="faq_q[]" value="<?= e($f['q']) ?>" maxlength="300" placeholder="सवाल" aria-label="सवाल">
+                  <textarea class="form-control" name="faq_a[]" rows="2" maxlength="2000" placeholder="जवाब" aria-label="जवाब"><?= e($f['a']) ?></textarea></div>
+              <?php endforeach; ?>
+            </div>
+            <template data-faq-template><div class="faq-row"><button type="button" class="btn-close" data-faq-remove aria-label="यह सवाल हटाएँ"></button>
+              <input class="form-control mb-2" name="faq_q[]" maxlength="300" placeholder="सवाल" aria-label="सवाल"><textarea class="form-control" name="faq_a[]" rows="2" maxlength="2000" placeholder="जवाब" aria-label="जवाब"></textarea></div></template>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-faq-add><i class="fa-solid fa-plus me-1"></i>सवाल जोड़ें</button>
+          </details>
         </div>
       </section>
     </div>

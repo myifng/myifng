@@ -1402,3 +1402,89 @@
     calc();
   }
 })();
+
+/* ==========================================================
+   Phase 10: ख़बर एडिटर में SEO स्कोर, FAQ पंक्तियाँ, 404 सूची में सब चुनें
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+
+  var box = $('[data-seo-box]');
+  if (box) {
+    var form = box.closest('form');
+    var f = function (sel) { return $(sel, form); };
+    var val = function (sel) { var el = f(sel); return el ? (el.value || '').trim() : ''; };
+    var norm = function (s) { return (s || '').toLowerCase().replace(/\s+/g, ' ').trim(); };
+    var has = function (hay, kw) { return kw !== '' && norm(hay).indexOf(kw) !== -1; };
+    var check = function () {
+      var area = $('.rte-area', form);
+      var html = area ? area.innerHTML : val('textarea[name="content"]');
+      var text = area ? (area.innerText || '') : html.replace(/<[^>]+>/g, ' ');
+      var words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      var firstP = ((area ? area.querySelector('p') : null) || { innerText: text.slice(0, 400) }).innerText || '';
+      var title = val('#f_title'), seoTitle = val('#f_meta_title') || title, desc = val('#f_meta_description') || val('#f_summary');
+      var kw = norm(val('#f_focus_keyword')), slug = val('#f_slug');
+      var tags = val('input[name="tags"]').split(',').filter(function (t) { return t.trim(); }).length;
+      var host = location.host, links = 0;
+      (area ? $$('a[href]', area) : []).forEach(function (a) { var h = a.getAttribute('href') || ''; if (h.charAt(0) === '/' || h.indexOf(host) !== -1) links++; });
+      var r = [];
+      var add = function (ok, w, good, bad, warn) { r.push({ ok: ok === true, warn: ok === 'warn', w: w, t: ok === true ? good : (ok === 'warn' && warn ? warn : bad) }); };
+      var tl = seoTitle.length;
+      add(tl >= 30 && tl <= 65 ? true : (tl > 0 && tl <= 75 ? 'warn' : false), 12, 'SEO शीर्षक की लंबाई ठीक (' + tl + ')', tl ? 'SEO शीर्षक ' + (tl < 30 ? 'छोटा' : 'लंबा') + ' है (' + tl + '); 30-65 अक्षर रखें' : 'शीर्षक लिखें', 'SEO शीर्षक थोड़ा ' + (tl < 30 ? 'छोटा' : 'लंबा') + ' (' + tl + ')');
+      var dl = desc.length;
+      add(dl >= 70 && dl <= 160 ? true : (dl > 0 ? 'warn' : false), 12, 'विवरण की लंबाई ठीक (' + dl + ')', 'SEO विवरण या सार लिखें (70-160 अक्षर)', 'विवरण ' + (dl < 70 ? 'छोटा' : 'लंबा') + ' है (' + dl + '); 70-160 अक्षर');
+      if (kw) {
+        add(has(seoTitle, kw) || has(title, kw), 12, 'फ़ोकस कीवर्ड शीर्षक में है', 'फ़ोकस कीवर्ड शीर्षक में नहीं');
+        add(has(desc, kw), 8, 'फ़ोकस कीवर्ड विवरण में है', 'फ़ोकस कीवर्ड विवरण में नहीं');
+        add(has(firstP, kw), 8, 'फ़ोकस कीवर्ड पहले पैराग्राफ़ में है', 'फ़ोकस कीवर्ड पहले पैराग्राफ़ में लाएँ');
+        var slugKw = kw.replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+        if (slugKw) add(slug.indexOf(slugKw) !== -1 ? true : 'warn', 4, 'फ़ोकस कीवर्ड URL में है', 'फ़ोकस कीवर्ड URL में नहीं', 'URL (स्लग) में फ़ोकस कीवर्ड के अंग्रेज़ी शब्द जोड़ सकते हैं');
+      } else {
+        add('warn', 12, '', '', 'फ़ोकस कीवर्ड लिखें (जिससे लोग खोजेंगे)');
+      }
+      add(words >= 300 ? true : (words >= 150 ? 'warn' : false), 14, words + ' शब्द: अच्छी लंबाई', 'बहुत छोटी ख़बर (' + words + ' शब्द); 300+ लिखें', words + ' शब्द; 300+ बेहतर');
+      add(!!val('#mf_featured_image'), 10, 'मुख्य इमेज लगी है', 'मुख्य इमेज लगाएँ (Google News/Discover)');
+      if (val('#mf_featured_image')) add(!!val('#f_image_caption') || 'warn', 4, 'इमेज का कैप्शन है', '', 'इमेज कैप्शन लिखें (alt टेक्स्ट भी बनता है)');
+      add(!!val('#f_category_id'), 6, 'श्रेणी चुनी है', 'श्रेणी चुनें');
+      add(tags >= 3 ? true : (tags ? 'warn' : false), 4, tags + ' टैग', 'टैग जोड़ें (3-5)', 'कम से कम 3 टैग');
+      add(links > 0 ? true : 'warn', 4, 'ख़बर में ' + links + ' अंदरूनी लिंक', '', 'अपनी साइट की किसी पुरानी ख़बर का लिंक जोड़ें');
+      var robots = val('#f_robots');
+      if (robots.indexOf('noindex') === 0) add(false, 0, '', 'यह ख़बर noindex है: Google में नहीं दिखेगी');
+      var total = 0, got = 0;
+      r.forEach(function (x) { total += x.w; got += x.ok ? x.w : (x.warn ? x.w / 2 : 0); });
+      var score = total ? Math.round(100 * got / total) : 0;
+      $('[data-seo-score]', box).textContent = score + '%';
+      var bar = $('[data-seo-bar]', box); bar.style.width = score + '%';
+      bar.style.background = score >= 80 ? 'var(--bs-success)' : (score >= 50 ? 'var(--bs-warning)' : 'var(--bs-danger)');
+      var ul = $('[data-seo-tips]', box); ul.textContent = '';
+      r.sort(function (a, b) { return (a.ok ? 2 : a.warn ? 1 : 0) - (b.ok ? 2 : b.warn ? 1 : 0); }).forEach(function (x) {
+        if (!x.t) return; var li = document.createElement('li'); li.className = x.ok ? 'ok' : (x.warn ? 'warn' : ''); li.textContent = x.t; ul.appendChild(li);
+      });
+    };
+    var t;
+    var later = function () { clearTimeout(t); t = setTimeout(check, 250); };
+    form.addEventListener('input', later);
+    form.addEventListener('change', later);
+    new MutationObserver(later).observe(form, { subtree: true, attributes: true, attributeFilter: ['value'] });
+    setTimeout(check, 300);
+  }
+
+  // FAQ पंक्तियाँ
+  var rows = $('[data-faq-rows]');
+  if (rows) {
+    var tpl = $('[data-faq-template]');
+    $('[data-faq-add]').addEventListener('click', function () {
+      if ($$('.faq-row', rows).length >= 10) { alert('ज़्यादा से ज़्यादा 10 सवाल।'); return; }
+      rows.appendChild(tpl.content.cloneNode(true)); var q = rows.lastElementChild.querySelector('input'); if (q) q.focus();
+    });
+    rows.addEventListener('click', function (e) { var b = e.target.closest('[data-faq-remove]'); if (b) b.closest('.faq-row').remove(); });
+  }
+
+  // सब चुनें: data-check-all="x" → data-check="x"
+  $$('[data-check-all]').forEach(function (all) {
+    var key = all.dataset.checkAll; if (!key || all.closest('form')) return;
+    all.addEventListener('change', function () { $$('[data-check="' + key + '"]').forEach(function (c) { c.checked = all.checked; }); });
+  });
+})();

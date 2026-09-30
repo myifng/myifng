@@ -70,7 +70,11 @@ final class CategoryController extends Controller
         Category::update($id, $data);
         MenuService::clearCache();
         AuditService::log('update', 'categories', $id, 'श्रेणी बदली: ' . $data['name'], $cat, $data);
-        $note = $cat['slug'] !== $data['slug'] ? ' URL बदला है: पुराने लिंक के लिए Phase 10 में रीडायरेक्ट मैनेजर।' : '';
+        $note = '';
+        if ($cat['slug'] !== $data['slug']) {
+            \App\Services\RedirectService::moved(route('category', ['slug' => $cat['slug']]), route('category', ['slug' => $data['slug']]), 'category:' . $id);
+            $note = setting('seo_auto_redirect', '1') === '1' ? ' URL बदला है: पुराने पते से नए पर 301 रीडायरेक्ट अपने आप बन गया।' : ' URL बदला है (अपने आप रीडायरेक्ट बंद है)।';
+        }
         return $this->toRoute('admin.categories.edit', ['id' => $id])->with('success', 'बदलाव सेव हो गए।' . $note);
     }
 

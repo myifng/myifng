@@ -97,6 +97,14 @@ final class NewsService
                 $id = News::create($data);
             }
             self::syncRelations($id, $rel);
+            // Phase 10: स्लग बदला (और ख़बर कभी प्रकाशित हुई थी) → पुराने पते से 301
+            if (isset($data['slug'])) {
+                if ($news && $news['slug'] !== $data['slug'] && $news['published_at']) {
+                    RedirectService::moved(self::url($news), self::url($data), 'news:' . $id);
+                } else {
+                    RedirectService::claim(self::url($data));
+                }
+            }
             self::addRevision($id, $reason !== '' ? $reason : ($news ? 'बदलाव' : 'पहला ड्राफ़्ट'), $correction && $news && $news['status'] === 'published');
             if ($news && $news['status'] === 'published') {
                 self::changed();

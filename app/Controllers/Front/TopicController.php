@@ -50,8 +50,9 @@ final class TopicController extends FrontController
         return $this->listing([
             'heading' => '#' . $t['name'], 'desc' => $t['description'], 'crumbs' => $crumbs, 'items' => $items,
             'seo' => [
-                'title' => $t['name'] . ' से जुड़ी ख़बरें' . ($items->page > 1 ? ' - पेज ' . $items->page : ''),
-                'description' => $t['description'] ?: $t['name'] . ' से जुड़ी ताज़ा ख़बरें, ' . setting('site_name') . ' पर।',
+                'title' => ($t['meta_title'] ?: $t['name'] . ' से जुड़ी ख़बरें') . ($items->page > 1 ? ' - पेज ' . $items->page : ''),
+                'description' => $t['meta_description'] ?: ($t['description'] ?: $t['name'] . ' से जुड़ी ताज़ा ख़बरें, ' . setting('site_name') . ' पर।'),
+                'robots' => setting('seo_noindex_tags', '0') === '1' ? 'noindex,follow' : 'index,follow',
                 'canonical' => route('tag', ['slug' => $t['slug']]) . ($items->page > 1 ? '?page=' . $items->page : ''),
                 'jsonld' => SeoService::breadcrumbs($crumbs),
             ],

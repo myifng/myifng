@@ -97,6 +97,9 @@ abstract class MultimediaController extends Controller
             $this->afterSave($id, $request, $row);
         });
         MultimediaService::changed();
+        if (isset($data['slug']) && $row['slug'] !== $data['slug']) {
+            \App\Services\RedirectService::moved(MultimediaService::url(static::KIND, $row), MultimediaService::url(static::KIND, $data), static::KIND . ':' . $id);
+        }
         AuditService::log('update', $cfg['module'], $id, static::LABELS['one'] . ' बदला: ' . $data['title'], $this->auditData($row), $this->auditData($data));
         return $this->toRoute('admin.' . $cfg['module'] . '.edit', ['id' => $id])->with('success', $this->savedMessage($data, false));
     }

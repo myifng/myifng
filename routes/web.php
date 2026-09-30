@@ -17,6 +17,7 @@ use App\Controllers\Front\NewsController;
 use App\Controllers\Front\PageController;
 use App\Controllers\Front\ReporterJoinController;
 use App\Controllers\Front\SearchController;
+use App\Controllers\Front\SitemapController;
 use App\Controllers\Front\TopicController;
 use App\Controllers\Front\VerifyController;
 use App\Controllers\Front\VideoController;
@@ -78,6 +79,13 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     // Phase 9: विज्ञापन की गिनती
     $r->get('/ad/{id:\d+}/click', [AdController::class, 'click'])->name('ad.click');
     $r->post('/ad/impressions', [AdController::class, 'impressions'])->name('ad.impressions')->middleware('throttle:120,5');
+
+    // Phase 10: साइटमैप, robots.txt, RSS
+    $r->get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+    $r->get('/sitemap-{part:[a-z0-9-]+}.xml', [SitemapController::class, 'part'])->name('sitemap.part');
+    $r->get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
+    $r->get('/feed', [SitemapController::class, 'feed'])->name('feed');
+    $r->get('/category/{slug:[a-z0-9-]+}/feed', [SitemapController::class, 'categoryFeed'])->name('category.feed');
 
     // लोकेशन: सबसे आख़िर में (slug आरक्षित शब्दों से नहीं टकराते: TaxonomyService::RESERVED)
     $r->get('/{path:[a-z0-9-]+(?:/[a-z0-9-]+)*}', [LocationController::class, 'show'])->name('location');
