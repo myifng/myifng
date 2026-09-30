@@ -1,7 +1,7 @@
-<?php $this->layout('layouts/auth'); $title = 'नया पासवर्ड'; ?>
+<?php $this->layout('layouts/auth'); $rp = ($portal ?? 'admin') === 'reporter' ? 'reporter.' : 'admin.'; $title = 'नया पासवर्ड'; ?>
 <h1 class="h3 fw-bold mb-1">नया पासवर्ड बनाएँ</h1>
 <p class="text-body-secondary mb-4">कम से कम 8 अक्षर, जिनमें अक्षर और अंक दोनों हों।</p>
-<form method="post" action="<?= e(route('admin.password.update')) ?>" novalidate>
+<form method="post" action="<?= e(route($rp . 'password.update')) ?>" novalidate>
   <?= csrf_field() ?>
   <input type="hidden" name="token" value="<?= e($token) ?>">
   <?= field('password', 'password', 'नया पासवर्ड', '', ['required' => true, 'attrs' => ['autocomplete' => 'new-password', 'autofocus' => true]]) ?>

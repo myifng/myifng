@@ -13,7 +13,7 @@ foreach ($districts as $d) {
     <nav class="crumb" aria-label="ब्रेडक्रम्ब"><a href="<?= e(url()) ?>">होम</a> <span aria-hidden="true">›</span> <span aria-current="page">रिपोर्टर बनें</span></nav>
     <h1 class="list-title">रिपोर्टर बनें</h1>
     <?php if (setting('join_intro')): ?><p class="list-desc"><?= e(setting('join_intro')) ?></p><?php endif; ?>
-    <p class="small-note">पहले आवेदन कर चुके हैं? <a href="<?= e(route('application.status')) ?>">आवेदन की स्थिति देखें</a></p>
+    <p class="small-note">पहले आवेदन कर चुके हैं? <a href="<?= e(route('application.status')) ?>">आवेदन की स्थिति देखें</a> · पहले से रिपोर्टर हैं? <a href="<?= e(route('reporter.login')) ?>">रिपोर्टर लॉगिन</a></p>
 
     <ol class="steps" data-steps-nav hidden>
       <?php foreach (['व्यक्तिगत', 'पता', 'पेशेवर', 'दस्तावेज़', 'घोषणा'] as $i => $s): ?><li data-step-i="<?= $i ?>"><span><?= $i + 1 ?></span><?= e($s) ?></li><?php endforeach; ?>

@@ -74,7 +74,7 @@ final class ReporterService
             ReporterApplication::update((int) $app['id'], ['reporter_id' => $rid]);
             $token = Str::random(32);
             PasswordReset::create(['user_id' => $userId, 'token_hash' => hash('sha256', $token), 'expires_at' => date('Y-m-d H:i:s', time() + 72 * 3600)]);
-            return ['reporter_id' => $rid, 'user_id' => $userId, 'link' => route('admin.password.reset', ['token' => $token])];
+            return ['reporter_id' => $rid, 'user_id' => $userId, 'link' => route('reporter.password.reset', ['token' => $token])];
         });
     }
 

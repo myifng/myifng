@@ -251,6 +251,7 @@ return [
             'session_timeout' => ['label' => 'निष्क्रियता पर लॉगआउट (मिनट)', 'type' => 'number', 'default' => '120', 'rules' => 'required|integer|min:5|max:1440', 'width' => 4],
             'login_max_attempts' => ['label' => 'ग़लत लॉगिन प्रयास की सीमा', 'type' => 'number', 'default' => '5', 'rules' => 'required|integer|min:3|max:20', 'width' => 4],
             'login_lockout_minutes' => ['label' => 'रोक का समय (मिनट)', 'type' => 'number', 'default' => '15', 'rules' => 'required|integer|min:1|max:1440', 'width' => 4],
+            'separate_reporter_login' => ['label' => 'रिपोर्टर और स्टाफ़ के लॉगिन पेज अलग रखें', 'type' => 'switch', 'default' => '1', 'help' => 'रिपोर्टर सिर्फ़ /reporter/login से, बाकी स्टाफ़ सिर्फ़ एडमिन लॉगिन से। एडमिन का पता बदलना हो तो config/env.php में ADMIN_PATH।'],
         ],
     ],
     // Phase 14: चुनाव/खेल डेटा API (किसी डेटा एजेंसी या अपने स्क्रिप्ट से नतीजे/स्कोर भेजने के लिए)

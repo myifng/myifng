@@ -19,7 +19,9 @@ final class AuthMiddleware implements Middleware
             if ($request->method() === 'GET') {
                 app('session')->set('intended', $request->fullUrl());
             }
-            return Response::redirect(route('admin.login'));
+            // रिपोर्टर का सेशन ख़त्म हो तो रिपोर्टर लॉगिन पेज पर (एडमिन पता न दिखे)
+            $reporter = ($_COOKIE['np_portal'] ?? '') === 'reporter' && setting('separate_reporter_login', '1') === '1';
+            return Response::redirect(route($reporter ? 'reporter.login' : 'admin.login'));
         }
         return $next($request);
     }

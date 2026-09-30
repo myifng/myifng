@@ -93,7 +93,7 @@ final class NotifyEvents
     public static function reporterApproved(string $name, ?string $mobile, string $code): void
     {
         self::safe(static fn() => NotificationService::notify('reporter_approved', ['sms' => [$mobile], 'whatsapp' => [$mobile]],
-            ['title' => 'बधाई ' . $name . '! आप ' . setting('site_name') . ' के रिपोर्टर बने', 'body' => 'रिपोर्टर ID: ' . $code, 'url' => route('admin.login')]));
+            ['title' => 'बधाई ' . $name . '! आप ' . setting('site_name') . ' के रिपोर्टर बने', 'body' => 'रिपोर्टर ID: ' . $code, 'url' => route('reporter.login')]));
     }
 
     private static function mobile(int $userId): array

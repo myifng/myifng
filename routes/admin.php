@@ -57,6 +57,17 @@ use App\Controllers\Admin\UserController;
 use App\Controllers\Admin\VideoController;
 use App\Controllers\Admin\WebStoryController;
 
+// ---------- रिपोर्टर का अलग लॉगिन (/reporter/login): एडमिन पते से अलग ----------
+$router->get('/reporter', static fn() => \App\Core\Response::redirect(auth()->check() ? route('admin.dashboard') : route('reporter.login')))->name('reporter.home');
+$router->group(['prefix' => '/reporter', 'as' => 'reporter.', 'middleware' => ['guest']], function ($r) {
+    $r->get('/login', [AuthController::class, 'showLogin'])->name('login');
+    $r->post('/login', [AuthController::class, 'login'])->name('login.submit')->middleware('throttle:20,5');
+    $r->get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.forgot');
+    $r->post('/forgot-password', [AuthController::class, 'sendReset'])->name('password.email')->middleware('throttle:5,15');
+    $r->get('/reset-password/{token:[a-f0-9]{64}}', [AuthController::class, 'showReset'])->name('password.reset');
+    $r->post('/reset-password', [AuthController::class, 'reset'])->name('password.update')->middleware('throttle:10,15');
+});
+
 $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'admin.'], function ($r) {
 
     // ---------- बिना लॉगिन ----------

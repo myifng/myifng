@@ -22,11 +22,19 @@
         <span class="bm-a"><?= e($words[0]) ?></span><?php if (!empty($words[1])): ?><span class="bm-b"><?= e($words[1]) ?></span><?php endif; ?><?php endif; ?>
       </div>
       <p class="auth-tag"><?= e(setting('tagline', 'डिजिटल न्यूज़रूम')) ?></p>
+      <?php if (($portal ?? 'admin') === 'reporter'): ?>
+      <ul class="auth-points">
+        <li><i class="fa-solid fa-pen-nib"></i> अपने क्षेत्र की ख़बर लिखें और डेस्क को भेजें</li>
+        <li><i class="fa-solid fa-list-check"></i> असाइनमेंट और ख़बर की स्थिति देखें</li>
+        <li><i class="fa-solid fa-id-card"></i> ID कार्ड, अधिकार पत्र और अपना प्रदर्शन</li>
+      </ul>
+      <?php else: ?>
       <ul class="auth-points">
         <li><i class="fa-solid fa-newspaper"></i> ख़बर लिखें, समीक्षा करें, प्रकाशित करें</li>
         <li><i class="fa-solid fa-id-card"></i> रिपोर्टर नेटवर्क और असाइनमेंट</li>
         <li><i class="fa-solid fa-chart-line"></i> न्यूज़रूम का पूरा हिसाब एक जगह</li>
       </ul>
+      <?php endif; ?>
       <div class="ticker-lines"><span></span><span></span><span></span></div>
     </div>
   </section>
