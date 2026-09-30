@@ -13,6 +13,9 @@ use PDOStatement;
 final class Database
 {
     private PDO $pdo;
+    /** इस अनुरोध में कितनी query और कुल समय (धीमे अनुरोध के लॉग के लिए) */
+    public static int $queries = 0;
+    public static float $queryMs = 0.0;
 
     public function __construct(private array $cfg)
     {
@@ -67,7 +70,10 @@ final class Database
             };
             $st->bindValue($key, $v, $type);
         }
+        $t = microtime(true);
         $st->execute();
+        self::$queries++;
+        self::$queryMs += (microtime(true) - $t) * 1000;
         return $st;
     }
 

@@ -3,13 +3,14 @@
 $env = is_file(__DIR__ . '/env.php') ? require __DIR__ . '/env.php' : [];
 
 return [
-    'version'      => '1.13.0',
-    'phase'        => 14,                                  // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
+    'version'      => '1.14.0',
+    'phase'        => 15,                                  // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
     'url'          => rtrim((string) ($env['APP_URL'] ?? ''), '/'),
     'key'          => (string) ($env['APP_KEY'] ?? ''),
     'debug'        => (bool) ($env['DEBUG'] ?? false),
     'timezone'     => (string) ($env['TIMEZONE'] ?? 'Asia/Kolkata'),
     'admin_path'   => trim((string) ($env['ADMIN_PATH'] ?? 'admin'), '/'),
+    'admin_ip_bypass' => !empty($env['ADMIN_IP_BYPASS']),               // एडमिन IP allowlist से फँस जाएँ तो env.php में ADMIN_IP_BYPASS = 1
     'session_name' => 'nsess_' . substr(md5((string) ($env['APP_KEY'] ?? 'x')), 0, 6),
     'cache'        => (bool) ($env['CACHE'] ?? true),
 

@@ -251,6 +251,12 @@ return [
             'session_timeout' => ['label' => 'निष्क्रियता पर लॉगआउट (मिनट)', 'type' => 'number', 'default' => '120', 'rules' => 'required|integer|min:5|max:1440', 'width' => 4],
             'login_max_attempts' => ['label' => 'ग़लत लॉगिन प्रयास की सीमा', 'type' => 'number', 'default' => '5', 'rules' => 'required|integer|min:3|max:20', 'width' => 4],
             'login_lockout_minutes' => ['label' => 'रोक का समय (मिनट)', 'type' => 'number', 'default' => '15', 'rules' => 'required|integer|min:1|max:1440', 'width' => 4],
+            'admin_ip_allowlist' => ['label' => 'एडमिन IP allowlist (वैकल्पिक)', 'type' => 'textarea', 'rules' => 'nullable|max:2000',
+                'help' => 'ख़ाली = कहीं से भी। एक लाइन में एक IP या रेंज (जैसे 203.0.113.5 या 203.0.113.0/24)। स्टाफ़ सिर्फ़ इन्हीं IP से लॉगिन/काम कर सकेगा; रिपोर्टर पर लागू नहीं। फँस जाएँ तो config/env.php में ADMIN_IP_BYPASS = 1।'],
+            'hsts' => ['label' => 'HTTPS पर HSTS हेडर भेजें', 'type' => 'switch', 'default' => '1', 'help' => 'ब्राउज़र हमेशा HTTPS से खोलेगा। सिर्फ़ तब चालू रखें जब SSL हमेशा रहेगा।'],
+            'audit_retention_days' => ['label' => 'ऑडिट लॉग कितने दिन रखें', 'type' => 'number', 'default' => '365', 'rules' => 'required|integer|min:0|max:3650', 'width' => 4, 'help' => '0 = कभी न हटाएँ'],
+            'log_retention_days' => ['label' => 'एरर/मेल लॉग फ़ाइलें कितने दिन', 'type' => 'number', 'default' => '30', 'rules' => 'required|integer|min:3|max:365', 'width' => 4],
+            'slow_request_ms' => ['label' => 'धीमा अनुरोध (मिलीसेकंड से ज़्यादा)', 'type' => 'number', 'default' => '1500', 'rules' => 'required|integer|min:200|max:30000', 'width' => 4],
             'separate_reporter_login' => ['label' => 'रिपोर्टर और स्टाफ़ के लॉगिन पेज अलग रखें', 'type' => 'switch', 'default' => '1', 'help' => 'रिपोर्टर सिर्फ़ /reporter/login से, बाकी स्टाफ़ सिर्फ़ एडमिन लॉगिन से। एडमिन का पता बदलना हो तो config/env.php में ADMIN_PATH।'],
         ],
     ],
@@ -261,6 +267,17 @@ return [
             'data_api_enabled' => ['label' => 'डेटा API चालू करें', 'type' => 'switch', 'default' => '0', 'help' => 'बंद हो तो /api/v1/… पर हर अनुरोध 404।'],
             'data_api_token' => ['label' => 'API टोकन (कम से कम 32 अक्षर)', 'type' => 'text', 'rules' => 'nullable|min:32|max:128|regex:/^[A-Za-z0-9_\-]+$/',
                 'help' => 'हेडर में भेजें: Authorization: Bearer <टोकन>। सुझाव (नया बनाने के लिए): ' . bin2hex(random_bytes(24)) . ' · किसी से साझा न करें; लीक हो तो तुरंत बदलें।'],
+        ],
+    ],
+    // Phase 15: बैकअप
+    'backups' => [
+        'label' => 'बैकअप', 'icon' => 'fa-database', 'permission' => 'manage',
+        'fields' => [
+            'backup_schedule' => ['label' => 'अपने-आप बैकअप', 'type' => 'select', 'options' => ['off' => 'बंद', 'daily' => 'रोज़', 'weekly' => 'हर हफ़्ते'], 'default' => 'off', 'rules' => 'required|in:off,daily,weekly', 'width' => 4,
+                'help' => 'cron की ज़रूरत नहीं: साइट पर आने वाले अनुरोधों से, जवाब भेजने के बाद चलता है।'],
+            'backup_schedule_type' => ['label' => 'अपने-आप बैकअप में', 'type' => 'select', 'options' => ['db' => 'सिर्फ़ डेटाबेस (हल्का)', 'full' => 'डेटाबेस + फ़ाइलें'], 'default' => 'db', 'rules' => 'required|in:db,full', 'width' => 4],
+            'backup_keep' => ['label' => 'कितने बैकअप रखें', 'type' => 'number', 'default' => '7', 'rules' => 'required|integer|min:1|max:100', 'width' => 4, 'help' => 'इससे पुराने अपने-आप हटेंगे।'],
+            'backup_include_private' => ['label' => 'फ़ाइल बैकअप में निजी फ़ाइलें (KYC, फ़ॉर्म अटैचमेंट) भी', 'type' => 'switch', 'default' => '1'],
         ],
     ],
     'maintenance' => [

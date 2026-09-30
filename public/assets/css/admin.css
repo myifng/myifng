@@ -919,3 +919,18 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 .auth-badge { display: inline-flex; align-items: center; gap: 6px; background: color-mix(in srgb, var(--brand) 12%, transparent); color: var(--brand); font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 99px; margin-bottom: 10px; }
 .auth-badge.staff { background: var(--page-bg, #f1f2f4); color: var(--ink); }
 .auth-alt { display: flex; flex-direction: column; gap: 6px; align-items: center; margin: 22px 0 0; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; text-align: center; }
+/* Phase 15: सिस्टम */
+.health-list { list-style: none; margin: 0; padding: 0; }
+.health-list li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 8px; align-items: start; padding: 9px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.health-list li:last-child { border-bottom: 0; }
+.health-list li > i { margin-top: 3px; }
+.health-list li.ok > i { color: #1b8a4a; } .health-list li.bad > i { color: #c62828; } .health-list li.warn > i { color: #d9730d; } .health-list li.unk > i { color: var(--muted); }
+.health-list li small { display: block; color: var(--muted); font-size: 12.5px; }
+.health-list li b { font-weight: 600; text-align: right; overflow-wrap: anywhere; max-width: 220px; }
+.health-list li.bad b { color: #c62828; }
+.bk-type { position: relative; cursor: pointer; }
+.bk-type input { position: absolute; opacity: 0; }
+.bk-type span { display: inline-block; border: 1px solid var(--line); border-radius: 8px; padding: 7px 12px; font-weight: 600; font-size: 14px; }
+.bk-type input:checked + span { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand); }
+.bk-type input:disabled + span { opacity: .45; cursor: not-allowed; }
+.bk-type input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }

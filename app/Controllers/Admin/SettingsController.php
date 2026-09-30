@@ -59,6 +59,18 @@ final class SettingsController extends Controller
             }
         }
 
+        // Phase 15: एडमिन IP allowlist: हर लाइन IP जाँचें, और अपना IP न हो तो सेव न हो (ख़ुद बाहर न हों)
+        if (array_key_exists('admin_ip_allowlist', $data)) {
+            $ips = \App\Services\SecurityService::parseAllowlist((string) $data['admin_ip_allowlist']);
+            if ($ips['invalid']) {
+                $errors['admin_ip_allowlist'] = 'ये IP सही नहीं: ' . implode(', ', array_slice($ips['invalid'], 0, 5));
+            } elseif ($ips['list'] && !\App\Services\SecurityService::ipAllowed($request->ip(), $ips['list'])) {
+                $errors['admin_ip_allowlist'] = 'आपका अभी का IP (' . $request->ip() . ') सूची में नहीं है; सेव करने पर आप ख़ुद एडमिन से बाहर हो जाते। पहले इसे जोड़ें।';
+            } else {
+                $data['admin_ip_allowlist'] = implode("\n", $ips['list']);
+            }
+        }
+
         // इमेज: नई अपलोड, हटाना, या पुरानी बनी रहे
         foreach ($schema['fields'] as $name => $f) {
             if ($f['type'] !== 'image') {

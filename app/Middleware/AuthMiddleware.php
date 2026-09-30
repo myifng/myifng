@@ -23,6 +23,12 @@ final class AuthMiddleware implements Middleware
             $reporter = ($_COOKIE['np_portal'] ?? '') === 'reporter' && setting('separate_reporter_login', '1') === '1';
             return Response::redirect(route($reporter ? 'reporter.login' : 'admin.login'));
         }
+        // Phase 15: एडमिन IP allowlist (सिर्फ़ स्टाफ़ पर; रिपोर्टर पर नहीं)
+        if (!\App\Services\SecurityService::staffIpOk($request->ip(), auth()->user()['role_slug'] ?? null)) {
+            \App\Services\AuditService::log('ip_blocked', 'auth', auth()->id(), 'allowlist से बाहर के IP से एडमिन: ' . $request->ip());
+            auth()->logout();
+            throw new \App\Core\HttpException(403, 'इस IP से एडमिन की अनुमति नहीं है।');
+        }
         return $next($request);
     }
 }

@@ -93,6 +93,15 @@ final class Auth
         // दूसरे ब्राउज़र से चुराया सेशन, या बहुत देर से निष्क्रिय सेशन: लॉगआउट
         $fp = hash('sha256', substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255));
         if (!hash_equals((string) $auth['fp'], $fp) || (time() - (int) $auth['last']) > $this->timeoutMinutes * 60) {
+            if (!hash_equals((string) $auth['fp'], $fp)) {
+                // Phase 15: ब्राउज़र बदला = संभव सेशन चोरी; ऑडिट में दर्ज (user() को दोबारा न बुलाए, इसलिए सीधे insert)
+                try {
+                    $this->db->insert('audit_logs', ['user_id' => (int) $auth['id'], 'action' => 'session_mismatch', 'module' => 'auth',
+                        'description' => 'दूसरे ब्राउज़र से सेशन इस्तेमाल: लॉगआउट किया', 'ip' => substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
+                        'user_agent' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255)]);
+                } catch (\Throwable) {
+                }
+            }
             $this->logout();
             $this->session->flash('flash', ['type' => 'warning', 'message' => 'सुरक्षा के लिए आपका सेशन बंद कर दिया गया। दोबारा लॉगिन करें।']);
             return $this->user = null;

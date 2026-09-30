@@ -87,12 +87,24 @@ final class App
         }
         $this->securityHeaders($response);
         $response->send();
+        $elapsed = (microtime(true) - (float) ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true))) * 1000;
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
         // Phase 13: पेज-व्यू जवाब भेजने के बाद दर्ज हो (पाठक को इंतज़ार नहीं)
         if ($request->method() === 'GET' && $response->status() === 200) {
-            if (function_exists('fastcgi_finish_request')) {
-                fastcgi_finish_request();
-            }
             \App\Services\AnalyticsService::record($request, $response);
+        }
+        // Phase 15: धीमे अनुरोध का लॉग; घंटे में एक बार शेड्यूल बैकअप और रोज़ की सफ़ाई (जवाब के बाद)
+        try {
+            \App\Services\SystemService::slow($elapsed, $request->method(), $request->path());
+            if (cache()->get('system.after_hourly') === null) {
+                cache()->set('system.after_hourly', time(), 3600);
+                \App\Services\SystemService::autoClean();
+                \App\Services\BackupService::scheduled();
+            }
+        } catch (\Throwable $e) {
+            logger()->warning('After-response: ' . $e->getMessage());
         }
     }
 
@@ -206,6 +218,18 @@ final class App
         $r->header('X-Frame-Options', 'SAMEORIGIN')
             ->header('X-Content-Type-Options', 'nosniff')
             ->header('Referrer-Policy', 'strict-origin-when-cross-origin')
-            ->header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+            ->header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+            // Phase 15: कड़ा पर सुरक्षित CSP (inline स्क्रिप्ट/GA/विज्ञापन नहीं टूटते): clickjacking, base-tag, plugin और फ़ॉर्म-हाइजैक से बचाव
+            ->header('Content-Security-Policy', "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self' https:")
+            ->header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+        $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+        if ($https) {
+            try {
+                if (setting('hsts', '1') === '1') {
+                    $r->header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+                }
+            } catch (\Throwable) {
+            }
+        }
     }
 }

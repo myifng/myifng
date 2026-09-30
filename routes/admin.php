@@ -575,5 +575,18 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');
         $r->get('/audit-logs/export', [AuditLogController::class, 'export'])->name('audit.export')->middleware('can:audit.export');
         $r->get('/audit-logs/{id:\d+}', [AuditLogController::class, 'show'])->name('audit.show')->middleware('can:audit.view');
+        $r->get('/audit-logs/logins', [AuditLogController::class, 'logins'])->name('audit.logins')->middleware('can:audit.view');
+
+        // ---------- Phase 15: सिस्टम, सुरक्षा, बैकअप ----------
+        $r->get('/system', [SystemController::class, 'index'])->name('system.index')->middleware('can:system.view');
+        $r->post('/system/cache', [SystemController::class, 'clearCache'])->name('system.cache')->middleware('can:system.manage');
+        $r->post('/system/cleanup', [SystemController::class, 'cleanup'])->name('system.cleanup')->middleware('can:system.manage');
+        $r->get('/system/security', [SystemController::class, 'security'])->name('system.security')->middleware('can:system.view');
+        $r->post('/system/security/unblock', [SystemController::class, 'unblock'])->name('system.unblock')->middleware('can:system.manage');
+        $bk = \App\Controllers\Admin\BackupController::class;
+        $r->get('/backups', [$bk, 'index'])->name('backups.index')->middleware('can:backups.view');
+        $r->post('/backups', [$bk, 'store'])->name('backups.store')->middleware('can:backups.create');
+        $r->get('/backups/{id:\d+}/download', [$bk, 'download'])->name('backups.download')->middleware('can:backups.view');
+        $r->delete('/backups/{id:\d+}', [$bk, 'destroy'])->name('backups.destroy')->middleware('can:backups.delete');
     });
 });

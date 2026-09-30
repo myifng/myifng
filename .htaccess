@@ -21,6 +21,9 @@ AddDefaultCharset UTF-8
   # छुपी फ़ाइलें (.env, .git आदि) बंद
   RewriteRule (^|/)\.(?!well-known/) - [F,L]
 
+  # बैकअप/लॉग/निजी फ़ाइलें (storage पहले से बंद), .git और composer फ़ाइलें
+  RewriteRule ^(\.git|vendor/composer)(/|$) - [F,L,NC]
+
   # मौजूद फ़ाइल/फ़ोल्डर (public/assets, public/uploads, install) सीधे परोसें
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
@@ -38,6 +41,11 @@ AddDefaultCharset UTF-8
   Header always set X-Content-Type-Options "nosniff"
 </IfModule>
 
+# Phase 15: gzip (HTML/CSS/JS/JSON/XML/SVG/फ़ॉन्ट)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/xhtml+xml application/rss+xml application/javascript application/json image/svg+xml font/ttf application/vnd.ms-fontobject
+</IfModule>
+
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType text/css "access plus 1 month"
@@ -47,4 +55,18 @@ AddDefaultCharset UTF-8
   ExpiresByType image/png "access plus 1 month"
   ExpiresByType image/svg+xml "access plus 1 month"
   ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 month"
+  ExpiresByType image/gif "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 6 months"
+  ExpiresByType application/pdf "access plus 1 week"
+  ExpiresByType video/mp4 "access plus 1 month"
+  ExpiresByType audio/mpeg "access plus 1 month"
+</IfModule>
+
+# CSS/JS के पते में ?v=फ़ाइल-समय होता है, इसलिए लंबा कैश सुरक्षित
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|woff2?|svg)$">
+    Header set Cache-Control "public, max-age=31536000"
+  </FilesMatch>
 </IfModule>

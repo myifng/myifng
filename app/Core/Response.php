@@ -7,6 +7,7 @@ namespace App\Core;
 class Response
 {
     private array $headers = [];
+    private ?string $file = null;
 
     public function __construct(private string $body = '', private int $status = 200)
     {
@@ -40,6 +41,16 @@ class Response
             ->header('Content-Type', 'text/csv; charset=utf-8')
             ->header('Content-Disposition', 'attachment; filename="' . preg_replace('/[^a-z0-9_.-]/i', '', $filename) . '"')
             ->header('Cache-Control', 'no-store');
+    }
+
+    /** बड़ी फ़ाइल (जैसे बैकअप) बिना मेमोरी में लिए भेजें */
+    public static function download(string $path, string $name, string $type = 'application/octet-stream'): self
+    {
+        $r = (new self(''))->header('Content-Type', $type)
+            ->header('Content-Disposition', 'attachment; filename="' . preg_replace('/[^a-z0-9_.-]/i', '', $name) . '"')
+            ->header('Content-Length', (string) filesize($path))->header('Cache-Control', 'no-store')->header('X-Content-Type-Options', 'nosniff');
+        $r->file = $path;
+        return $r;
     }
 
     public function header(string $name, string $value): self
@@ -85,6 +96,13 @@ class Response
             foreach ($this->headers as $k => $v) {
                 header($k . ': ' . $v);
             }
+        }
+        if ($this->file !== null) {
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            readfile($this->file);
+            return;
         }
         echo $this->body;
     }

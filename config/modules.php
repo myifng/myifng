@@ -91,7 +91,7 @@ return [
         'sports'       => ['label' => 'खेल केंद्र', 'icon' => 'fa-trophy', 'group' => 'special', 'phase' => 14, 'route' => 'admin.sports.index', 'actions' => [...$crud, 'manage']],
 
         // ---------- Phase 15 ----------
-        'backups'      => ['label' => 'बैकअप', 'icon' => 'fa-database', 'group' => 'system', 'phase' => 15, 'actions' => ['view', 'create', 'delete', 'manage']],
-        'system'       => ['label' => 'सिस्टम / कैश', 'icon' => 'fa-server', 'group' => 'system', 'phase' => 15, 'actions' => ['view', 'manage']],
+        'backups'      => ['label' => 'बैकअप', 'icon' => 'fa-database', 'group' => 'system', 'phase' => 15, 'route' => 'admin.backups.index', 'actions' => ['view', 'create', 'delete', 'manage']],
+        'system'       => ['label' => 'सिस्टम / कैश', 'icon' => 'fa-server', 'group' => 'system', 'phase' => 15, 'route' => 'admin.system.index', 'actions' => ['view', 'manage']],
     ],
 ];

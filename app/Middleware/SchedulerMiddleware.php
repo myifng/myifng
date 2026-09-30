@@ -19,6 +19,7 @@ final class SchedulerMiddleware implements Middleware
         try {
             if (cache()->get('scheduler.news') === null) {
                 cache()->set('scheduler.news', time(), 60);
+                cache()->set('system.scheduler_last', time(), 30 * 86400); // सिस्टम पेज पर "आख़िरी बार चला"
                 if (NewsService::publishDue() > 0) {
                     cache()->flush('home');
                 }

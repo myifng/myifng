@@ -7,6 +7,7 @@
   </div>
   <?php if (can('audit.export')): ?><a class="btn btn-outline-secondary" href="<?= e(route('admin.audit.export') . '?' . http_build_query(array_filter($filters))) ?>"><i class="fa-solid fa-file-csv me-1"></i> CSV</a><?php endif; ?>
 </div>
+<?= $this->insert('admin/system/_nav', ['active' => 'audit']) ?>
 <section class="panel">
   <form class="filter-bar" method="get">
     <div class="input-icon flex-grow-1"><i class="fa-solid fa-magnifying-glass"></i><input class="form-control" type="search" name="q" value="<?= e($filters['q']) ?>" placeholder="विवरण, यूज़र या IP" aria-label="खोजें"></div>

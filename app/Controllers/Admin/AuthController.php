@@ -62,6 +62,11 @@ final class AuthController extends Controller
                 : 'यह पेज सिर्फ़ रिपोर्टर के लिए है। स्टाफ़ अपने एडमिन लॉगिन पेज से लॉगिन करें।';
             return $this->toRoute($portal . '.login')->withErrors(['email' => $msg])->withInput(['email' => $data['email']]);
         }
+        if (!\App\Services\SecurityService::staffIpOk($request->ip(), auth()->user()['role_slug'] ?? null)) {
+            AuditService::log('ip_blocked', 'auth', auth()->id(), 'allowlist से बाहर के IP से लॉगिन: ' . $request->ip());
+            auth()->logout();
+            return $this->toRoute($portal . '.login')->withErrors(['email' => 'इस नेटवर्क (IP) से एडमिन लॉगिन की अनुमति नहीं है। दफ़्तर के नेटवर्क से लॉगिन करें।'])->withInput(['email' => $data['email']]);
+        }
         self::rememberPortal($isReporter ? 'reporter' : 'admin');
         AuditService::log('login', 'auth', auth()->id(), 'लॉगिन किया' . ($portal === 'reporter' ? ' (रिपोर्टर पोर्टल)' : ''));
         $intended = (string) app('session')->get('intended', '');
