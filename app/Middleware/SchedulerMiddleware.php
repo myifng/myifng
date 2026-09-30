@@ -22,6 +22,10 @@ final class SchedulerMiddleware implements Middleware
                 if (NewsService::publishDue() > 0) {
                     cache()->flush('home');
                 }
+                // Phase 11: सूचनाएँ (ब्रेकिंग पुश, ई-पेपर, वैधता) और कतार: ईमेल/पुश/SMS, न्यूज़लेटर
+                \App\Services\NotifyEvents::tick();
+                \App\Services\NotificationService::process(50, 15);
+                \App\Services\NewsletterService::process(null, 15);
                 if (cache()->get('scheduler.daily') === null) {
                     cache()->set('scheduler.daily', time(), 3600);
                     \App\Services\ReporterService::expireDue(); // वैधता ख़त्म हुए रिपोर्टर

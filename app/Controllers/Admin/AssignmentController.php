@@ -71,6 +71,7 @@ final class AssignmentController extends Controller
         $data['created_by'] = auth()->id();
         $data['status'] = 'open';
         $id = Assignment::create($data);
+        \App\Services\NotifyEvents::assignment($data);
         AuditService::log('create', 'assignments', $id, 'असाइनमेंट दिया: ' . $data['title'], null, $data);
         return $this->toRoute('admin.assignments.index')->with('success', 'असाइनमेंट “' . $data['title'] . '” सौंप दिया गया।');
     }
@@ -88,6 +89,9 @@ final class AssignmentController extends Controller
             $data['status'] = $request->str('status');
         }
         Assignment::update($id, $data);
+        if ((int) ($data['reporter_id'] ?? 0) !== (int) $a['reporter_id']) {
+            \App\Services\NotifyEvents::assignment($data); // नए रिपोर्टर को सौंपा
+        }
         AuditService::log('update', 'assignments', $id, 'असाइनमेंट बदला: ' . $data['title'], $a, $data);
         return $this->toRoute('admin.assignments.edit', ['id' => $id])->with('success', 'असाइनमेंट सेव हो गया।');
     }

@@ -1488,3 +1488,48 @@
     all.addEventListener('change', function () { $$('[data-check="' + key + '"]').forEach(function (c) { c.checked = all.checked; }); });
   });
 })();
+
+/* ==========================================================
+   Phase 11: घंटी (सूचनाएँ), पोल के विकल्प
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var csrf = ($('meta[name="csrf-token"]') || {}).content || '';
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+
+  var bell = $('[data-bell]');
+  if (bell) {
+    var count = $('[data-bell-count]', bell), list = $('[data-bell-items]', bell);
+    var paint = function (j) {
+      count.hidden = !j.unread; count.textContent = Math.min(99, j.unread);
+      if (!j.items || !j.items.length) return;
+      list.innerHTML = j.items.map(function (n) {
+        return '<a class="dropdown-item notif-item' + (n.read ? '' : ' unread') + '" href="' + esc(n.url || '#') + '"><b>' + esc(n.title) + '</b>' + (n.body ? '<span>' + esc(n.body) + '</span>' : '') + '<small>' + esc(n.time) + '</small></a>';
+      }).join('');
+    };
+    var load = function () { fetch(bell.dataset.bell, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (r) { return r.json(); }).then(paint).catch(function () {}); };
+    bell.addEventListener('show.bs.dropdown', load);
+    setInterval(function () { if (!document.hidden) load(); }, 120000);
+    $('[data-bell-readall]', bell).addEventListener('click', function (e) {
+      e.stopPropagation();
+      fetch(bell.dataset.bellRead, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, 'Accept': 'application/json' } }).then(function () { count.hidden = true; $$('.notif-item.unread', list).forEach(function (a) { a.classList.remove('unread'); }); });
+    });
+  }
+
+  var opts = $('[data-poll-opts]');
+  if (opts) {
+    $('[data-opt-add]').addEventListener('click', function () {
+      if ($$('.poll-opt-row', opts).length >= 10) { alert('ज़्यादा से ज़्यादा 10 विकल्प।'); return; }
+      var row = document.createElement('div'); row.className = 'input-group mb-2 poll-opt-row';
+      row.innerHTML = '<input type="hidden" name="option_id[]" value="0"><input class="form-control" name="option[]" maxlength="200" aria-label="विकल्प"><button class="btn btn-outline-secondary" type="button" data-opt-remove aria-label="विकल्प हटाएँ"><i class="fa-solid fa-xmark"></i></button>';
+      opts.appendChild(row); $('input[name="option[]"]', row).focus();
+    });
+    opts.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-opt-remove]'); if (!b) return;
+      if ($$('.poll-opt-row', opts).length <= 2) { alert('कम से कम 2 विकल्प चाहिए।'); return; }
+      b.closest('.poll-opt-row').remove();
+    });
+  }
+})();

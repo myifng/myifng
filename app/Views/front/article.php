@@ -38,6 +38,7 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
           <?php foreach ($share as $k): if (isset($shareLinks[$k])): [$href, $ic, $lab, $cls] = $shareLinks[$k]; ?><a class="<?= e($cls) ?>" href="<?= e($href) ?>" target="_blank" rel="noopener" aria-label="<?= e($lab) ?> पर शेयर करें"><i class="<?= e($ic) ?>"></i></a><?php endif; endforeach; ?>
           <?php if (in_array('copy', $share, true)): ?><button type="button" class="s-cp" data-copy-link="<?= e($shareUrl) ?>" aria-label="लिंक कॉपी करें"><i class="fa-solid fa-link"></i></button><?php endif; ?>
           <?php if (in_array('native', $share, true)): ?><button type="button" class="s-native" data-native-share data-title="<?= e($news['title']) ?>" data-url="<?= e($shareUrl) ?>" aria-label="शेयर करें" hidden><i class="fa-solid fa-share-nodes"></i></button><?php endif; ?>
+          <?php if (\App\Services\ReaderAuth::enabled()): $bm = $engage['bookmarked'] ?? false; ?><button type="button" class="s-save<?= $bm ? ' on' : '' ?>" data-bookmark="<?= e(route('account.bookmark', ['id' => $news['id']])) ?>" aria-pressed="<?= $bm ? 'true' : 'false' ?>" aria-label="<?= $bm ? 'सेव है' : 'बाद में पढ़ने के लिए सेव करें' ?>" title="सेव करें"><i class="fa-<?= $bm ? 'solid' : 'regular' ?> fa-bookmark"></i></button><?php endif; ?>
         </div>
       <?php endif; ?>
     </div>
@@ -66,8 +67,14 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
     <?php if (!$isPreview): ?><?= ad_slot('article_bottom') ?><?php endif; ?>
     <?php if ($rel['tag_links']): ?><div class="art-tags"><?php foreach ($rel['tag_links'] as $tg): ?><a href="<?= e(route('tag', ['slug' => $tg['slug']])) ?>">#<?= e($tg['name']) ?></a><?php endforeach; ?></div><?php endif; ?>
     <?php if ($reporter && setting('author_box', '1') === '1'): ?>
-      <div class="author-box"><?= avatar_html($reporter['avatar'], $reporter['name']) ?><div><b><?= e($reporter['name']) ?></b><?php if ($reporter['bio']): ?><p><?= e($reporter['bio']) ?></p><?php endif; ?></div></div>
+      <div class="author-box"><?= avatar_html($reporter['avatar'], $reporter['name']) ?><div><b><?= e($reporter['name']) ?></b><?php if ($reporter['bio']): ?><p><?= e($reporter['bio']) ?></p><?php endif; ?></div>
+        <?php if (!$isPreview && \App\Services\ReaderAuth::enabled()): ?><?= follow_button('reporter', (int) $reporter['id'], 'फ़ॉलो', $engage['follows'] ?? []) ?><?php endif; ?></div>
     <?php endif; ?>
+    <?php if (!$isPreview && \App\Services\ReaderAuth::enabled() && ($category || $locationChain)): ?>
+      <div class="follow-row"><span>फ़ॉलो करें:</span><?php if ($category): ?><?= follow_button('category', (int) $category['id'], $category['name'], $engage['follows'] ?? []) ?><?php endif; ?>
+        <?php if ($locationChain): $lc = end($locationChain); ?><?= follow_button('location', (int) $lc['id'], $lc['name'], $engage['follows'] ?? []) ?><?php endif; ?></div>
+    <?php endif; ?>
+    <?php if (!empty($engage['comments']['enabled'])): ?><?= $this->insert('partials/front/comments', ['news' => $news, 'c' => $engage['comments'], 'reader' => $engage['reader']]) ?><?php endif; ?>
     <?php if ($related): ?>
       <section class="related"><?= block_head('ये भी पढ़ें') ?><div class="cgrid cols-3"><?php foreach ($related as $r): ?><?= news_card($r, 'card') ?><?php endforeach; ?></div></section>
     <?php endif; ?>

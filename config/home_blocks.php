@@ -61,6 +61,9 @@ return [
     'newsletter' => ['label' => 'न्यूज़लेटर', 'icon' => 'fa-envelope-open-text', 'needs' => null, 'desc' => 'ईमेल सब्सक्राइब फ़ॉर्म', 'fields' => [
         'text' => ['label' => 'संदेश', 'type' => 'text', 'default' => 'हर सुबह दिन की बड़ी ख़बरें आपके ईमेल पर'],
     ]],
+    'poll' => ['label' => 'पोल', 'icon' => 'fa-square-poll-vertical', 'needs' => 'polls', 'desc' => 'चालू पोल (ख़ाली = सबसे नया चालू पोल)', 'fields' => [
+        'poll' => ['label' => 'पोल', 'type' => 'poll', 'default' => ''],
+    ]],
     'custom_html' => ['label' => 'कस्टम HTML', 'icon' => 'fa-code', 'needs' => null, 'manage' => true, 'desc' => 'अपना HTML/एम्बेड (सिर्फ़ प्रबंधक)', 'fields' => [
         'html' => ['label' => 'HTML कोड', 'type' => 'code'],
         'boxed' => ['label' => 'सफ़ेद बॉक्स में दिखाएँ', 'type' => 'switch', 'default' => 1],

@@ -27,6 +27,7 @@ final class PageController extends Controller
     {
         $content = ContentRenderer::render($page['content']);
         $content = $isPreview ? $content : \App\Services\AdService::shortcodes($content);
+        $content = \App\Services\PollService::shortcodes($content);
         return $this->view('front/page', [
             'page' => $page,
             'content' => $content,

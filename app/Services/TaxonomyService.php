@@ -15,7 +15,7 @@ final class TaxonomyService
     public const RESERVED = ['admin', 'api', 'page', 'category', 'topic', 'tag', 'tags', 'search', 'author', 'reporter', 'epaper', 'e-paper',
         'live-tv', 'live', 'video', 'videos', 'photo', 'photos', 'gallery', 'web-stories', 'podcast', 'sitemap', 'sitemap-xml', 'feed', 'rss',
         'amp', 'news', 'login', 'logout', 'register', 'install', 'public', 'storage', 'uploads', 'assets', 'my-city', 'newsletter', 'contact', 'latest', 'trending',
-        'audio', 'ad', 'ads', 'live-updates', 'join-as-reporter', 'application-status', 'verify-reporter'];
+        'audio', 'ad', 'ads', 'live-updates', 'join-as-reporter', 'application-status', 'verify-reporter', 'account', 'poll', 'polls', 'push', 'comments'];
 
     /** ख़बरों में इस्तेमाल: [टेबल, कॉलम] (Phase 4 की टेबल; न हों तो जाँच छोड़ दी जाती है) */
     private const USAGE = [

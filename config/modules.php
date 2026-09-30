@@ -72,11 +72,11 @@ return [
         'redirects'    => ['label' => 'रीडायरेक्ट', 'icon' => 'fa-diamond-turn-right', 'group' => 'insights', 'phase' => 10, 'route' => 'admin.redirects.index', 'actions' => [...$crud]],
 
         // ---------- Phase 11-12 ----------
-        'comments'     => ['label' => 'टिप्पणियाँ', 'icon' => 'fa-comments', 'group' => 'audience', 'phase' => 11, 'actions' => ['view', 'edit', 'delete', 'approve']],
-        'polls'        => ['label' => 'पोल', 'icon' => 'fa-square-poll-vertical', 'group' => 'audience', 'phase' => 11, 'actions' => [...$crud, 'publish']],
-        'newsletter'   => ['label' => 'न्यूज़लेटर', 'icon' => 'fa-envelope-open-text', 'group' => 'audience', 'phase' => 11, 'actions' => [...$crud, 'export', 'manage']],
-        'readers'      => ['label' => 'पाठक खाते', 'icon' => 'fa-user-group', 'group' => 'audience', 'phase' => 11, 'actions' => ['view', 'edit', 'delete', 'export']],
-        'notifications'=> ['label' => 'नोटिफ़िकेशन', 'icon' => 'fa-bell', 'group' => 'audience', 'phase' => 11, 'actions' => ['view', 'create', 'manage']],
+        'comments'     => ['label' => 'टिप्पणियाँ', 'icon' => 'fa-comments', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.comments.index', 'actions' => ['view', 'edit', 'delete', 'approve']],
+        'polls'        => ['label' => 'पोल', 'icon' => 'fa-square-poll-vertical', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.polls.index', 'actions' => [...$crud, 'publish']],
+        'newsletter'   => ['label' => 'न्यूज़लेटर', 'icon' => 'fa-envelope-open-text', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.newsletter.index', 'actions' => [...$crud, 'export', 'manage']],
+        'readers'      => ['label' => 'पाठक खाते', 'icon' => 'fa-user-group', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.readers.index', 'actions' => ['view', 'edit', 'delete', 'export']],
+        'notifications'=> ['label' => 'नोटिफ़िकेशन', 'icon' => 'fa-bell', 'group' => 'audience', 'phase' => 11, 'route' => 'admin.notifications.center', 'actions' => ['view', 'create', 'manage']],
         'forms'        => ['label' => 'फ़ॉर्म बिल्डर', 'icon' => 'fa-wpforms', 'group' => 'audience', 'phase' => 12, 'actions' => [...$crud, 'export']],
         'news_tips'    => ['label' => 'न्यूज़ टिप', 'icon' => 'fa-lightbulb', 'group' => 'audience', 'phase' => 12, 'actions' => ['view', 'edit', 'delete', 'approve']],
         'complaints'   => ['label' => 'शिकायत / ग्रीवांस', 'icon' => 'fa-scale-balanced', 'group' => 'audience', 'phase' => 12, 'actions' => ['view', 'edit', 'delete', 'manage', 'export']],

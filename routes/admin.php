@@ -16,6 +16,7 @@ use App\Controllers\Admin\BreakingController;
 use App\Controllers\Admin\BureauController;
 use App\Controllers\Admin\CampaignController;
 use App\Controllers\Admin\CategoryController;
+use App\Controllers\Admin\CommentController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\EditorController;
 use App\Controllers\Admin\EpaperController;
@@ -29,9 +30,12 @@ use App\Controllers\Admin\LocationController;
 use App\Controllers\Admin\MediaController;
 use App\Controllers\Admin\MenuController;
 use App\Controllers\Admin\NewsController;
+use App\Controllers\Admin\NewsletterController;
+use App\Controllers\Admin\NotificationController;
 use App\Controllers\Admin\NewsWorkflowController;
 use App\Controllers\Admin\PageController;
 use App\Controllers\Admin\PlaylistController;
+use App\Controllers\Admin\PollController;
 use App\Controllers\Admin\PodcastController;
 use App\Controllers\Admin\ReporterController;
 use App\Controllers\Admin\ReporterPortalController;
@@ -40,6 +44,7 @@ use App\Controllers\Admin\SystemController;
 use App\Controllers\Admin\TagController;
 use App\Controllers\Admin\TopicController;
 use App\Controllers\Admin\ProfileController;
+use App\Controllers\Admin\ReaderController;
 use App\Controllers\Admin\RedirectController;
 use App\Controllers\Admin\RoleController;
 use App\Controllers\Admin\SeoController;
@@ -399,6 +404,61 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->put('/redirects/{id:\d+}', [RedirectController::class, 'update'])->name('redirects.update')->middleware('can:redirects.edit');
         $r->post('/redirects/{id:\d+}/toggle', [RedirectController::class, 'toggle'])->name('redirects.toggle')->middleware('can:redirects.edit');
         $r->delete('/redirects/{id:\d+}', [RedirectController::class, 'destroy'])->name('redirects.destroy')->middleware('can:redirects.delete');
+
+        // ---------- Phase 11: टिप्पणियाँ, पोल, न्यूज़लेटर, पाठक, नोटिफ़िकेशन ----------
+        $r->get('/comments', [CommentController::class, 'index'])->name('comments.index')->middleware('can:comments.view');
+        $r->post('/comments/action', [CommentController::class, 'action'])->name('comments.action')->middleware('can:comments.approve,comments.delete');
+        $r->post('/comments/{id:\d+}/reply', [CommentController::class, 'reply'])->name('comments.reply')->middleware('can:comments.edit');
+        $r->post('/comments/{id:\d+}/block', [CommentController::class, 'block'])->name('comments.block')->middleware('can:comments.edit');
+        $r->get('/comments/blocks', [CommentController::class, 'blocks'])->name('comments.blocks')->middleware('can:comments.view');
+        $r->post('/comments/blocks', [CommentController::class, 'addWord'])->name('comments.words')->middleware('can:comments.edit');
+        $r->post('/comments/blocks/{id:\d+}/delete', [CommentController::class, 'unblock'])->name('comments.unblock')->middleware('can:comments.edit');
+
+        $r->get('/polls', [PollController::class, 'index'])->name('polls.index')->middleware('can:polls.view');
+        $r->get('/polls/create', [PollController::class, 'create'])->name('polls.create')->middleware('can:polls.create');
+        $r->post('/polls', [PollController::class, 'store'])->name('polls.store')->middleware('can:polls.create');
+        $r->get('/polls/{id:\d+}/edit', [PollController::class, 'edit'])->name('polls.edit')->middleware('can:polls.view');
+        $r->put('/polls/{id:\d+}', [PollController::class, 'update'])->name('polls.update')->middleware('can:polls.edit');
+        $r->get('/polls/{id:\d+}/export', [PollController::class, 'export'])->name('polls.export')->middleware('can:polls.view');
+        $r->delete('/polls/{id:\d+}', [PollController::class, 'destroy'])->name('polls.destroy')->middleware('can:polls.delete');
+
+        $r->get('/newsletter', [NewsletterController::class, 'index'])->name('newsletter.index')->middleware('can:newsletter.view');
+        $r->get('/newsletter/create', [NewsletterController::class, 'create'])->name('newsletter.create')->middleware('can:newsletter.create');
+        $r->post('/newsletter', [NewsletterController::class, 'store'])->name('newsletter.store')->middleware('can:newsletter.create');
+        $r->post('/newsletter/process', [NewsletterController::class, 'process'])->name('newsletter.process')->middleware('can:newsletter.manage');
+        $r->get('/newsletter/subscribers', [NewsletterController::class, 'subscribers'])->name('newsletter.subscribers')->middleware('can:newsletter.view');
+        $r->post('/newsletter/subscribers', [NewsletterController::class, 'addSubscribers'])->name('newsletter.subscribers.add')->middleware('can:newsletter.create');
+        $r->post('/newsletter/subscribers/action', [NewsletterController::class, 'subscriberAction'])->name('newsletter.subscribers.action')->middleware('can:newsletter.edit,newsletter.delete');
+        $r->get('/newsletter/subscribers/export', [NewsletterController::class, 'export'])->name('newsletter.export')->middleware('can:newsletter.export');
+        $r->get('/newsletter/lists', [NewsletterController::class, 'lists'])->name('newsletter.lists')->middleware('can:newsletter.view');
+        $r->post('/newsletter/lists', [NewsletterController::class, 'saveList'])->name('newsletter.lists.save')->middleware('can:newsletter.edit');
+        $r->delete('/newsletter/lists/{id:\d+}', [NewsletterController::class, 'deleteList'])->name('newsletter.lists.destroy')->middleware('can:newsletter.delete');
+        $r->get('/newsletter/templates', [NewsletterController::class, 'templates'])->name('newsletter.templates')->middleware('can:newsletter.view');
+        $r->post('/newsletter/templates', [NewsletterController::class, 'saveTemplate'])->name('newsletter.templates.save')->middleware('can:newsletter.manage');
+        $r->delete('/newsletter/templates/{id:\d+}', [NewsletterController::class, 'deleteTemplate'])->name('newsletter.templates.destroy')->middleware('can:newsletter.manage');
+        $r->get('/newsletter/{id:\d+}', [NewsletterController::class, 'show'])->name('newsletter.show')->middleware('can:newsletter.view');
+        $r->get('/newsletter/{id:\d+}/preview', [NewsletterController::class, 'preview'])->name('newsletter.preview')->middleware('can:newsletter.view');
+        $r->get('/newsletter/{id:\d+}/edit', [NewsletterController::class, 'edit'])->name('newsletter.edit')->middleware('can:newsletter.edit');
+        $r->put('/newsletter/{id:\d+}', [NewsletterController::class, 'update'])->name('newsletter.update')->middleware('can:newsletter.edit');
+        $r->post('/newsletter/{id:\d+}/cancel', [NewsletterController::class, 'cancel'])->name('newsletter.cancel')->middleware('can:newsletter.manage');
+        $r->post('/newsletter/{id:\d+}/duplicate', [NewsletterController::class, 'duplicate'])->name('newsletter.duplicate')->middleware('can:newsletter.create');
+        $r->delete('/newsletter/{id:\d+}', [NewsletterController::class, 'destroy'])->name('newsletter.destroy')->middleware('can:newsletter.delete');
+
+        $r->get('/readers', [ReaderController::class, 'index'])->name('readers.index')->middleware('can:readers.view');
+        $r->get('/readers/export', [ReaderController::class, 'export'])->name('readers.export')->middleware('can:readers.export');
+        $r->get('/readers/{id:\d+}', [ReaderController::class, 'show'])->name('readers.show')->middleware('can:readers.view');
+        $r->post('/readers/{id:\d+}', [ReaderController::class, 'update'])->name('readers.update')->middleware('can:readers.edit');
+        $r->delete('/readers/{id:\d+}', [ReaderController::class, 'destroy'])->name('readers.destroy')->middleware('can:readers.delete');
+
+        // घंटी: हर लॉगिन स्टाफ़ (अपनी सूचनाएँ); सेंटर: notifications.*
+        $r->get('/notifications/bell', [NotificationController::class, 'bell'])->name('notifications.bell');
+        $r->get('/notifications/mine', [NotificationController::class, 'mine'])->name('notifications.mine');
+        $r->post('/notifications/read', [NotificationController::class, 'readAll'])->name('notifications.read');
+        $r->get('/notifications/open/{id:\d+}', [NotificationController::class, 'open'])->name('notifications.open');
+        $r->get('/notifications', [NotificationController::class, 'center'])->name('notifications.center')->middleware('can:notifications.view');
+        $r->post('/notifications/send', [NotificationController::class, 'send'])->name('notifications.send')->middleware('can:notifications.create');
+        $r->post('/notifications/process', [NotificationController::class, 'process'])->name('notifications.process')->middleware('can:notifications.manage');
+        $r->post('/notifications/retry', [NotificationController::class, 'retry'])->name('notifications.retry')->middleware('can:notifications.manage');
 
         // ऑडिट लॉग
         $r->get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index')->middleware('can:audit.view');

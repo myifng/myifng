@@ -459,3 +459,146 @@
     window.gtag('config', ga);
   }
 })();
+
+/* ==========================================================
+   Phase 11: सेव, फ़ॉलो, टिप्पणी का जवाब, पोल, न्यूज़लेटर, वेब पुश
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var csrf = ($('meta[name="csrf-token"]') || {}).content || '';
+  var post = function (url, body) {
+    return fetch(url, { method: 'POST', body: body, credentials: 'same-origin', headers: { 'X-CSRF-Token': csrf, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { j._status = r.status; return j; }); });
+  };
+  var toLogin = function (j) { if (j && j._status === 401) { location.href = j.login || '/account/login'; return true; } return false; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+
+  // पुष्टि वाले फ़ॉर्म
+  document.addEventListener('submit', function (e) {
+    var f = e.target;
+    if (f.matches('form[data-confirm]') && !confirm(f.dataset.confirm)) e.preventDefault();
+  }, true);
+
+  // सेव (बुकमार्क)
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-bookmark]'); if (!b) return;
+    e.preventDefault(); b.disabled = true;
+    post(b.dataset.bookmark, new FormData()).then(function (j) {
+      b.disabled = false; if (toLogin(j) || !j.ok) return;
+      b.classList.toggle('on', j.on); b.setAttribute('aria-pressed', j.on ? 'true' : 'false');
+      b.setAttribute('aria-label', j.on ? 'सेव है' : 'बाद में पढ़ने के लिए सेव करें');
+      var i = $('i', b); if (i) i.className = (j.on ? 'fa-solid' : 'fa-regular') + ' fa-bookmark';
+    }).catch(function () { b.disabled = false; });
+  });
+
+  // फ़ॉलो
+  var setFollow = function (key, on) {
+    $$('[data-follow="' + key + '"]').forEach(function (btn) {
+      btn.classList.toggle('on', on); btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      var i = $('i', btn); if (i) i.className = 'fa-solid ' + (on ? 'fa-check' : 'fa-plus');
+    });
+  };
+  document.addEventListener('submit', function (e) {
+    var f = e.target; if (!f.matches('.follow-form')) return;
+    e.preventDefault();
+    var btn = $('button', f); btn.disabled = true;
+    post(f.action, new FormData(f)).then(function (j) { btn.disabled = false; if (toLogin(j)) return; if (j.ok) setFollow(btn.dataset.follow, j.on); })
+      .catch(function () { btn.disabled = false; });
+  });
+
+  // लोकेशन खोज: फ़ॉलो वाले चिप या "मेरा शहर" चुनना
+  $$('[data-loc-follow], [data-loc-pick]').forEach(function (box) {
+    var inp = $('input[type="search"]', box), out = $('[data-loc-results]', box), t, pick = box.hasAttribute('data-loc-pick');
+    var followUrl = ($('.follow-form') || {}).action || (location.origin + '/account/follow');
+    inp.addEventListener('input', function () {
+      clearTimeout(t); var q = inp.value.trim();
+      if (pick) { $('input[type="hidden"]', box).value = ''; }
+      if (q.length < 2) { out.innerHTML = ''; return; }
+      t = setTimeout(function () {
+        fetch(box.dataset.search + '?q=' + encodeURIComponent(q), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (r) { return r.json(); }).then(function (j) {
+          out.innerHTML = (j.items || []).slice(0, 8).map(function (l) {
+            return pick ? '<button type="button" class="follow-chip" data-pick="' + l.id + '" data-name="' + esc(l.name) + '">' + esc(l.label || l.name) + '</button>'
+              : '<form method="post" action="' + esc(followUrl) + '" class="follow-form"><input type="hidden" name="_csrf" value="' + esc(csrf) + '"><input type="hidden" name="type" value="location"><input type="hidden" name="id" value="' + l.id + '">'
+                + '<button type="submit" class="follow-chip" data-follow="location:' + l.id + '" aria-pressed="false"><i class="fa-solid fa-plus"></i> ' + esc(l.label || l.name) + '</button></form>';
+          }).join('') || '<small class="muted">कोई लोकेशन नहीं मिली</small>';
+        });
+      }, 250);
+    });
+    if (pick) out.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-pick]'); if (!b) return;
+      $('input[type="hidden"]', box).value = b.dataset.pick; inp.value = b.dataset.name; out.innerHTML = '';
+    });
+  });
+
+  // टिप्पणी का जवाब
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-reply]'); if (!b) return;
+    var f = b.parentNode.querySelector('[data-reply-form]'); if (!f) return;
+    f.hidden = !f.hidden; if (!f.hidden) { var ta = $('textarea', f); if (ta) ta.focus(); }
+  });
+
+  // पोल
+  document.addEventListener('submit', function (e) {
+    var f = e.target; if (!f.matches('[data-poll-form]')) return;
+    e.preventDefault();
+    var box = f.closest('[data-poll]'), msg = $('[data-poll-msg]', f), btn = $('button[type="submit"]', f);
+    if (!$$('input[name="options[]"]:checked', f).length) { msg.textContent = 'कोई विकल्प चुनें।'; return; }
+    if (btn) btn.disabled = true;
+    post(f.action, new FormData(f)).then(function (j) {
+      if (j.ok && j.html) { var d = document.createElement('div'); d.innerHTML = j.html; box.replaceWith(d.firstElementChild); }
+      else { msg.textContent = j.message || 'वोट नहीं हो सका।'; if (btn) btn.disabled = false; }
+    }).catch(function () { f.submit(); });
+  });
+
+  // न्यूज़लेटर
+  document.addEventListener('submit', function (e) {
+    var f = e.target; if (!f.matches('[data-nl-form]')) return;
+    e.preventDefault();
+    var msg = $('[data-nl-msg]', f), btn = $('button', f); btn.disabled = true;
+    post(f.action, new FormData(f)).then(function (j) {
+      btn.disabled = false; msg.textContent = j.message || 'कुछ ग़लत हुआ।'; msg.className = 'nl-msg ' + (j.ok ? 'ok' : 'err');
+      if (j.ok) f.reset();
+    }).catch(function () { btn.disabled = false; f.submit(); });
+  });
+
+  // वेब पुश
+  var key = ($('meta[name="push-key"]') || {}).content;
+  var btns = $$('[data-push-toggle]');
+  if (key && btns.length && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window) {
+    var swUrl = $('meta[name="push-sw"]').content, subUrl = $('meta[name="push-sub"]').content, unsubUrl = $('meta[name="push-unsub"]').content;
+    var appKey = function () { var s = key.replace(/-/g, '+').replace(/_/g, '/'); s += '='.repeat((4 - s.length % 4) % 4); var r = atob(s), a = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; };
+    var scope = new URL('./', swUrl).pathname;
+    var reg = navigator.serviceWorker.register(swUrl, { scope: scope });
+    var paint = function (on) {
+      btns.forEach(function (b) {
+        b.hidden = false; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        var i = $('i', b); if (i) i.className = (on ? 'fa-solid' : 'fa-regular') + ' fa-bell';
+        if (!b.classList.contains('nav-tool')) b.textContent = on ? 'पुश बंद करें' : 'पुश चालू करें';
+        else b.title = on ? 'ब्रेकिंग न्यूज़ की सूचना चालू है (बंद करने के लिए दबाएँ)' : (b.dataset.title || (b.dataset.title = b.title));
+      });
+      $$('[data-push-box]').forEach(function (x) { x.hidden = false; });
+    };
+    reg.then(function (r) { return r.pushManager.getSubscription(); }).then(function (s) { paint(!!s && Notification.permission === 'granted'); }).catch(function () {});
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        reg.then(function (r) {
+          return r.pushManager.getSubscription().then(function (s) {
+            if (s) {
+              var fd = new FormData(); fd.append('endpoint', s.endpoint);
+              return s.unsubscribe().then(function () { return post(unsubUrl, fd); }).then(function () { paint(false); });
+            }
+            return Notification.requestPermission().then(function (p) {
+              if (p !== 'granted') { alert('ब्राउज़र ने सूचना की अनुमति नहीं दी। ब्राउज़र की साइट सेटिंग से बदलें।'); return; }
+              return r.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: appKey() }).then(function (sub) {
+                var fd = new FormData(); fd.append('subscription', JSON.stringify(sub)); fd.append('topics[]', 'breaking'); fd.append('topics[]', 'epaper');
+                return post(subUrl, fd).then(function (j) { paint(!!j.ok); });
+              });
+            });
+          });
+        }).catch(function () { alert('इस ब्राउज़र में पुश सूचना नहीं चल सकी।'); });
+      });
+    });
+  }
+})();

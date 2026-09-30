@@ -216,6 +216,7 @@ final class NewsController extends Controller
             'og_description' => $v['og_description'] ? trim(strip_tags((string) $v['og_description'])) : null,
             'og_image' => $request->str('og_image') ?: null,
             'faq' => self::faq($request),
+            'allow_comments' => $request->bool('allow_comments') ? 1 : 0,
         ];
         // फ़्लैग सिर्फ़ डेस्क
         if (can('news.approve')) {
@@ -281,7 +282,7 @@ final class NewsController extends Controller
     {
         $news = self::findVisible($id);
         $copy = array_intersect_key($news, array_flip(['subtitle', 'summary', 'content', 'featured_image', 'image_caption', 'image_credit', 'video_url', 'audio_file',
-            'category_id', 'location_id', 'source', 'news_credit', 'meta_description', 'meta_keywords', 'robots', 'language_id', 'focus_keyword', 'og_title', 'og_description', 'og_image', 'faq']));
+            'category_id', 'location_id', 'source', 'news_credit', 'meta_description', 'meta_keywords', 'robots', 'language_id', 'focus_keyword', 'og_title', 'og_description', 'og_image', 'faq', 'allow_comments']));
         $copy['title'] = $news['title'] . ' (कॉपी)';
         $copy['slug'] = NewsService::uniqueSlug($news['slug'] . '-copy');
         $copy['reporter_id'] = auth()->id();

@@ -310,6 +310,7 @@ final class NewsService
             }
         });
         self::changed();
+        NotifyEvents::newsStatus($news, $to, $remark); // Phase 11
         AuditService::log($action, 'news', $news['id'], NewsWorkflow::label($news['status']) . ' → ' . NewsWorkflow::label($to) . ': ' . $news['title'] . ($remark !== '' ? ' (' . mb_substr($remark, 0, 120) . ')' : ''));
         return null;
     }
@@ -348,6 +349,7 @@ final class NewsService
                 self::syncAssignment($n, 'published');
                 self::recountTags(array_map('intval', array_column(db()->all('SELECT tag_id FROM {p}news_tags WHERE news_id = ?', [$n['id']]), 'tag_id')));
             });
+            NotifyEvents::newsStatus($n, 'published');
         }
         return count($due);
     }

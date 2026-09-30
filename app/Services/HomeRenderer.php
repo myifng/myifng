@@ -25,7 +25,7 @@ final class HomeRenderer
                 continue; // मॉड्यूल अभी तैयार नहीं
             }
             // पाठक का शहर हर पाठक का अलग; ब्रेकिंग अपने समय पर ख़त्म होती है (उसका अपना 60 सेकंड कैश)
-            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || in_array($s['block_type'], ['breaking', 'ads'], true); // विज्ञापन: बारी-बारी, कैश नहीं
+            $dynamic = ($s['block_type'] === 'location' && empty($s['settings']['location'])) || in_array($s['block_type'], ['breaking', 'ads', 'newsletter', 'poll'], true); // विज्ञापन: बारी-बारी; फ़ॉर्म में हर पाठक का अपना CSRF टोकन/वोट
             $key = 'home.section.' . $s['id'] . '.' . md5($s['updated_at'] . json_encode($s['settings']));
             $inner = $dynamic ? self::section($s) : cache()->remember($key, self::TTL, static fn() => self::section($s));
             if ($inner === '') {
@@ -181,6 +181,12 @@ final class HomeRenderer
                 return $cards ? ['cards' => array_slice($cards, 0, 6)] : null;
             case 'custom_html':
                 return trim((string) ($set['html'] ?? '')) !== '' ? [] : null;
+            case 'newsletter':
+                return NewsletterService::enabled() ? ['lists' => db()->all('SELECT id, name FROM {p}newsletter_lists WHERE is_public = 1 ORDER BY is_default DESC, name')] : null;
+            case 'poll':
+                $pid = (int) ($set['poll'] ?? 0) ?: (int) db()->value("SELECT id FROM {p}polls WHERE status = 'active' AND (start_at IS NULL OR start_at <= NOW()) AND (end_at IS NULL OR end_at > NOW()) ORDER BY id DESC LIMIT 1");
+                $w = $pid ? PollService::widget($pid) : '';
+                return $w !== '' ? ['widget' => $w] : null;
             default:
                 return null; // विज्ञापन (Phase 9), न्यूज़लेटर (Phase 11) आदि
         }

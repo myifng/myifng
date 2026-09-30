@@ -61,6 +61,10 @@ $renderMenu = function (array $items, int $depth = 0) use (&$renderMenu): string
       <button class="nav-toggle js-drawer" type="button" aria-label="मेनू खोलें" aria-controls="drawer" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
       <ul class="menu"><?= $renderMenu($main['items']) ?></ul>
       <?php if (app('router')->has('search')): ?><button type="button" class="nav-tool" data-open-search aria-label="खोजें" aria-controls="siteSearch" aria-expanded="false"><i class="fa-solid fa-magnifying-glass"></i></button><?php endif; ?>
+      <?php if (setting('push_enabled', '0') === '1'): ?><button type="button" class="nav-tool" data-push-toggle aria-label="ब्रेकिंग न्यूज़ की सूचना" title="<?= e(setting('push_prompt', 'ब्रेकिंग न्यूज़ सबसे पहले पाएँ')) ?>" hidden><i class="fa-regular fa-bell"></i></button><?php endif; ?>
+      <?php if (app('router')->has('account') && \App\Services\ReaderAuth::enabled()): $rd = \App\Services\ReaderAuth::user(); $rdn = $rd ? \App\Services\NotificationService::unread('reader', (int) $rd['id']) : 0; ?>
+        <a class="nav-tool nav-acct" href="<?= e(route($rd ? 'account' : 'account.login')) ?>" aria-label="<?= $rd ? 'मेरा खाता' . ($rdn ? " ($rdn नई सूचना)" : '') : 'लॉगिन' ?>"><?= $rd ? '<span class="acct-dot">' . e(mb_substr((string) $rd['name'], 0, 1)) . '</span>' : '<i class="fa-regular fa-user"></i>' ?><?= $rdn ? '<b class="nav-badge">' . min(99, $rdn) . '</b>' : '' ?></a>
+      <?php endif; ?>
       <?php if (\App\Services\LiveTvService::isOn()): ?><a class="live" href="<?= e(route('live_tv')) ?>"><i></i>LIVE</a><?php endif; ?>
     </div>
   </nav>

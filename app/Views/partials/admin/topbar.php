@@ -31,11 +31,13 @@
     <a class="btn btn-icon btn-ghost d-none d-sm-inline-flex" href="<?= e(url()) ?>" target="_blank" rel="noopener" title="वेबसाइट देखें" aria-label="वेबसाइट देखें"><i class="fa-solid fa-globe"></i></a>
     <button class="btn btn-icon btn-ghost" type="button" data-theme-toggle title="डार्क/लाइट मोड" aria-label="डार्क या लाइट मोड"><i class="fa-solid fa-circle-half-stroke"></i></button>
 
-    <div class="dropdown">
-      <button class="btn btn-icon btn-ghost" data-bs-toggle="dropdown" aria-expanded="false" aria-label="सूचनाएँ"><i class="fa-regular fa-bell"></i></button>
+    <?php $unreadN = \App\Services\NotificationService::unread('user', (int) auth()->id()); ?>
+    <div class="dropdown" data-bell="<?= e(route('admin.notifications.bell')) ?>" data-bell-read="<?= e(route('admin.notifications.read')) ?>">
+      <button class="btn btn-icon btn-ghost position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="सूचनाएँ<?= $unreadN ? " ($unreadN नई)" : '' ?>"><i class="fa-regular fa-bell"></i><span class="bell-count" data-bell-count<?= $unreadN ? '' : ' hidden' ?>><?= min(99, $unreadN) ?></span></button>
       <div class="dropdown-menu dropdown-menu-end shadow notif-menu">
-        <div class="px-3 py-2 fw-semibold border-bottom">सूचनाएँ</div>
-        <div class="p-4 text-center text-body-secondary small"><i class="fa-regular fa-bell-slash fa-2x mb-2 d-block opacity-50"></i>अभी कोई नई सूचना नहीं है।</div>
+        <div class="px-3 py-2 fw-semibold border-bottom d-flex justify-content-between align-items-center">सूचनाएँ <button type="button" class="btn btn-link btn-sm p-0" data-bell-readall>सब पढ़ी</button></div>
+        <div class="notif-items" data-bell-items><div class="p-4 text-center text-body-secondary small"><i class="fa-regular fa-bell-slash fa-2x mb-2 d-block opacity-50"></i>अभी कोई नई सूचना नहीं है।</div></div>
+        <a class="d-block text-center small py-2 border-top" href="<?= e(route('admin.notifications.mine')) ?>">सभी सूचनाएँ</a>
       </div>
     </div>
 

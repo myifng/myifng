@@ -201,6 +201,7 @@ final class ApplicationController extends Controller
             '<p>नमस्ते ' . e($a['full_name']) . ',</p><p>आपका आवेदन मंज़ूर हो गया है। आपकी रिपोर्टर ID: <b>' . e($r['reporter_code']) . '</b></p>'
             . '<p>अपना पासवर्ड बनाने के लिए यह लिंक खोलें (72 घंटे तक मान्य):<br><a href="' . e($res['link']) . '">' . e($res['link']) . '</a></p><p>लॉगिन ईमेल: ' . e($a['email']) . '</p>');
         AuditService::log('approve', 'applications', $id, $a['app_no'] . ' मंज़ूर → ' . $r['reporter_code']);
+        \App\Services\NotifyEvents::reporterApproved((string) $a['full_name'], $a['mobile'] ?? null, (string) $r['reporter_code']);
         app('session')->flash('password_link', $res['link']);
         return $this->toRoute('admin.reporters.show', ['id' => $res['reporter_id']])->with($sent ? 'success' : 'warning',
             'रिपोर्टर ' . $r['reporter_code'] . ' बन गया। ' . ($sent ? 'पासवर्ड बनाने का लिंक ईमेल पर भेजा गया।' : 'ईमेल नहीं जा सका: नीचे दिया लिंक रिपोर्टर को ख़ुद भेजें।'));

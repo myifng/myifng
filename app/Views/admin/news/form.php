@@ -99,6 +99,7 @@ $thenLabels = ['submit' => 'सेव करके डेस्क को भे
             <div class="col-md-6"><?= field('text', 'meta_keywords', 'कीवर्ड', $news['meta_keywords'] ?? '', ['placeholder' => 'ख़ाली हो तो टैग']) ?></div>
             <div class="col-md-6"><?= field('select', 'robots', 'सर्च इंजन', $news['robots'] ?? 'index,follow', ['options' => News::ROBOTS]) ?></div>
           </div>
+          <?= field('switch', 'allow_comments', 'इस ख़बर पर पाठकों की टिप्पणियाँ', (int) ($news['allow_comments'] ?? 1)) ?>
           <?= field('url', 'canonical_url', 'Canonical URL (वैकल्पिक)', $news['canonical_url'] ?? '', ['help' => 'सिर्फ़ तब, जब यह ख़बर मूल रूप से किसी और वेबसाइट की हो']) ?>
           <?php $faqRows = \App\Services\SeoService::faqItems($news['faq'] ?? null);
           if (is_array(old('faq_q'))) {

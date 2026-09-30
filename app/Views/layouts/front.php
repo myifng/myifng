@@ -49,6 +49,7 @@ $theme = in_array($_COOKIE['theme'] ?? '', ['light', 'dark'], true) ? $_COOKIE['
 <?php if (setting('seo_yandex')): ?><meta name="yandex-verification" content="<?= e(setting('seo_yandex')) ?>"><?php endif; ?>
 <meta name="theme-color" content="<?= e($brand) ?>">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
+<?php if (setting('push_enabled', '0') === '1' && ($vk = \App\Services\Notify\WebPush::keys())): ?><meta name="push-key" content="<?= e($vk['public']) ?>"><meta name="push-sw" content="<?= e(route('push.sw')) ?>"><meta name="push-sub" content="<?= e(route('push.subscribe')) ?>"><meta name="push-unsub" content="<?= e(route('push.unsubscribe')) ?>"><?php endif; ?>
 <?php if (app('router')->has('ad.impressions')): ?><meta name="ad-imp" content="<?= e(route('ad.impressions')) ?>"><?php endif; ?>
 <?php if (setting('favicon')): ?><link rel="icon" href="<?= e(upload_url(setting('favicon'))) ?>"><?php endif; ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">

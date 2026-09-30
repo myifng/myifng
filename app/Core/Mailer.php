@@ -13,13 +13,15 @@ final class Mailer
     {
     }
 
-    public function send(string $to, string $subject, string $html): bool
+    /** $extra: अतिरिक्त हेडर (जैसे न्यूज़लेटर का List-Unsubscribe) */
+    public function send(string $to, string $subject, string $html, array $extra = []): bool
     {
         $headers = [
             'MIME-Version: 1.0',
             'Content-Type: text/html; charset=UTF-8',
             'From: ' . mb_encode_mimeheader($this->fromName, 'UTF-8') . ' <' . $this->fromEmail . '>',
             'X-Mailer: PHP',
+            ...array_values(array_filter($extra, static fn($h) => is_string($h) && !preg_match('/[\r\n]/', $h))),
         ];
         $ok = false;
         if (function_exists('mail') && filter_var($to, FILTER_VALIDATE_EMAIL)) {

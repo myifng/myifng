@@ -157,6 +157,12 @@ function block_field(int $sid, string $name, array $f, mixed $value, array $cate
                 $o .= '<option value="' . e($k) . '"' . selected($k, $value) . '>' . e($l) . '</option>';
             }
             return '<div class="col-md-4">' . $label . '<select class="form-select form-select-sm" id="' . $id . '" name="' . $n . '">' . $o . '</select></div>';
+        case 'poll':
+            $o = '<option value="">— सबसे नया चालू पोल —</option>';
+            foreach (db()->all("SELECT id, question, status FROM {p}polls WHERE status <> 'draft' ORDER BY id DESC LIMIT 50") as $pl) {
+                $o .= '<option value="' . (int) $pl['id'] . '"' . selected((string) $pl['id'], (string) $value) . '>' . e(\App\Helpers\Str::limit($pl['question'], 70)) . ($pl['status'] === 'closed' ? ' (बंद)' : '') . '</option>';
+            }
+            return '<div class="col-md-6">' . $label . '<select class="form-select form-select-sm" id="' . $id . '" name="' . $n . '">' . $o . '</select></div>';
         case 'adslot':
             $o = '';
             foreach (\App\Services\AdService::slotOptions() as $k => $l) {

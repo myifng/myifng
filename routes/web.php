@@ -3,9 +3,11 @@
  * वेबसाइट के रूट। लोकेशन वाला रूट (/{राज्य}/{ज़िला}/…) सबसे आख़िर में, ताकि बाकी रास्ते पहले मिलें।
  * @var App\Core\Router $router
  */
+use App\Controllers\Front\AccountController;
 use App\Controllers\Front\AdController;
 use App\Controllers\Front\AudioController;
 use App\Controllers\Front\CategoryController;
+use App\Controllers\Front\EngageController;
 use App\Controllers\Front\EpaperController;
 use App\Controllers\Front\GalleryController;
 use App\Controllers\Front\HomeController;
@@ -86,6 +88,44 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
     $r->get('/feed', [SitemapController::class, 'feed'])->name('feed');
     $r->get('/category/{slug:[a-z0-9-]+}/feed', [SitemapController::class, 'categoryFeed'])->name('category.feed');
+
+    // Phase 11: पाठक खाता
+    $r->get('/account/login', [AccountController::class, 'loginForm'])->name('account.login');
+    $r->post('/account/login', [AccountController::class, 'login'])->name('account.login.post')->middleware('throttle:20,10');
+    $r->get('/account/register', [AccountController::class, 'registerForm'])->name('account.register');
+    $r->post('/account/register', [AccountController::class, 'register'])->name('account.register.post')->middleware('throttle:5,60');
+    $r->get('/account/verify/{token:[a-f0-9]{48}}', [AccountController::class, 'verify'])->name('account.verify');
+    $r->post('/account/verify/resend', [AccountController::class, 'resend'])->name('account.resend')->middleware('throttle:3,30');
+    $r->get('/account/forgot', [AccountController::class, 'forgotForm'])->name('account.forgot');
+    $r->post('/account/forgot', [AccountController::class, 'forgot'])->name('account.forgot.post')->middleware('throttle:5,30');
+    $r->get('/account/reset/{token:[a-f0-9]{48}}', [AccountController::class, 'resetForm'])->name('account.reset');
+    $r->post('/account/reset/{token:[a-f0-9]{48}}', [AccountController::class, 'reset'])->name('account.reset.post')->middleware('throttle:10,30');
+    $r->post('/account/logout', [AccountController::class, 'logout'])->name('account.logout');
+    $r->get('/account', [AccountController::class, 'home'])->name('account');
+    $r->get('/account/saved', [AccountController::class, 'saved'])->name('account.saved');
+    $r->get('/account/history', [AccountController::class, 'history'])->name('account.history');
+    $r->get('/account/following', [AccountController::class, 'following'])->name('account.following');
+    $r->get('/account/notifications', [AccountController::class, 'notifications'])->name('account.notifications');
+    $r->get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
+    $r->post('/account/settings', [AccountController::class, 'saveProfile'])->name('account.profile');
+    $r->post('/account/prefs', [AccountController::class, 'savePrefs'])->name('account.prefs');
+    $r->post('/account/password', [AccountController::class, 'password'])->name('account.password')->middleware('throttle:10,30');
+    $r->post('/account/history/clear', [AccountController::class, 'clearHistory'])->name('account.history.clear');
+    $r->post('/account/delete', [AccountController::class, 'destroy'])->name('account.delete')->middleware('throttle:5,30');
+    $r->post('/account/bookmark/{id:\d+}', [AccountController::class, 'bookmark'])->name('account.bookmark')->middleware('throttle:60,5');
+    $r->post('/account/follow', [AccountController::class, 'follow'])->name('account.follow')->middleware('throttle:60,5');
+
+    // Phase 11: टिप्पणी, पोल, न्यूज़लेटर, वेब पुश
+    $r->post('/news/{slug:[a-z0-9-]+}/comments', [EngageController::class, 'comment'])->name('comments.store')->middleware('throttle:5,10');
+    $r->get('/poll/{id:\d+}', [EngageController::class, 'poll'])->name('poll');
+    $r->post('/poll/{id:\d+}/vote', [EngageController::class, 'vote'])->name('poll.vote')->middleware('throttle:20,10');
+    $r->post('/newsletter', [EngageController::class, 'subscribe'])->name('newsletter.subscribe')->middleware('throttle:5,30');
+    $r->get('/newsletter/confirm/{token:[a-f0-9]{40}}', [EngageController::class, 'confirm'])->name('newsletter.confirm');
+    $r->get('/newsletter/unsubscribe/{token:[a-f0-9]{40}}', [EngageController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+    $r->post('/newsletter/unsubscribe/{token:[a-f0-9]{40}}', [EngageController::class, 'unsubscribe'])->name('newsletter.unsubscribe.post')->middleware('throttle:20,10');
+    $r->get('/sw.js', [EngageController::class, 'serviceWorker'])->name('push.sw');
+    $r->post('/push/subscribe', [EngageController::class, 'pushSubscribe'])->name('push.subscribe')->middleware('throttle:20,10');
+    $r->post('/push/unsubscribe', [EngageController::class, 'pushUnsubscribe'])->name('push.unsubscribe')->middleware('throttle:20,10');
 
     // लोकेशन: सबसे आख़िर में (slug आरक्षित शब्दों से नहीं टकराते: TaxonomyService::RESERVED)
     $r->get('/{path:[a-z0-9-]+(?:/[a-z0-9-]+)*}', [LocationController::class, 'show'])->name('location');

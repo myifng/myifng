@@ -160,3 +160,11 @@ function ad_slot(string $key): string
 {
     return \App\Services\AdService::slot($key);
 }
+
+/** Phase 11: फ़ॉलो बटन (लॉगिन न हो तो भी दिखे; दबाने पर लॉगिन) */
+function follow_button(string $type, int $id, string $label, array $follows = []): string
+{
+    $on = in_array($id, $follows[$type] ?? [], true);
+    return '<form method="post" action="' . e(route('account.follow')) . '" class="follow-form">' . csrf_field() . '<input type="hidden" name="type" value="' . e($type) . '"><input type="hidden" name="id" value="' . $id . '">'
+        . '<button type="submit" class="follow-chip' . ($on ? ' on' : '') . '" data-follow="' . e($type) . ':' . $id . '" aria-pressed="' . ($on ? 'true' : 'false') . '"><i class="fa-solid ' . ($on ? 'fa-check' : 'fa-plus') . '"></i> ' . e($label) . '</button></form>';
+}

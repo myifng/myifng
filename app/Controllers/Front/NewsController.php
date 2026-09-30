@@ -50,6 +50,18 @@ final class NewsController extends FrontController
         if (!$isPreview) {
             $content = AdService::inject(AdService::shortcodes($content));
         }
+        $content = \App\Services\PollService::shortcodes($content); // Phase 11: [poll:ID]
+        // Phase 11: पाठक (सेव/फ़ॉलो/इतिहास), टिप्पणियाँ
+        $reader = \App\Services\ReaderAuth::user();
+        $engage = ['reader' => $reader, 'bookmarked' => false, 'follows' => []];
+        if ($reader && !$isPreview) {
+            \App\Services\ReaderService::logRead($reader, (int) $news['id']);
+            $engage['bookmarked'] = \App\Services\ReaderService::isBookmarked((int) $reader['id'], (int) $news['id']);
+            $engage['follows'] = \App\Services\ReaderService::follows((int) $reader['id']);
+        }
+        [$cOpen, $cWhy] = \App\Services\CommentService::open($news);
+        [$cThread, $cCount] = $isPreview ? [[], 0] : \App\Services\CommentService::thread((int) $news['id']);
+        $engage['comments'] = ['open' => $cOpen && !$isPreview, 'why' => $cWhy, 'thread' => $cThread, 'count' => $cCount, 'enabled' => setting('comments_enabled', '1') === '1' && (int) ($news['allow_comments'] ?? 1)];
         $faq = SeoService::faqItems($news['faq'] ?? null);
         $live = LiveBlogService::forNews((int) $news['id']);
         $liveUpdates = $live ? LiveBlogService::updates((int) $live['id']) : [];
@@ -57,7 +69,7 @@ final class NewsController extends FrontController
             'news' => $news, 'content' => $content, 'isPreview' => $isPreview, 'rel' => $rel, 'category' => $cat, 'locationChain' => $chain,
             'reporter' => $reporter, 'crumbs' => $crumbs, 'related' => $related, 'side' => $this->sidebar(), 'live' => $live, 'liveUpdates' => $liveUpdates,
             'previewNote' => $isPreview ? 'प्रीव्यू · स्थिति: ' . NewsWorkflow::label($news['status']) . ($news['deleted_at'] ? ' (ट्रैश में)' : '') : '',
-            'shareUrl' => NewsService::url($news), 'faq' => $faq,
+            'shareUrl' => NewsService::url($news), 'faq' => $faq, 'engage' => $engage,
             'seo' => [
                 'title' => $news['meta_title'] ?: $news['title'],
                 'description' => $news['meta_description'] ?: ($news['summary'] ?: $plain),
