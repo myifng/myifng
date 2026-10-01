@@ -299,3 +299,29 @@ function my_city(): ?array
 
 require_once __DIR__ . '/form.php';
 require_once __DIR__ . '/front.php';
+
+/**
+ * Phase 16 (सुलभता): रंग इतना गहरा करें कि सफ़ेद पर टेक्स्ट और रंग पर सफ़ेद टेक्स्ट पढ़ने लायक हो (WCAG 4.5:1)।
+ * पहले से गहरा रंग वैसा ही रहता है।
+ */
+function readable_color(string $hex, float $ratio = 4.5): string
+{
+    if (preg_match('/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i', $hex, $m)) {
+        $hex = '#' . $m[1] . $m[1] . $m[2] . $m[2] . $m[3] . $m[3];
+    }
+    if (!preg_match('/^#([0-9a-f]{6})$/i', $hex, $m)) {
+        return $hex;
+    }
+    $rgb = array_map('hexdec', str_split($m[1], 2));
+    $lum = static function (array $c): float {
+        $l = array_map(static function ($v) {
+            $v /= 255;
+            return $v <= 0.03928 ? $v / 12.92 : (($v + 0.055) / 1.055) ** 2.4;
+        }, $c);
+        return 0.2126 * $l[0] + 0.7152 * $l[1] + 0.0722 * $l[2];
+    };
+    for ($i = 0; $i < 40 && 1.05 / ($lum($rgb) + 0.05) < $ratio; $i++) {
+        $rgb = array_map(static fn($v) => (int) floor($v * 0.94), $rgb);
+    }
+    return sprintf('#%02x%02x%02x', ...$rgb);
+}

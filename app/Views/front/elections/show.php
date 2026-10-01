@@ -19,7 +19,7 @@ $statusLabel = static fn(array $s) => $s['status'] === 'declared' ? 'जीत�
     </section>
     <?php if (count($alliances) > 1): ?>
     <section class="box"><div class="bhead"><h2>गठबंधन</h2></div>
-      <div class="el-alliances"><?php foreach ($alliances as $a): ?><div class="el-al" style="--c:<?= e($a['color']) ?>"><b><?= e($a['name']) ?></b><span class="el-big"><?= num($a['total']) ?></span><small>जीते <?= num($a['won']) ?> · आगे <?= num($a['leading']) ?> · वोट <?= e((string) $a['share']) ?>%</small></div><?php endforeach; ?></div>
+      <div class="el-alliances"><?php foreach ($alliances as $a): ?><div class="el-al" style="--c:<?= e(readable_color($a['color'])) ?>"><b><?= e($a['name']) ?></b><span class="el-big"><?= num($a['total']) ?></span><small>जीते <?= num($a['won']) ?> · आगे <?= num($a['leading']) ?> · वोट <?= e((string) $a['share']) ?>%</small></div><?php endforeach; ?></div>
     </section>
     <?php endif; ?>
   </div>
@@ -27,7 +27,7 @@ $statusLabel = static fn(array $s) => $s['status'] === 'declared' ? 'जीत�
   <?php if ($key): ?>
   <section class="box"><div class="bhead"><h2>बड़े चेहरे</h2></div>
     <div class="el-key"><?php foreach ($key as $c): $st = $c['status'] === 'declared' ? ((int) $c['leader_id'] === (int) $c['id'] ? ['जीते', 'win'] : ['हारे', 'lose']) : ($c['status'] === 'counting' ? ((int) $c['leader_id'] === (int) $c['id'] ? ['आगे', 'lead'] : ['पीछे', 'trail']) : ['', '']); ?>
-      <a class="el-kc" href="<?= e(route('elections.seat', ['slug' => $e['slug'], 'seat' => $c['seat_slug']])) ?>" style="--c:<?= e((string) ($c['color'] ?: '#888')) ?>">
+      <a class="el-kc" href="<?= e(route('elections.seat', ['slug' => $e['slug'], 'seat' => $c['seat_slug']])) ?>" style="--c:<?= e(readable_color((string) ($c['color'] ?: '#888'))) ?>">
         <span class="el-ph"><?= $c['photo'] ? media_img($c['photo'], 'thumb', $c['name']) : '<i class="fa-solid fa-user"></i>' ?></span>
         <b><?= e($c['name']) ?></b><small><?= e((string) $c['party']) ?> · <?= e($c['seat']) ?></small>
         <?php if ($st[0]): ?><span class="el-res el-<?= $st[1] ?>"><?= $st[0] ?></span><?php endif; ?>
@@ -46,8 +46,8 @@ $statusLabel = static fn(array $s) => $s['status'] === 'declared' ? 'जीत�
       <tbody><?php foreach ($seats as $s): ?>
         <tr data-el-row data-district="<?= e((string) $s['district']) ?>" data-text="<?= e(mb_strtolower($s['seat'] . ' ' . $s['leader'] . ' ' . $s['runner'] . ' ' . $s['district'])) ?>">
           <td><a href="<?= e(route('elections.seat', ['slug' => $e['slug'], 'seat' => $s['slug']])) ?>"><b><?= e($s['seat']) ?></b></a><small><?= e((string) $s['district']) ?><?= $s['reserved'] !== 'gen' ? ' · ' . e(ES::RESERVED[$s['reserved']]) : '' ?></small></td>
-          <td><?php if ($s['leader']): ?><span class="party-tag" style="--c:<?= e((string) $s['leader_color']) ?>"><?= e((string) $s['leader_party']) ?></span> <?= e($s['leader']) ?> <small class="el-res-s"><?= $statusLabel($s) ?></small><?php else: ?><span class="muted">इंतज़ार</span><?php endif; ?></td>
-          <td class="hide-sm"><?= $s['runner'] ? '<span class="party-tag" style="--c:' . e((string) $s['runner_color']) . '">' . e((string) $s['runner_party']) . '</span> ' . e($s['runner']) : '—' ?></td>
+          <td><?php if ($s['leader']): ?><span class="party-tag" style="--c:<?= e(readable_color((string) $s['leader_color'])) ?>"><?= e((string) $s['leader_party']) ?></span> <?= e($s['leader']) ?> <small class="el-res-s"><?= $statusLabel($s) ?></small><?php else: ?><span class="muted">इंतज़ार</span><?php endif; ?></td>
+          <td class="hide-sm"><?= $s['runner'] ? '<span class="party-tag" style="--c:' . e(readable_color((string) $s['runner_color'])) . '">' . e((string) $s['runner_party']) . '</span> ' . e($s['runner']) : '—' ?></td>
           <td><?= $s['leader'] ? num((int) $s['margin']) : '—' ?></td>
         </tr>
       <?php endforeach; ?></tbody>

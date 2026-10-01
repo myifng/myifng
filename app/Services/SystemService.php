@@ -57,6 +57,10 @@ final class SystemService
                 ['शेड्यूलर आख़िरी बार चला', $last ? date('d-m-Y H:i', (int) $last) : 'जानकारी नहीं', $last && time() - (int) $last < 3 * 3600, 'साइट पर ट्रैफ़िक से चलता है; चाहें तो cron से /robots.txt हर 15 मिनट खोलें'],
                 ['डिस्क में ख़ाली', BackupService::size((int) $free), $free > 500 * 1048576, 'कम से कम 500 MB ख़ाली रखें'],
                 ['कैश', config('app.cache') ? 'चालू' : 'बंद', (bool) config('app.cache'), 'config/env.php में CACHE = true'],
+                // Phase 16: PWA को HTTPS चाहिए (localhost छोड़कर); आइकन बनाने के लिए GD
+                ['PWA (ऐप)', PwaService::enabled() ? 'चालू' . (function_exists('imagecreatetruecolor') ? '' : ' (GD नहीं: आइकन नहीं बनेंगे)') : 'बंद',
+                    !PwaService::enabled() || (function_exists('imagecreatetruecolor') && (str_starts_with((string) config('app.url'), 'https://') || in_array(parse_url((string) config('app.url'), PHP_URL_HOST), ['localhost', '127.0.0.1'], true))),
+                    'फ़ोन पर इंस्टॉल और ऑफ़लाइन के लिए HTTPS (SSL) ज़रूरी है'],
             ],
         ];
     }

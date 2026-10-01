@@ -107,6 +107,9 @@ final class AnalyticsService
         $medium = strtolower(trim((string) $request->query('utm_medium', '')));
         if ($utm !== '') {
             $utm = mb_substr(preg_replace('/[^a-z0-9._-]/', '', $utm), 0, 60);
+            if ($utm === 'pwa') {
+                return ['direct', 'pwa']; // Phase 16: होम स्क्रीन ऐप से खोला
+            }
             if (in_array($medium, ['push', 'email', 'newsletter', 'notification'], true) || in_array($utm, ['push', 'newsletter', 'email'], true)) {
                 return ['push', $utm ?: null];
             }

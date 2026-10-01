@@ -114,12 +114,6 @@ final class EngageController extends FrontController
     }
 
     // ---------- वेब पुश ----------
-    public function serviceWorker(Request $request): Response
-    {
-        $js = (string) file_get_contents(BASE_PATH . '/public/assets/js/sw.js');
-        return (new Response($js, 200))->header('Content-Type', 'application/javascript; charset=UTF-8')->header('Service-Worker-Allowed', '/')->header('Cache-Control', 'no-cache');
-    }
-
     public function pushSubscribe(Request $request): Response
     {
         if (setting('push_enabled', '0') !== '1') {

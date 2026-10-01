@@ -8,7 +8,7 @@ $trend = setting('trending_bar', '1') === '1' ? NewsQuery::trending(10) : [];
 $speed = ['slow' => 70, 'medium' => 45, 'fast' => 28][setting('ticker_speed', 'medium')] ?? 45;
 ?>
 <?php if ($t['items']): ?>
-<div class="ticker<?= $t['breaking'] ? ' is-breaking' : '' ?>" role="region" aria-label="<?= $t['breaking'] ? 'ब्रेकिंग न्यूज़' : 'ताज़ा ख़बरें' ?>">
+<div class="ticker<?= $t['breaking'] ? ' is-breaking' : '' ?>" role="region" aria-label="<?= $t['breaking'] ? 'ब्रेकिंग न्यूज़ पट्टी' : 'ताज़ा ख़बरों की पट्टी' ?>">
   <div class="wrap">
     <span class="ticker-label"><?= $t['breaking'] ? 'ब्रेकिंग' : 'ताज़ा' ?></span>
     <div class="ticker-track"><div class="ticker-run" style="animation-duration:<?= (int) $speed ?>s">

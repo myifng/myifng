@@ -103,7 +103,7 @@ final class AdService
         return match ($key) {
             'popup' => '<div class="ad-popup" data-ad-popup data-hours="' . (int) setting('ads_popup_hours', '24') . '" data-delay="' . (int) setting('ads_popup_delay', '5') . '" role="dialog" aria-modal="true" aria-label="' . e(self::label()) . '" hidden>'
                 . '<div class="ad-popup-box"><button type="button" class="ad-close" data-ad-close aria-label="बंद करें">×</button>' . $html . '</div></div>',
-            'mobile_sticky' => '<div class="ad-sticky" data-ad-sticky><button type="button" class="ad-close" data-ad-close aria-label="बंद करें">×</button>' . $html . '</div>',
+            'mobile_sticky' => '<aside class="ad-sticky" data-ad-sticky aria-label="विज्ञापन (नीचे)"><button type="button" class="ad-close" data-ad-close aria-label="बंद करें">×</button>' . $html . '</aside>',
             default => '<div class="ad-slot ad-slot-' . e($key) . '" data-ad-slot="' . e($key) . '">' . $html . '</div>',
         };
     }

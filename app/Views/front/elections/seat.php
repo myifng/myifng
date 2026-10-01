@@ -18,14 +18,14 @@ $max = max(1, (int) ($lead['votes'] ?? 1));
       · अपडेट <?= hindi_date($s['result_at'], true) ?>
     </p>
     <?php if ($hasVotes): ?>
-      <div class="el-verdict" style="--c:<?= e((string) ($lead['party_color'] ?: '#888')) ?>">
+      <div class="el-verdict" style="--c:<?= e(readable_color((string) ($lead['party_color'] ?: '#888'))) ?>">
         <b><?= e($lead['name']) ?></b> (<?= e((string) ($lead['party_short'] ?: 'निर्दलीय')) ?>) <?= $s['status'] === 'declared' ? 'जीते' : 'आगे' ?>,
         अंतर <b><?= num((int) $s['margin']) ?></b> वोट
       </div>
     <?php endif; ?>
     <ol class="el-cands">
       <?php foreach ($candidates as $i => $c): $isLead = $hasVotes && $i === 0; ?>
-        <li class="<?= $c['withdrawn'] ? 'withdrawn' : '' ?>" style="--c:<?= e((string) ($c['party_color'] ?: '#888')) ?>">
+        <li class="<?= $c['withdrawn'] ? 'withdrawn' : '' ?>" style="--c:<?= e(readable_color((string) ($c['party_color'] ?: '#888'))) ?>">
           <span class="el-ph"><?= $c['photo'] ? media_img($c['photo'], 'thumb', $c['name']) : '<i class="fa-solid fa-user"></i>' ?></span>
           <div class="el-cinfo">
             <b><?= e($c['name']) ?></b> <?php if ($isLead): ?><span class="el-res el-<?= $s['status'] === 'declared' ? 'win' : 'lead' ?>"><?= $s['status'] === 'declared' ? 'जीते' : 'आगे' ?></span><?php endif; ?><?= $c['is_incumbent'] ? ' <small class="muted">(मौजूदा)</small>' : '' ?><?= $c['withdrawn'] ? ' <small class="muted">(नाम वापस)</small>' : '' ?>
@@ -42,7 +42,7 @@ $max = max(1, (int) ($lead['votes'] ?? 1));
       <section><h2>पिछले नतीजे</h2><div class="table-scroll"><table class="el-seats">
         <thead><tr><th>चुनाव</th><th>विजेता</th><th class="hide-sm">दूसरे नंबर</th><th>अंतर</th></tr></thead>
         <tbody><?php foreach ($history as $h): ?><tr><td><a href="<?= e(route('elections.show', ['slug' => $h['slug']])) ?>"><?= (int) $h['year'] ?></a></td>
-          <td><span class="party-tag" style="--c:<?= e((string) $h['winner_color']) ?>"><?= e((string) $h['winner_party']) ?></span> <?= e((string) $h['winner']) ?></td>
+          <td><span class="party-tag" style="--c:<?= e(readable_color((string) $h['winner_color'])) ?>"><?= e((string) $h['winner_party']) ?></span> <?= e((string) $h['winner']) ?></td>
           <td class="hide-sm"><?= e((string) $h['runner']) ?> <small class="muted"><?= e((string) $h['runner_party']) ?></small></td><td><?= num((int) $h['margin']) ?></td></tr><?php endforeach; ?></tbody>
       </table></div></section>
     <?php endif; ?>

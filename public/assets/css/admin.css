@@ -22,6 +22,9 @@
   --bs-primary: var(--brand);
   --bs-link-color: var(--brand);
   --bs-link-hover-color: color-mix(in srgb, var(--brand) 80%, #000);
+  /* Phase 16 (सुलभता): Bootstrap लिंक का नीला हल्की पृष्ठभूमि पर 4.5:1 से कम था */
+  --bs-link-color-rgb: 10, 88, 202;
+  --bs-link-hover-color-rgb: 8, 66, 152;
 }
 [data-bs-theme="dark"] {
   --side-bg: #0b0a0d;
@@ -33,6 +36,8 @@
   --muted: #a6a1ac;
   --bs-body-bg: #111013;
   --bs-link-color: color-mix(in srgb, var(--brand) 70%, #fff);
+  --bs-link-color-rgb: 110, 168, 254;
+  --bs-link-hover-color-rgb: 158, 197, 254;
 }
 
 html, body { height: 100%; }

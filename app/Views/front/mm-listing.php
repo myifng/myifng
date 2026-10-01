@@ -33,10 +33,10 @@ $desc ??= null;
   <?php if ($items->items): ?>
     <section class="box">
       <?php if (!empty($listHeading)): ?><?= block_head($listHeading) ?><?php endif; ?>
-      <div class="cgrid <?= $tall ? 'tall-grid' : 'cols-4' ?>"><?php foreach ($items->items as $m): ?><?= mm_card($m, $tall ? 'tall' : 'card', ['kicker' => !$tall, 'h' => 'h2']) ?><?php endforeach; ?></div>
+      <div class="cgrid <?= $tall ? 'tall-grid' : 'cols-4' ?>" data-more-list><?php foreach ($items->items as $m): ?><?= mm_card($m, $tall ? 'tall' : 'card', ['kicker' => !$tall, 'h' => 'h2']) ?><?php endforeach; ?></div>
     </section>
     <?php if ($items->pages > 1): ?>
-      <nav class="pager" aria-label="पेज">
+      <nav class="pager" aria-label="पेज" data-more-pager>
         <?php if ($items->page > 1): ?><a href="<?= e($items->url($items->page - 1)) ?>" rel="prev"><i class="fa-solid fa-angle-left"></i> पिछला</a><?php endif; ?>
         <span>पेज <?= num($items->page) ?> / <?= num($items->pages) ?></span>
         <?php if ($items->page < $items->pages): ?><a href="<?= e($items->url($items->page + 1)) ?>" rel="next">अगला <i class="fa-solid fa-angle-right"></i></a><?php endif; ?>

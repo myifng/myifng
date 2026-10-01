@@ -80,6 +80,7 @@ $renderMenu = function (array $items, int $depth = 0) use (&$renderMenu): string
     <div class="drawer-panel" role="dialog" aria-modal="true" aria-label="मेनू">
       <div class="drawer-head"><b><?= e(setting('site_name')) ?></b><button type="button" class="js-drawer-close" aria-label="मेनू बंद करें"><i class="fa-solid fa-xmark"></i></button></div>
       <ul class="drawer-menu"><?= $renderMenu(($mobile['items'] ?: $main['items'])) ?></ul>
+      <?php if (\App\Services\PwaService::enabled()): ?><a href="#" class="app-link drawer-app" data-pwa-link hidden><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i> ऐप इंस्टॉल करें</a><?php endif; ?>
       <?php if ($social): ?><div class="social drawer-social"><?php foreach ($social as $k => $ic): ?><a href="<?= e(setting($k)) ?>" target="_blank" rel="noopener" aria-label="<?= e(ucfirst($k)) ?>"><i class="fa-brands <?= e($ic) ?>"></i></a><?php endforeach; ?></div><?php endif; ?>
     </div>
   </div>

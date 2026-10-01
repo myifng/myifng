@@ -33,6 +33,7 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
         <?php if (setting('reading_time', '1') === '1'): ?><span><?= NewsService::readingTime((int) $news['word_count']) ?> मिनट में पढ़ें</span><?php endif; ?>
         <?php if (setting('show_views') === '1'): ?><span><i class="fa-regular fa-eye"></i> <?= num($news['views']) ?></span><?php endif; ?>
       </div>
+      <div class="fs-ctl" role="group" aria-label="अक्षर का आकार" data-fs-ctl hidden><button type="button" data-fs="-1" aria-label="अक्षर छोटे करें">A<sup>−</sup></button><button type="button" data-fs="1" aria-label="अक्षर बड़े करें">A<sup>+</sup></button></div>
       <?php if ($share && !$isPreview): ?>
         <div class="share" aria-label="शेयर करें" data-share-id="<?= (int) $news['id'] ?>" data-share-url="<?= e(route('api.share')) ?>">
           <?php foreach ($share as $k): if (isset($shareLinks[$k])): [$href, $ic, $lab, $cls] = $shareLinks[$k]; ?><a class="<?= e($cls) ?>" href="<?= e($href) ?>" target="_blank" rel="noopener" aria-label="<?= e($lab) ?> पर शेयर करें"><i class="<?= e($ic) ?>"></i></a><?php endif; endforeach; ?>

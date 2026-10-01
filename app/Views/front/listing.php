@@ -4,7 +4,7 @@ $lead = $items && $items->page === 1 && !$search && $items->items ? $items->item
 $rest = $items ? ($lead ? array_slice($items->items, 1) : $items->items) : [];
 $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $color) ? $color : null;
 ?>
-<div class="wrap page-wrap with-side listing-page"<?= $c ? ' style="--cat:' . e($c) . '"' : '' ?>>
+<div class="wrap page-wrap with-side listing-page"<?= $c ? ' style="--cat:' . e(readable_color($c)) . '"' : '' ?>>
   <div class="main-col">
     <?php if ($banner && !empty($special)): ?><div class="special-banner"><?= media_img($banner, 'large', $heading, ['loading' => 'eager']) ?></div><?php endif; ?>
     <header class="list-head box">
@@ -30,9 +30,9 @@ $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $color) ? $color : null;
 
     <?php if ($items && $items->items): ?>
       <?php if ($lead): ?><div class="box list-lead"><?= news_card($lead, 'wide', ['h' => 'h2']) ?></div><?php endif; ?>
-      <?php if ($rest): ?><div class="box listing"><?php foreach ($rest as $n): ?><?= news_card($n, 'wide', ['h' => 'h2']) ?><?php endforeach; ?></div><?php endif; ?>
+      <?php if ($rest): ?><div class="box listing" data-more-list><?php foreach ($rest as $n): ?><?= news_card($n, 'wide', ['h' => 'h2']) ?><?php endforeach; ?></div><?php endif; ?>
       <?php if ($items->pages > 1): ?>
-        <nav class="pager" aria-label="पेज">
+        <nav class="pager" aria-label="पेज" data-more-pager>
           <?php if ($items->page > 1): ?><a href="<?= e($items->url($items->page - 1)) ?>" rel="prev"><i class="fa-solid fa-angle-left"></i> पिछला</a><?php endif; ?>
           <span>पेज <?= num($items->page) ?> / <?= num($items->pages) ?></span>
           <?php if ($items->page < $items->pages): ?><a href="<?= e($items->url($items->page + 1)) ?>" rel="next">अगला <i class="fa-solid fa-angle-right"></i></a><?php endif; ?>

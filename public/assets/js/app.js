@@ -698,3 +698,237 @@
     b.addEventListener('click', function () { setTimeout(function () { location.reload(); }, 900); });
   });
 })();
+
+/* ==========================================================
+   Phase 16: PWA, मोबाइल, सुलभता
+   ========================================================== */
+(function () {
+  'use strict';
+  var $ = function (s, el) { return (el || document).querySelector(s); };
+  var $$ = function (s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); };
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  };
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var live = document.createElement('div');
+  live.className = 'sr-only'; live.setAttribute('aria-live', 'polite'); live.setAttribute('role', 'status');
+  document.body.appendChild(live);
+  var say = function (t) { live.textContent = ''; setTimeout(function () { live.textContent = t; }, 50); };
+
+  /* सर्विस वर्कर: पेज लोड होने के बाद; सेटिंग से बंद हो तो पुराना हटाएँ */
+  var swMeta = $('meta[name="sw"]');
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      if (swMeta) {
+        navigator.serviceWorker.register(swMeta.content, { scope: new URL('./', swMeta.content).pathname }).catch(function () {});
+      } else if (navigator.serviceWorker.getRegistrations && !$('.offline-page')) {
+        navigator.serviceWorker.getRegistrations().then(function (rs) {
+          rs.forEach(function (r) { var w = r.active || r.waiting || r.installing; if (w && /\/sw\.js(\?|$)/.test(w.scriptURL)) r.unregister(); });
+        }).catch(function () {});
+      }
+    });
+  }
+
+  /* "ऐप इंस्टॉल करें": दूसरी बार आने पर, मोबाइल पर; "अभी नहीं" = 14 दिन */
+  var bar = $('[data-pwa-install]'), deferred = null;
+  var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios|fxios|edgios/i.test(navigator.userAgent);
+  try {
+    if (!sessionStorage.getItem('np_seen')) { sessionStorage.setItem('np_seen', '1'); store.set('np_visits', String((+store.get('np_visits') || 0) + 1)); }
+  } catch (e) {}
+  var canShow = function () {
+    return bar && !standalone && matchMedia('(max-width: 760px)').matches && (+store.get('np_visits') || 0) >= 2 && (+store.get('np_pi_until') || 0) < Date.now();
+  };
+  var showBar = function (iosHelp) {
+    if (!bar) return;
+    if (iosHelp) { $('[data-pi-text]', bar).textContent = 'Safari में नीचे शेयर बटन दबाएँ, फिर "Add to Home Screen" चुनें।'; $('[data-pi-yes]', bar).hidden = true; }
+    bar.hidden = false; document.body.classList.add('has-pi');
+  };
+  var hideBar = function () { if (bar) { bar.hidden = true; document.body.classList.remove('has-pi'); } };
+  var installLinks = $$('[data-pwa-link]');
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); deferred = e;
+    installLinks.forEach(function (a) { a.hidden = false; });
+    if (canShow()) setTimeout(function () { showBar(false); }, 3000);
+  });
+  if (ios && !standalone) {
+    installLinks.forEach(function (a) { a.hidden = false; });
+    if (canShow()) setTimeout(function () { showBar(true); }, 3000);
+  }
+  var install = function () {
+    if (deferred) {
+      deferred.prompt();
+      deferred.userChoice.then(function () { deferred = null; hideBar(); }).catch(hideBar);
+    } else if (ios) { showBar(true); }
+  };
+  if (bar) {
+    $('[data-pi-yes]', bar).addEventListener('click', install);
+    $('[data-pi-no]', bar).addEventListener('click', function () { store.set('np_pi_until', String(Date.now() + 14 * 864e5)); hideBar(); });
+  }
+  installLinks.forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); install(); }); });
+  window.addEventListener('appinstalled', function () { hideBar(); installLinks.forEach(function (a) { a.hidden = true; }); });
+
+  /* ऑफ़लाइन पेज: हाल में पढ़ी (कैश की) ख़बरें */
+  var offList = $('[data-offline-list]');
+  if (offList && 'caches' in window) {
+    caches.open('np-pages').then(function (c) {
+      return c.keys().then(function (keys) {
+        keys = keys.reverse().slice(0, 40);
+        return Promise.all(keys.map(function (k) {
+          return c.match(k).then(function (r) { return r ? r.text() : ''; }).then(function (html) {
+            var m = /<title>([^<]*)<\/title>/i.exec(html);
+            var d = document.createElement('textarea'); d.innerHTML = m ? m[1] : '';
+            return { url: k.url, title: d.value };
+          });
+        }));
+      });
+    }).then(function (items) {
+      var ul = $('[data-offline-items]', offList), seen = {};
+      items.forEach(function (it) {
+        var path = new URL(it.url).pathname;
+        if (!it.title || seen[path] || /\/offline$/.test(path)) return;
+        seen[path] = 1;
+        var li = document.createElement('li'), a = document.createElement('a');
+        var home = $('.off-head .logo');
+        a.href = it.url; a.textContent = home && new URL(home.href).pathname === path ? 'होम पेज' : (it.title.replace(/\s*[|·-]\s*[^|·-]+$/, '') || it.title);
+        li.appendChild(a); ul.appendChild(li);
+      });
+      if (ul.children.length) offList.hidden = false;
+    }).catch(function () {});
+  }
+  $$('[data-retry]').forEach(function (b) { b.addEventListener('click', function () { location.reload(); }); });
+  if ($('.offline-page')) window.addEventListener('online', function () { location.reload(); });
+
+  /* नेट जाने/आने की सूचना */
+  var toast = function (t, cls) {
+    var el = $('.net-toast') || document.body.appendChild(Object.assign(document.createElement('div'), { className: 'net-toast' }));
+    el.textContent = t; el.className = 'net-toast show ' + (cls || '');
+    say(t);
+    clearTimeout(el._t); el._t = setTimeout(function () { el.classList.remove('show'); }, 4000);
+  };
+  window.addEventListener('offline', function () { toast('आप ऑफ़लाइन हैं। हाल में पढ़ी ख़बरें फिर भी खुलेंगी।', 'off'); });
+  window.addEventListener('online', function () { toast('फिर से ऑनलाइन।', 'on'); });
+
+  /* "और ख़बरें": पेज बदले बिना अगली ख़बरें (बिना JS पुराना पेजिनेशन) */
+  $$('[data-more-pager]').forEach(function (pager) {
+    var list = pager.parentNode.querySelector('[data-more-list]');
+    if (!list || !$('a[rel="next"]', pager) || !window.fetch || !window.DOMParser) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'btn more-btn'; btn.innerHTML = '<i class="fa-solid fa-angles-down" aria-hidden="true"></i> और ख़बरें';
+    pager.parentNode.insertBefore(btn, pager);
+    pager.hidden = true;
+    var skel = function (n) {
+      var f = document.createDocumentFragment();
+      for (var i = 0; i < n; i++) {
+        var d = document.createElement('div'); d.className = 'skel-item'; d.setAttribute('aria-hidden', 'true');
+        d.innerHTML = '<span class="sk sk-img"></span><span class="sk-body"><span class="sk sk-line"></span><span class="sk sk-line w70"></span><span class="sk sk-line w40"></span></span>';
+        f.appendChild(d);
+      }
+      return f;
+    };
+    btn.addEventListener('click', function () {
+      var next = $('a[rel="next"]', pager);
+      if (!next || btn.disabled) return;
+      btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = 'लोड हो रहा है…';
+      list.appendChild(skel(3));
+      fetch(next.href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'more' } }).then(function (r) {
+        if (!r.ok) throw new Error(r.status); return r.text();
+      }).then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var nl = doc.querySelector('[data-more-list]'), np = doc.querySelector('[data-more-pager]');
+        $$('.skel-item', list).forEach(function (s) { s.remove(); });
+        var added = 0, first = null;
+        if (nl) Array.prototype.slice.call(nl.children).forEach(function (c) { list.appendChild(c); added++; first = first || c; });
+        if (np) { np.hidden = true; pager.replaceWith(np); pager = np; }
+        if (history.replaceState) history.replaceState(null, '', next.href);
+        say(added + ' और ख़बरें जुड़ गईं');
+        var fl = first && (first.matches('a') ? first : $('a', first));
+        if (fl) fl.focus({ preventScroll: true });
+        if (np && $('a[rel="next"]', np)) { btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = '<i class="fa-solid fa-angles-down" aria-hidden="true"></i> और ख़बरें'; }
+        else { btn.replaceWith(Object.assign(document.createElement('p'), { className: 'more-end', textContent: 'सभी ख़बरें दिख गईं' })); }
+      }).catch(function () {
+        $$('.skel-item', list).forEach(function (s) { s.remove(); });
+        btn.disabled = false; btn.removeAttribute('aria-busy'); btn.textContent = 'लोड नहीं हुआ, दोबारा कोशिश करें';
+      });
+    });
+  });
+
+  /* ऊपर पेज बदलने की पतली पट्टी (ऐप मोड में भी पता चले कि पेज खुल रहा है) */
+  var prog = document.createElement('div'); prog.className = 'nav-progress'; prog.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(prog);
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download') || a.hasAttribute('data-pwa-link')) return;
+    var u = new URL(a.href, location.href);
+    if (u.origin !== location.origin || (u.pathname === location.pathname && u.search === location.search)) return;
+    prog.classList.add('go');
+  });
+  window.addEventListener('pageshow', function () { prog.classList.remove('go'); });
+
+  /* ख़बर: पढ़ने की प्रगति + अक्षर का आकार (याद रहता है) */
+  var art = $('.news-article .prose');
+  if (art) {
+    var rp = document.createElement('div'); rp.className = 'read-progress'; rp.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(rp);
+    var tick = false;
+    var upd = function () {
+      tick = false;
+      var r = art.getBoundingClientRect(), total = r.height - innerHeight * 0.6;
+      rp.style.transform = 'scaleX(' + Math.max(0, Math.min(1, total > 0 ? -r.top / total : 1)) + ')';
+    };
+    addEventListener('scroll', function () { if (!tick) { tick = true; requestAnimationFrame(upd); } }, { passive: true });
+    var fsCtl = $('[data-fs-ctl]');
+    var steps = [0.88, 1, 1.12, 1.25, 1.4];
+    var cur = Math.max(0, Math.min(steps.length - 1, +(store.get('np_fs') || 1)));
+    var apply = function () {
+      document.documentElement.style.setProperty('--fs-k', steps[cur]);
+      if (fsCtl) { $('[data-fs="-1"]', fsCtl).disabled = cur === 0; $('[data-fs="1"]', fsCtl).disabled = cur === steps.length - 1; }
+    };
+    if (fsCtl) {
+      fsCtl.hidden = false;
+      $$('[data-fs]', fsCtl).forEach(function (b) {
+        b.addEventListener('click', function () {
+          cur = Math.max(0, Math.min(steps.length - 1, cur + (+b.dataset.fs)));
+          store.set('np_fs', String(cur)); apply(); say('अक्षर का आकार ' + Math.round(steps[cur] * 100) + '%');
+        });
+      });
+    }
+    apply();
+  }
+
+  /* "ऊपर जाएँ" बटन */
+  var top = document.createElement('button');
+  top.type = 'button'; top.className = 'to-top'; top.setAttribute('aria-label', 'पेज के ऊपर जाएँ'); top.hidden = true;
+  top.innerHTML = '<i class="fa-solid fa-arrow-up" aria-hidden="true"></i>';
+  document.body.appendChild(top);
+  var topTick = false;
+  addEventListener('scroll', function () {
+    if (topTick) return; topTick = true;
+    requestAnimationFrame(function () { topTick = false; top.hidden = scrollY < innerHeight * 2; });
+  }, { passive: true });
+  top.addEventListener('click', function () {
+    scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    var f = $('.logo') || $('#main'); if (f) f.focus({ preventScroll: true });
+  });
+
+  /* इमेज आ जाए तो स्केलेटन की चमक बंद */
+  var loaded = function (img) { img.setAttribute('data-loaded', ''); };
+  $$('.th img').forEach(function (img) { if (img.complete) loaded(img); });
+  document.addEventListener('load', function (e) { if (e.target.tagName === 'IMG') loaded(e.target); }, true);
+  document.addEventListener('error', function (e) { if (e.target.tagName === 'IMG') loaded(e.target); }, true);
+
+  /* मेनू ड्रॉअर: Tab ड्रॉअर के अंदर ही घूमे */
+  var drawer = $('#drawer');
+  if (drawer) {
+    drawer.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab' || drawer.hidden) return;
+      var f = $$('a[href], button:not([disabled]), input, select, textarea', drawer).filter(function (x) { return x.offsetParent !== null; });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+  }
+})();

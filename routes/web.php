@@ -18,6 +18,7 @@ use App\Controllers\Front\LocationApiController;
 use App\Controllers\Front\LocationController;
 use App\Controllers\Front\NewsController;
 use App\Controllers\Front\PageController;
+use App\Controllers\Front\PwaController;
 use App\Controllers\Front\ReporterJoinController;
 use App\Controllers\Front\SearchController;
 use App\Controllers\Front\SitemapController;
@@ -126,7 +127,12 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
     $r->get('/newsletter/confirm/{token:[a-f0-9]{40}}', [EngageController::class, 'confirm'])->name('newsletter.confirm');
     $r->get('/newsletter/unsubscribe/{token:[a-f0-9]{40}}', [EngageController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
     $r->post('/newsletter/unsubscribe/{token:[a-f0-9]{40}}', [EngageController::class, 'unsubscribe'])->name('newsletter.unsubscribe.post')->middleware('throttle:20,10');
-    $r->get('/sw.js', [EngageController::class, 'serviceWorker'])->name('push.sw');
+    $r->get('/sw.js', [PwaController::class, 'serviceWorker'])->name('push.sw');
+    // Phase 16: PWA
+    $r->get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+    $r->get('/pwa/icon-{size:\d+}.png', [PwaController::class, 'icon'])->name('pwa.icon');
+    $r->get('/pwa/icon-{size:\d+}-maskable.png', [PwaController::class, 'maskable'])->name('pwa.icon.maskable');
+    $r->get('/offline', [PwaController::class, 'offline'])->name('pwa.offline');
     $r->post('/push/subscribe', [EngageController::class, 'pushSubscribe'])->name('push.subscribe')->middleware('throttle:20,10');
     $r->post('/push/unsubscribe', [EngageController::class, 'pushUnsubscribe'])->name('push.unsubscribe')->middleware('throttle:20,10');
 

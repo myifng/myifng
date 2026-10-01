@@ -27,7 +27,7 @@ function news_thumb(array $n, string $size = 'medium', string $class = ''): stri
     if (!empty($n['featured_image'])) {
         $img = media_img($n['featured_image'], $size, (string) $n['title']);
     } else {
-        $c = preg_match('/^#[0-9a-f]{6}$/i', (string) ($n['category_color'] ?? '')) ? $n['category_color'] : 'var(--brand)';
+        $c = preg_match('/^#[0-9a-f]{6}$/i', (string) ($n['category_color'] ?? '')) ? readable_color($n['category_color']) : 'var(--brand)';
         $img = '<span class="th-empty" style="--c:' . e($c) . '"><b>' . e(mb_substr((string) ($n['category'] ?: setting('site_name')), 0, 1)) . '</b></span>';
     }
     return '<span class="th' . ($class ? ' ' . e($class) : '') . '">' . $img . $video . $flag . '</span>';

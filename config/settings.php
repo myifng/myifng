@@ -280,6 +280,19 @@ return [
             'backup_include_private' => ['label' => 'फ़ाइल बैकअप में निजी फ़ाइलें (KYC, फ़ॉर्म अटैचमेंट) भी', 'type' => 'switch', 'default' => '1'],
         ],
     ],
+    // Phase 16: वेबसाइट को फ़ोन पर ऐप की तरह इंस्टॉल करना (PWA)
+    'pwa' => [
+        'label' => 'ऐप (PWA)', 'icon' => 'fa-mobile-screen-button', 'permission' => 'edit',
+        'fields' => [
+            'pwa_enabled' => ['label' => 'PWA चालू करें (होम स्क्रीन पर इंस्टॉल, ऑफ़लाइन पढ़ना, तेज़ लोडिंग)', 'type' => 'switch', 'default' => '1', 'help' => 'HTTPS (SSL) ज़रूरी है। बंद करने पर पाठकों के फ़ोन का कैश अपने-आप साफ़ हो जाता है; वेब पुश अलग से चलता रहता है।'],
+            'pwa_name' => ['label' => 'ऐप का पूरा नाम', 'type' => 'text', 'rules' => 'nullable|max:60', 'width' => 6, 'help' => 'ख़ाली = वेबसाइट का नाम'],
+            'pwa_short_name' => ['label' => 'छोटा नाम (होम स्क्रीन पर आइकन के नीचे)', 'type' => 'text', 'rules' => 'nullable|max:15', 'width' => 6, 'help' => '12 अक्षर तक सबसे अच्छा'],
+            'pwa_icon' => ['label' => 'ऐप आइकन', 'type' => 'image', 'width' => 4, 'help' => 'चौकोर PNG, कम से कम 512×512। ख़ाली = फ़ेविकॉन/मोबाइल लोगो से अपने-आप।'],
+            'pwa_background' => ['label' => 'खुलते समय बैकग्राउंड रंग', 'type' => 'color', 'default' => '#ffffff', 'rules' => 'required|color', 'width' => 4],
+            'pwa_offline_pages' => ['label' => 'ऑफ़लाइन पढ़ने के लिए हाल की कितनी ख़बरें रखें', 'type' => 'number', 'default' => '30', 'rules' => 'required|integer|min:0|max:100', 'width' => 4, 'help' => '0 = ऑफ़लाइन कॉपी नहीं (सिर्फ़ ऑफ़लाइन पेज)'],
+            'pwa_install_prompt' => ['label' => 'मोबाइल पर "ऐप इंस्टॉल करें" पट्टी दिखाएँ', 'type' => 'switch', 'default' => '1', 'help' => 'दूसरी बार आने पर दिखती है; "अभी नहीं" दबाने पर 14 दिन तक नहीं।'],
+        ],
+    ],
     'maintenance' => [
         'label' => 'मेंटेनेंस', 'icon' => 'fa-screwdriver-wrench', 'permission' => 'manage',
         'fields' => [

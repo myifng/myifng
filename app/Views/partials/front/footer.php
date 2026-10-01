@@ -35,6 +35,7 @@ $copy = strtr((string) setting('copyright_text', '© {year} {site_name}'), ['{ye
     <?php endif; ?>
     <div class="fbottom">
       <span><?= e($copy) ?></span>
+      <?php if (\App\Services\PwaService::enabled()): ?><a href="#" class="app-link" data-pwa-link hidden><i class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i> ऐप इंस्टॉल करें</a><?php endif; ?>
       <?php if ($legal['items']): ?><ul class="legal"><?php foreach ($legal['items'] as $it): ?><li><a href="<?= e($it['href']) ?>"><?= e($it['title']) ?></a></li><?php endforeach; ?></ul><?php endif; ?>
     </div>
   </div>

@@ -14,7 +14,7 @@ $this->layout('layouts/front');
       </nav>
     </header>
     <?php if ($items->items): ?>
-      <div class="box fc-grid"><?php foreach ($items->items as $f): ?><?= $this->insert('front/fact-check/_card', ['f' => $f]) ?><?php endforeach; ?></div>
+      <div class="box fc-grid" data-more-list><?php foreach ($items->items as $f): ?><?= $this->insert('front/fact-check/_card', ['f' => $f]) ?><?php endforeach; ?></div>
       <?= $this->insert('partials/front/pager', ['p' => $items]) ?>
     <?php else: ?>
       <div class="box empty"><p>अभी कोई फ़ैक्ट चेक नहीं।</p></div>

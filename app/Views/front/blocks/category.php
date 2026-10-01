@@ -1,4 +1,4 @@
-<?php $layout = $set['layout'] ?? 'lead-list'; $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $cat['color']) ? $cat['color'] : null; ?>
+<?php $layout = $set['layout'] ?? 'lead-list'; $c = preg_match('/^#[0-9a-f]{6}$/i', (string) $cat['color']) ? readable_color($cat['color']) : null; ?>
 <div class="box catbox"<?= $c ? ' style="--cat:' . e($c) . '"' : '' ?>>
   <?= block_head($heading, $more) ?>
   <?php if ($subs && $layout !== 'half'): ?><nav class="subnav" aria-label="<?= e($cat['name']) ?> की उप-श्रेणियाँ"><?php foreach ($subs as $s): ?><a href="<?= e(route('category', ['slug' => $s['slug']])) ?>"><?= e($s['name']) ?></a><?php endforeach; ?></nav><?php endif; ?>
