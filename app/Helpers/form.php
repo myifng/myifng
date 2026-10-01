@@ -60,7 +60,7 @@ function field(string $type, string $name, string $label, mixed $value = null, a
 function status_badge(string $status): string
 {
     $map = ['active' => ['success', 'चालू'], 'inactive' => ['secondary', 'बंद'], 'suspended' => ['danger', 'निलंबित'],
-        'success' => ['success', 'सफल'], 'failed' => ['danger', 'असफल'], 'blocked' => ['warning', 'रोका गया'], 'logout' => ['secondary', 'लॉगआउट']];
+        'success' => ['success', 'सफल'], 'failed' => ['danger', 'असफल'], 'blocked' => ['warning', 'रोका गया'], 'logout' => ['secondary', 'लॉगआउट'], 'otp_sent' => ['info', 'OTP भेजा'], 'otp_failed' => ['danger', 'ग़लत OTP']];
     [$c, $l] = $map[$status] ?? ['secondary', $status];
     return '<span class="badge-status text-bg-' . $c . '"><i class="dot"></i>' . e($l) . '</span>';
 }
@@ -126,6 +126,12 @@ function setting_field(string $name, array $f, bool $disabled = false): string
                 $o .= '<option value="' . e($k) . '"' . selected($k, $val) . ($f['type'] === 'font' ? ' style="font-family:\'' . e($k) . '\'"' : '') . '>' . e($l) . '</option>';
             }
             return '<div class="' . $col . ' mb-3"><label class="form-label" for="' . $id . '">' . $label . '</label><select class="form-select' . $invalid . '" id="' . $id . '" name="' . e($name) . '"' . $dis . '>' . $o . '</select>' . $help . $errHtml . '</div>';
+        case 'password':
+            // सेव पासवर्ड कभी पेज पर नहीं भेजते; ख़ाली छोड़ें = पुराना बना रहे
+            $has = (string) setting($name) !== '';
+            $ph = $has ? '•••••••• (सेव है; बदलना हो तो नया लिखें)' : '';
+            $rm = $has ? '<label class="form-check small mt-1"><input class="form-check-input" type="checkbox" name="remove_' . e($name) . '" value="1"' . $dis . '> <span class="form-check-label">सेव पासवर्ड हटाएँ</span></label>' : '';
+            return '<div class="' . $col . ' mb-3"><label class="form-label" for="' . $id . '">' . $label . '</label><input type="password" class="form-control' . $invalid . '" id="' . $id . '" name="' . e($name) . '" value="" placeholder="' . e($ph) . '" autocomplete="new-password"' . $dis . '>' . $rm . $help . $errHtml . '</div>';
         case 'color':
             return '<div class="' . $col . ' mb-3"><label class="form-label" for="' . $id . '">' . $label . '</label><div class="input-group"><input type="color" class="form-control form-control-color' . $invalid . '" id="' . $id . '" name="' . e($name) . '" value="' . e($val) . '"' . $dis . ' data-color-sync="#' . $id . '_hex"><input type="text" class="form-control font-monospace" id="' . $id . '_hex" value="' . e($val) . '" aria-label="' . $label . ' (hex)" readonly></div>' . $help . $errHtml . '</div>';
         default:

@@ -36,6 +36,17 @@ $section ??= ['साइट सेटिंग', route('admin.settings.index'), 
           <?= setting_field($name, $f, !$canEdit) ?>
         <?php endforeach; ?>
       </div>
+      <?php if ($active === 'mail' && $canEdit): ?>
+        <div class="mail-test border rounded p-3 mt-1">
+          <h3 class="h6 mb-1"><i class="fa-solid fa-paper-plane me-1"></i> टेस्ट मेल भेजें</h3>
+          <p class="small text-body-secondary mb-2">पहले ऊपर की सेटिंग <b>सेव</b> करें, फिर जाँचें कि मेल पहुँचता है। (अभी: <?= \App\Core\Mailer::driver() === 'smtp' ? 'SMTP ' . e((string) setting('smtp_host')) : 'PHP mail()' ?>)</p>
+          <div class="d-flex flex-wrap gap-2">
+            <input class="form-control" style="max-width:320px" type="email" name="test_to" value="<?= e((string) user('email')) ?>" aria-label="टेस्ट मेल किस पते पर">
+            <button class="btn btn-outline-primary" type="submit" formaction="<?= e(route('admin.settings.mail_test')) ?>" formnovalidate><i class="fa-solid fa-paper-plane me-1"></i> भेजें</button>
+          </div>
+          <?php if ($log = app('session')->getFlash('mail_transcript')): ?><pre class="small bg-body-tertiary border rounded p-2 mt-2 mb-0" style="max-height:220px;overflow:auto;white-space:pre-wrap"><?= e($log) ?></pre><?php endif; ?>
+        </div>
+      <?php endif; ?>
       <?php if ($active === 'branding'): ?>
         <div class="brand-preview" aria-hidden="true">
           <span class="bp-label">प्रीव्यू</span>

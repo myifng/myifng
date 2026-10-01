@@ -164,7 +164,7 @@ final class App
         $view = new View($base . '/app/Views');
         $this->set('view', $view);
 
-        $this->bind('mailer', fn() => new Mailer($logger, (string) setting('mail_from_email', 'no-reply@' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), (string) setting('site_name', 'News')));
+        $this->bind('mailer', fn() => new Mailer($logger, (string) (setting('mail_from_email') ?: 'no-reply@' . preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? 'localhost'))), (string) (setting('mail_from_name') ?: setting('site_name', 'News'))));
 
         $router = new Router();
         $this->set('router', $router);

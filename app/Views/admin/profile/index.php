@@ -33,6 +33,19 @@
       </div>
       <div class="panel-foot"><button class="btn btn-dark" type="submit">पासवर्ड बदलें</button></div>
     </form>
+    <?php $tfOn = \App\Services\TwoFactorService::enabled(); $tfDev = \App\Services\TwoFactorService::devices((int) auth()->id()); ?>
+    <section class="panel mt-3">
+      <div class="panel-head"><h2><i class="fa-solid fa-shield-halved me-1 text-body-secondary"></i>दो-चरण लॉगिन</h2><?= $tfOn ? '<span class="badge text-bg-success">चालू</span>' : '<span class="badge text-bg-light">बंद</span>' ?></div>
+      <div class="panel-body small">
+        <p class="mb-2"><?= $tfOn ? 'लॉगिन के समय पासवर्ड के बाद आपके ईमेल <b>' . e((string) user('email')) . '</b> पर OTP आता है।' : 'एडमिन ने दो-चरण लॉगिन (ईमेल OTP) अभी चालू नहीं किया है।' ?></p>
+        <?php if ($tfDev): ?>
+          <form method="post" action="<?= e(route('admin.profile.devices')) ?>" data-confirm="सभी याद रखे गए डिवाइस पर अगली बार फिर OTP माँगा जाएगा।" class="d-flex flex-wrap align-items-center gap-2">
+            <?= csrf_field() ?><span>याद रखे गए डिवाइस: <b><?= (int) $tfDev ?></b></span>
+            <button class="btn btn-sm btn-outline-danger" type="submit"><i class="fa-solid fa-xmark me-1"></i>सभी भूलें</button>
+          </form>
+        <?php endif; ?>
+      </div>
+    </section>
     <section class="panel mt-3">
       <div class="panel-head"><h2>लॉगिन हिस्ट्री</h2></div>
       <ul class="activity compact">

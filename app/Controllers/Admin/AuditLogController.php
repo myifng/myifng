@@ -62,7 +62,7 @@ final class AuditLogController extends Controller
             $w[] = 'h.user_id = ?';
             $p[] = $f['user'];
         }
-        if (in_array($f['status'], ['success', 'failed', 'blocked', 'logout'], true)) {
+        if (in_array($f['status'], ['success', 'failed', 'blocked', 'logout', 'otp_sent', 'otp_failed'], true)) {
             $w[] = 'h.status = ?';
             $p[] = $f['status'];
         }

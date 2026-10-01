@@ -1,7 +1,7 @@
 <?php
 $this->layout('layouts/admin');
 $title = 'लॉगिन इतिहास';
-$labels = ['success' => ['सफल', 'success'], 'failed' => ['असफल', 'danger'], 'blocked' => ['रोका गया', 'warning'], 'logout' => ['लॉगआउट', 'secondary']];
+$labels = ['success' => ['सफल', 'success'], 'failed' => ['असफल', 'danger'], 'blocked' => ['रोका गया', 'warning'], 'logout' => ['लॉगआउट', 'secondary'], 'otp_sent' => ['OTP भेजा', 'info'], 'otp_failed' => ['ग़लत OTP', 'danger']];
 $qs = http_build_query(array_filter($f));
 ?>
 <div class="page-head">

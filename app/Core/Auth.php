@@ -20,8 +20,11 @@ final class Auth
     ) {
     }
 
-    /** @return array{ok: bool, message: string} */
-    public function attempt(string $email, string $password, Request $req): array
+    /**
+     * $login = false: सिर्फ़ जाँच (दो-चरण लॉगिन में OTP के बाद लॉगिन होता है)
+     * @return array{ok: bool, message: string, user?: array}
+     */
+    public function attempt(string $email, string $password, Request $req, bool $login = true): array
     {
         $email = strtolower(trim($email));
         $ip = $req->ip();
@@ -56,8 +59,10 @@ final class Auth
             $this->db->update('users', ['password' => password_hash($password, PASSWORD_DEFAULT)], 'id = ?', [$user['id']]);
         }
         $this->db->delete('login_attempts', 'ip = ? OR email = ?', [$ip, $email]);
-        $this->login($user, $req);
-        return ['ok' => true, 'message' => ''];
+        if ($login) {
+            $this->login($user, $req);
+        }
+        return ['ok' => true, 'message' => '', 'user' => $user];
     }
 
     public function login(array $user, Request $req): void

@@ -32,6 +32,25 @@ final class SettingsController extends Controller
         ]);
     }
 
+    /** सेव की गई ईमेल सेटिंग से टेस्ट मेल; न जाए तो SMTP की बातचीत दिखाएँ */
+    public function mailTest(Request $request): Response
+    {
+        $to = trim($request->str('test_to')) ?: (string) user('email');
+        $back = $this->toRoute('admin.settings', ['tab' => 'mail']);
+        if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {
+            return $back->with('danger', 'टेस्ट मेल का पता सही नहीं है।');
+        }
+        $mailer = app('mailer');
+        $site = (string) setting('site_name');
+        $ok = $mailer->send($to, 'टेस्ट मेल: ' . $site, '<div style="font-family:sans-serif;font-size:15px;line-height:1.6"><h2 style="margin:0 0 8px">✅ ईमेल सेटिंग ठीक है</h2><p>यह <b>' . e($site) . '</b> से भेजा गया टेस्ट मेल है। अब OTP, पासवर्ड रीसेट और सूचनाएँ इसी तरीके से जाएँगी।</p><p style="color:#666;font-size:13px">तरीका: ' . e(\App\Core\Mailer::driver() === 'smtp' ? 'SMTP (' . setting('smtp_host') . ')' : 'PHP mail()') . ' · समय: ' . date('d-m-Y H:i:s') . '</p></div>');
+        AuditService::log('mail_test', 'settings', 'mail', 'टेस्ट मेल ' . ($ok ? 'भेजा' : 'नहीं गया') . ': ' . $to);
+        if ($mailer->transcript()) {
+            app('session')->flash('mail_transcript', implode("\n", $mailer->transcript()));
+        }
+        return $ok ? $back->with('success', "टेस्ट मेल $to पर भेज दिया। इनबॉक्स (और स्पैम फ़ोल्डर) देखें।")
+            : $back->with('danger', 'मेल नहीं गया: ' . $mailer->lastError());
+    }
+
     public function update(Request $request, string $tab): Response
     {
         $schema = SettingsSchema::tab($tab) ?? throw new HttpException(404);
@@ -71,6 +90,24 @@ final class SettingsController extends Controller
             }
         }
 
+        // पासवर्ड: ख़ाली = पुराना बना रहे; "हटाएँ" = ख़ाली
+        foreach ($schema['fields'] as $name => $f) {
+            if ($f['type'] === 'password') {
+                $raw = is_scalar($post[$name] ?? null) ? (string) $post[$name] : '';
+                if (!empty($post['remove_' . $name])) {
+                    $data[$name] = '';
+                } elseif ($raw === '') {
+                    unset($data[$name]);
+                } else {
+                    $data[$name] = $raw; // पासवर्ड में आगे-पीछे की जगह भी मायने रखती है
+                }
+            }
+        }
+        // ईमेल: SMTP चुना तो होस्ट ज़रूरी
+        if (($data['mail_driver'] ?? '') === 'smtp' && trim((string) ($data['smtp_host'] ?? '')) === '') {
+            $errors['smtp_host'] = 'SMTP चुना है तो होस्ट लिखें।';
+        }
+
         // इमेज: नई अपलोड, हटाना, या पुरानी बनी रहे
         foreach ($schema['fields'] as $name => $f) {
             if ($f['type'] !== 'image') {
@@ -99,11 +136,22 @@ final class SettingsController extends Controller
         }
         cache()->flush('menus');
         cache()->flush('home');
+        // ऑडिट में पासवर्ड नहीं
+        foreach ($schema['fields'] as $name => $f) {
+            if ($f['type'] === 'password' && array_key_exists($name, $data)) {
+                $old[$name] = $old[$name] !== '' ? '••••' : '';
+                $data[$name] = $data[$name] !== '' ? '•••• (बदला)' : '';
+            }
+        }
         AuditService::log('update', 'settings', $tab, 'सेटिंग बदली: ' . $schema['label'], $old, $data);
 
         $msg = '“' . $schema['label'] . '” सेटिंग सेव हो गई।';
         if (($data['maintenance_mode'] ?? '0') === '1') {
             return $this->back()->with('warning', $msg . ' मेंटेनेंस मोड चालू है: पाठकों को वेबसाइट बंद दिखेगी। आप लॉगिन हैं, इसलिए आपको साइट दिखती रहेगी।');
+        }
+        if (($data['two_factor_enabled'] ?? '0') === '1' && ($old['two_factor_enabled'] ?? '0') !== '1') {
+            return $this->back()->with('warning', $msg . ' दो-चरण लॉगिन चालू हो गया: अगली बार से सभी स्टाफ़ और रिपोर्टर को ईमेल OTP लगेगा। सेटिंग → ईमेल में "टेस्ट मेल" भेजकर पक्का कर लें कि मेल पहुँच रहा है।'
+                . ' (मेल बंद हो जाए तो config/env.php में TWO_FACTOR_BYPASS = 1)');
         }
         if (str_starts_with($tab, 'seo')) {
             cache()->flush('sitemap');

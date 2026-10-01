@@ -86,6 +86,7 @@ final class UserController extends Controller
 
         if (!empty($data['password'])) {
             $data['password'] = password_hash((string) $request->input('password'), PASSWORD_DEFAULT);
+            \App\Services\TwoFactorService::forget($id);
         } else {
             unset($data['password']);
         }

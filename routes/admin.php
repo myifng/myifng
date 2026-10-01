@@ -62,6 +62,9 @@ $router->get('/reporter', static fn() => \App\Core\Response::redirect(auth()->ch
 $router->group(['prefix' => '/reporter', 'as' => 'reporter.', 'middleware' => ['guest']], function ($r) {
     $r->get('/login', [AuthController::class, 'showLogin'])->name('login');
     $r->post('/login', [AuthController::class, 'login'])->name('login.submit')->middleware('throttle:20,5');
+    $r->get('/login/verify', [AuthController::class, 'showOtp'])->name('login.otp');
+    $r->post('/login/verify', [AuthController::class, 'verifyOtp'])->name('login.otp.verify')->middleware('throttle:15,10');
+    $r->post('/login/resend', [AuthController::class, 'resendOtp'])->name('login.otp.resend')->middleware('throttle:6,10');
     $r->get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.forgot');
     $r->post('/forgot-password', [AuthController::class, 'sendReset'])->name('password.email')->middleware('throttle:5,15');
     $r->get('/reset-password/{token:[a-f0-9]{64}}', [AuthController::class, 'showReset'])->name('password.reset');
@@ -74,6 +77,9 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
     $r->group(['middleware' => ['guest']], function ($r) {
         $r->get('/login', [AuthController::class, 'showLogin'])->name('login');
         $r->post('/login', [AuthController::class, 'login'])->name('login.submit')->middleware('throttle:20,5');
+        $r->get('/login/verify', [AuthController::class, 'showOtp'])->name('login.otp');
+        $r->post('/login/verify', [AuthController::class, 'verifyOtp'])->name('login.otp.verify')->middleware('throttle:15,10');
+        $r->post('/login/resend', [AuthController::class, 'resendOtp'])->name('login.otp.resend')->middleware('throttle:6,10');
         $r->get('/forgot-password', [AuthController::class, 'showForgot'])->name('password.forgot');
         $r->post('/forgot-password', [AuthController::class, 'sendReset'])->name('password.email')->middleware('throttle:5,15');
         $r->get('/reset-password/{token:[a-f0-9]{64}}', [AuthController::class, 'showReset'])->name('password.reset');
@@ -93,6 +99,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/profile', [ProfileController::class, 'edit'])->name('profile');
         $r->post('/profile', [ProfileController::class, 'update'])->name('profile.update');
         $r->post('/profile/password', [ProfileController::class, 'password'])->name('profile.password');
+        $r->post('/profile/devices', [ProfileController::class, 'forgetDevices'])->name('profile.devices');
 
         // यूज़र
         $r->get('/users', [UserController::class, 'index'])->name('users.index')->middleware('can:users.view');
@@ -118,6 +125,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         // ---------- Phase 2 ----------
         // साइट सेटिंग
         $r->get('/settings', [SettingsController::class, 'index'])->name('settings.index')->middleware('can:settings.view');
+        $r->post('/settings/mail/test', [SettingsController::class, 'mailTest'])->name('settings.mail_test')->middleware('can:settings.manage', 'throttle:10,10');
         $r->get('/settings/{tab:[a-z_]+}', [SettingsController::class, 'edit'])->name('settings')->middleware('can:settings.view');
         $r->post('/settings/{tab:[a-z_]+}', [SettingsController::class, 'update'])->name('settings.update')->middleware('can:settings.edit,settings.manage');
 

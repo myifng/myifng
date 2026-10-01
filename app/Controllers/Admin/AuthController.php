@@ -10,6 +10,7 @@ use App\Helpers\Str;
 use App\Models\PasswordReset;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\TwoFactorService;
 
 /** लॉगिन, लॉगआउट, पासवर्ड भूलें और रीसेट */
 final class AuthController extends Controller
@@ -49,30 +50,85 @@ final class AuthController extends Controller
     {
         $data = $this->validate($request, ['email' => 'required|email', 'password' => 'required'], ['email' => 'ईमेल', 'password' => 'पासवर्ड']);
         $portal = $this->portal($request);
-        $result = auth()->attempt($data['email'], (string) $request->input('password'), $request);
+        // पासवर्ड जाँचें, पर लॉगिन अभी नहीं (पोर्टल, IP और OTP के बाद)
+        $result = auth()->attempt($data['email'], (string) $request->input('password'), $request, false);
         if (!$result['ok']) {
             return $this->toRoute($portal . '.login')->withErrors(['email' => $result['message']])->withInput(['email' => $data['email']]);
         }
+        $user = $result['user'];
+        $role = (string) db()->value('SELECT slug FROM {p}roles WHERE id = ?', [$user['role_id']]);
         // रिपोर्टर सिर्फ़ /reporter/login से, बाकी स्टाफ़ सिर्फ़ एडमिन लॉगिन से (पासवर्ड सही होने के बाद ही बताया जाता है)
-        $isReporter = (auth()->user()['role_slug'] ?? '') === 'reporter';
+        $isReporter = $role === 'reporter';
         if (self::separated() && $isReporter !== ($portal === 'reporter')) {
-            AuditService::log('login_wrong_portal', 'auth', auth()->id(), 'ग़लत लॉगिन पेज से प्रयास (' . $portal . ')');
-            auth()->logout();
+            AuditService::log('login_wrong_portal', 'auth', (int) $user['id'], 'ग़लत लॉगिन पेज से प्रयास (' . $portal . '): ' . $user['email']);
             $msg = $isReporter ? 'आप रिपोर्टर हैं: कृपया रिपोर्टर लॉगिन पेज से लॉगिन करें: ' . route('reporter.login')
                 : 'यह पेज सिर्फ़ रिपोर्टर के लिए है। स्टाफ़ अपने एडमिन लॉगिन पेज से लॉगिन करें।';
             return $this->toRoute($portal . '.login')->withErrors(['email' => $msg])->withInput(['email' => $data['email']]);
         }
-        if (!\App\Services\SecurityService::staffIpOk($request->ip(), auth()->user()['role_slug'] ?? null)) {
-            AuditService::log('ip_blocked', 'auth', auth()->id(), 'allowlist से बाहर के IP से लॉगिन: ' . $request->ip());
-            auth()->logout();
+        if (!\App\Services\SecurityService::staffIpOk($request->ip(), $role)) {
+            AuditService::log('ip_blocked', 'auth', (int) $user['id'], 'allowlist से बाहर के IP से लॉगिन: ' . $request->ip() . ' (' . $user['email'] . ')');
             return $this->toRoute($portal . '.login')->withErrors(['email' => 'इस नेटवर्क (IP) से एडमिन लॉगिन की अनुमति नहीं है। दफ़्तर के नेटवर्क से लॉगिन करें।'])->withInput(['email' => $data['email']]);
         }
+        // दो-चरण लॉगिन: भरोसेमंद डिवाइस न हो तो ईमेल OTP
+        if (TwoFactorService::enabled() && !TwoFactorService::trusted((int) $user['id'])) {
+            $r = TwoFactorService::start($user, $portal, $request);
+            if (!$r['ok']) {
+                AuditService::log('otp_mail_failed', 'auth', (int) $user['id'], 'OTP ईमेल नहीं गया: ' . $user['email']);
+                return $this->toRoute($portal . '.login')->withErrors(['email' => $r['message']])->withInput(['email' => $data['email']]);
+            }
+            return $this->toRoute($portal . '.login.otp');
+        }
+        return $this->complete($request, $user, $portal);
+    }
+
+    /** लॉगिन पूरा: सेशन, पोर्टल याद, ऑडिट, सही पेज पर */
+    private function complete(Request $request, array $user, string $portal, string $how = ''): Response
+    {
+        auth()->login($user, $request);
+        $isReporter = (auth()->user()['role_slug'] ?? '') === 'reporter';
         self::rememberPortal($isReporter ? 'reporter' : 'admin');
-        AuditService::log('login', 'auth', auth()->id(), 'लॉगिन किया' . ($portal === 'reporter' ? ' (रिपोर्टर पोर्टल)' : ''));
+        AuditService::log('login', 'auth', auth()->id(), 'लॉगिन किया' . ($portal === 'reporter' ? ' (रिपोर्टर पोर्टल)' : '') . $how);
         $intended = (string) app('session')->get('intended', '');
         app('session')->forget('intended');
         $target = $intended !== '' && str_starts_with($intended, '/') && !str_starts_with($intended, '//') ? $intended : route('admin.dashboard');
         return $this->redirect($target)->with('success', 'स्वागत है, ' . user('name') . '!');
+    }
+
+    // ---------- दो-चरण लॉगिन (ईमेल OTP) ----------
+    public function showOtp(Request $request): Response
+    {
+        $p = TwoFactorService::pending($request);
+        $portal = $this->portal($request);
+        if (!$p) {
+            return $this->toRoute($portal . '.login')->with('warning', 'OTP का समय ख़त्म हो गया या लॉगिन शुरू नहीं हुआ। दोबारा लॉगिन करें।');
+        }
+        $email = (string) db()->value('SELECT email FROM {p}users WHERE id = ?', [$p['uid']]);
+        return $this->view('auth/otp', ['portal' => $portal, 'email' => TwoFactorService::maskEmail($email),
+            'wait' => max(0, $p['sent'] + TwoFactorService::RESEND_AFTER - time()), 'expires' => $p['exp'], 'days' => TwoFactorService::rememberDays()]);
+    }
+
+    public function verifyOtp(Request $request): Response
+    {
+        $portal = $this->portal($request);
+        $r = TwoFactorService::verify($request, $request->str('otp'));
+        if (!$r['ok']) {
+            return $this->toRoute($portal . ($r['restart'] ? '.login' : '.login.otp'))->withErrors([$r['restart'] ? 'email' : 'otp' => $r['message']]);
+        }
+        $user = $r['user'];
+        if ($request->bool('remember_device')) {
+            TwoFactorService::trust((int) $user['id'], $request);
+        }
+        return $this->complete($request, $user, $portal, ' (ईमेल OTP से)');
+    }
+
+    public function resendOtp(Request $request): Response
+    {
+        $portal = $this->portal($request);
+        $r = TwoFactorService::resend($request);
+        if (!empty($r['restart'])) {
+            return $this->toRoute($portal . '.login')->withErrors(['email' => $r['message']]);
+        }
+        return $this->toRoute($portal . '.login.otp')->with($r['ok'] ? 'success' : 'warning', $r['message']);
     }
 
     public function logout(Request $request): Response
@@ -125,6 +181,7 @@ final class AuthController extends Controller
         }
         $this->validate($request, ['password' => 'required|password|confirmed'], ['password' => 'नया पासवर्ड']);
         User::update((int) $row['user_id'], ['password' => password_hash((string) $request->input('password'), PASSWORD_DEFAULT)]);
+        TwoFactorService::forget((int) $row['user_id']); // नया पासवर्ड = पुराने भरोसेमंद डिवाइस रद्द
         db()->update('password_resets', ['used_at' => now()], 'user_id = ? AND used_at IS NULL', [$row['user_id']]);
         db()->delete('login_attempts', 'email = (SELECT email FROM {p}users WHERE id = ?)', [$row['user_id']]);
         AuditService::log('password_reset', 'auth', $row['user_id'], 'पासवर्ड रीसेट किया');

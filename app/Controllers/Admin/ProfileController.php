@@ -39,6 +39,14 @@ final class ProfileController extends Controller
         return $this->back()->with('success', 'प्रोफ़ाइल सेव हो गई।');
     }
 
+    /** दो-चरण लॉगिन: इस यूज़र के सभी "याद रखे गए" डिवाइस भूलें */
+    public function forgetDevices(Request $request): Response
+    {
+        $n = \App\Services\TwoFactorService::forget((int) auth()->id());
+        \App\Services\AuditService::log('2fa_forget_devices', 'auth', auth()->id(), "भरोसेमंद डिवाइस हटाए: $n");
+        return $this->back()->with('success', "$n डिवाइस भूल गए। अगली बार वहाँ OTP माँगा जाएगा।");
+    }
+
     public function password(Request $request): Response
     {
         $this->validate($request, UserValidator::passwordRules(), UserValidator::LABELS + ['password' => 'नया पासवर्ड']);
@@ -48,6 +56,7 @@ final class ProfileController extends Controller
             return $this->back()->withErrors(['current_password' => 'मौजूदा पासवर्ड ग़लत है।']);
         }
         User::update($id, ['password' => password_hash((string) $request->input('password'), PASSWORD_DEFAULT)]);
+        \App\Services\TwoFactorService::forget($id); // नया पासवर्ड = पुराने भरोसेमंद डिवाइस रद्द
         app('session')->regenerate();
         AuditService::log('password_change', 'profile', $id, 'अपना पासवर्ड बदला');
         return $this->back()->with('success', 'पासवर्ड बदल गया।');

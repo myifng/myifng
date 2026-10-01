@@ -939,3 +939,7 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 .bk-type input:checked + span { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand); }
 .bk-type input:disabled + span { opacity: .45; cursor: not-allowed; }
 .bk-type input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+/* दो-चरण लॉगिन: OTP */
+.otp-input { text-align: center; font-size: 28px; font-weight: 700; letter-spacing: .45em; font-variant-numeric: tabular-nums; padding-left: .45em; }
+.otp-input::placeholder { letter-spacing: .3em; opacity: .35; }
