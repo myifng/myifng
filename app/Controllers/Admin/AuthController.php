@@ -10,6 +10,7 @@ use App\Helpers\Str;
 use App\Models\PasswordReset;
 use App\Models\User;
 use App\Services\AuditService;
+use App\Services\MailTemplate;
 use App\Services\TwoFactorService;
 
 /** लॉगिन, लॉगआउट, पासवर्ड भूलें और रीसेट */
@@ -158,7 +159,9 @@ final class AuthController extends Controller
             PasswordReset::create(['user_id' => $user['id'], 'token_hash' => hash('sha256', $token), 'expires_at' => date('Y-m-d H:i:s', time() + 3600)]);
             $link = route($this->rn($request, 'password.reset'), ['token' => $token]);
             $site = e(setting('site_name', 'News'));
-            app('mailer')->send($user['email'], "$site: पासवर्ड रीसेट", "<p>नमस्ते " . e($user['name']) . ",</p><p>पासवर्ड बदलने के लिए नीचे दिए लिंक पर जाएँ। यह लिंक 60 मिनट तक चलेगा।</p><p><a href=\"" . e($link) . "\">" . e($link) . "</a></p><p>अगर आपने यह अनुरोध नहीं किया, तो इस ईमेल को अनदेखा करें।</p>");
+            app('mailer')->send($user['email'], "$site: पासवर्ड रीसेट", MailTemplate::title('पासवर्ड रीसेट करें', '🔑') . MailTemplate::hello((string) $user['name'])
+                . MailTemplate::p('आपके खाते के लिए पासवर्ड बदलने का अनुरोध मिला है। नीचे के बटन से नया पासवर्ड बनाएँ।') . MailTemplate::button($link, 'नया पासवर्ड बनाएँ')
+                . MailTemplate::note('यह लिंक <b>60 मिनट</b> तक चलेगा और सिर्फ़ एक बार काम करेगा। अगर आपने यह अनुरोध नहीं किया, तो इस ईमेल को अनदेखा करें; आपका पासवर्ड नहीं बदलेगा।', 'warn'));
             AuditService::log('password_reset_requested', 'auth', $user['id'], 'पासवर्ड रीसेट लिंक माँगा');
         }
         return $this->back()->with('success', 'अगर यह ईमेल हमारे सिस्टम में है, तो पासवर्ड रीसेट का लिंक भेज दिया गया है। अपना इनबॉक्स (और स्पैम) देखें।');

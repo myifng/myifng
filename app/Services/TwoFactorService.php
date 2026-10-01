@@ -179,13 +179,13 @@ final class TwoFactorService
     {
         $site = (string) setting('site_name');
         $min = (int) (self::expiry() / 60);
-        $html = '<div style="font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#1c1b1d;max-width:480px">'
-            . '<p>नमस्ते ' . e((string) $user['name']) . ',</p>'
-            . '<p><b>' . e($site) . '</b> में लॉगिन के लिए आपका OTP:</p>'
-            . '<p style="font-size:32px;font-weight:700;letter-spacing:8px;background:#f4f3f3;border-radius:8px;padding:12px 16px;text-align:center;margin:12px 0">' . e($code) . '</p>'
-            . '<p>यह OTP <b>' . $min . ' मिनट</b> तक मान्य है। इसे किसी से साझा न करें; हमारी टीम कभी OTP नहीं माँगती।</p>'
-            . '<p style="color:#666;font-size:13px">IP: ' . e($req->ip()) . ' · डिवाइस: ' . e(function_exists('device_name') ? device_name($req->userAgent()) : mb_substr($req->userAgent(), 0, 80)) . ' · समय: ' . date('d-m-Y H:i') . '</p>'
-            . '<p style="color:#b3121a;font-size:13px">अगर आपने लॉगिन की कोशिश नहीं की, तो तुरंत अपना पासवर्ड बदलें।</p></div>';
+        $device = function_exists('device_name') ? device_name($req->userAgent()) : mb_substr($req->userAgent(), 0, 80);
+        $html = MailTemplate::title('लॉगिन OTP', '🔐') . MailTemplate::hello((string) $user['name'])
+            . MailTemplate::p('<b>' . e($site) . '</b> में लॉगिन पूरा करने के लिए यह OTP डालें:')
+            . MailTemplate::code($code, 'आपका एक-बार का कोड')
+            . MailTemplate::p('यह OTP <b>' . $min . ' मिनट</b> तक मान्य है। इसे किसी से साझा न करें; हमारी टीम कभी OTP नहीं माँगती।')
+            . MailTemplate::info([['IP पता', $req->ip()], ['डिवाइस', $device], ['समय', date('d-m-Y, H:i')]])
+            . MailTemplate::note('अगर लॉगिन की यह कोशिश आपने नहीं की, तो तुरंत अपना पासवर्ड बदलें और एडमिन को बताएँ।', 'warn');
         return app('mailer')->send((string) $user['email'], "$code: $site लॉगिन OTP", $html);
     }
 

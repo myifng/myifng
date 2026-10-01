@@ -204,13 +204,6 @@ final class NotificationService
     /** ब्रांड वाले साधारण HTML में ईमेल (तुरंत; लेन-देन वाले मेल जैसे सत्यापन) */
     public static function mail(string $to, string $subject, string $html): bool
     {
-        $brand = preg_match('/^#[0-9a-f]{6}$/i', (string) setting('primary_color')) ? setting('primary_color') : '#d71920';
-        $site = e((string) setting('site_name'));
-        $body = '<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body style="margin:0;background:#f2f2f2;font-family:Arial,sans-serif;color:#1c1b1d">'
-            . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:16px 8px"><table role="presentation" width="100%" style="max-width:560px;background:#fff;border-radius:6px">'
-            . '<tr><td style="background:' . $brand . ';color:#fff;padding:14px 18px;font-size:20px;font-weight:bold">' . $site . '</td></tr>'
-            . '<tr><td style="padding:18px;font-size:15px;line-height:1.6">' . $html . '</td></tr>'
-            . '<tr><td style="padding:12px 18px;font-size:12px;color:#777;background:#fafafa">' . $site . ' · <a href="' . e(url()) . '" style="color:#777">' . e(url()) . '</a></td></tr></table></td></tr></table></body></html>';
-        return app('mailer')->send($to, $subject, $body);
+        return app('mailer')->send($to, $subject, \App\Services\MailTemplate::wrap($html, ['preheader' => mb_substr(trim(strip_tags($html)), 0, 120)]));
     }
 }

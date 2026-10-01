@@ -6,9 +6,15 @@ $this->layout('layouts/auth');
 $title = 'OTP से पुष्टि';
 $err = error('otp');
 ?>
-<span class="auth-badge<?= $isRep ? '' : ' staff' ?>"><i class="fa-solid fa-shield-halved"></i> दो-चरण लॉगिन</span>
-<h1 class="h3 fw-bold mb-1">ईमेल पर आया OTP डालें</h1>
-<p class="text-body-secondary mb-4">हमने <b dir="ltr"><?= e($email) ?></b> पर 6 अंकों का कोड भेजा है। इनबॉक्स न दिखे तो स्पैम फ़ोल्डर भी देखें।</p>
+<ol class="auth-progress" aria-label="लॉगिन के चरण">
+  <li class="done"><span><i class="fa-solid fa-check" aria-hidden="true"></i></span>पासवर्ड</li>
+  <li class="now" aria-current="step"><span>2</span>ईमेल OTP</li>
+</ol>
+<div class="auth-head">
+  <span class="auth-icon"><i class="fa-solid fa-envelope-open-text" aria-hidden="true"></i></span>
+  <div><span class="auth-badge<?= $isRep ? '' : ' staff' ?>">दो-चरण सुरक्षा</span><h1 class="auth-title">ईमेल पर आया OTP डालें</h1></div>
+</div>
+<p class="auth-sub">हमने <b dir="ltr"><?= e($email) ?></b> पर 6 अंकों का कोड भेजा है। इनबॉक्स में न दिखे तो स्पैम फ़ोल्डर भी देखें।</p>
 <form method="post" action="<?= e(route($rp . 'login.otp.verify')) ?>" novalidate data-otp-form>
   <?= csrf_field() ?>
   <label class="form-label" for="f_otp">OTP</label>
@@ -19,13 +25,13 @@ $err = error('otp');
   <?php if ($days > 0): ?>
     <label class="form-check mb-3"><input class="form-check-input" type="checkbox" name="remember_device" value="1"> <span class="form-check-label">इस डिवाइस को <?= (int) $days ?> दिन याद रखें (यहाँ दोबारा OTP नहीं माँगेगा)</span></label>
   <?php endif; ?>
-  <button class="btn btn-brand w-100 btn-lg" type="submit">पुष्टि करें और लॉगिन <i class="fa-solid fa-arrow-right ms-1"></i></button>
+  <button class="btn btn-brand w-100 btn-lg auth-submit" type="submit">पुष्टि करें और लॉगिन <i class="fa-solid fa-arrow-right ms-1"></i></button>
 </form>
 <form method="post" action="<?= e(route($rp . 'login.otp.resend')) ?>" class="text-center mt-3">
   <?= csrf_field() ?>
   <button class="btn btn-link btn-sm" type="submit" data-otp-resend data-wait="<?= (int) $wait ?>"<?= $wait > 0 ? ' disabled' : '' ?>><i class="fa-solid fa-rotate-right me-1"></i>OTP दोबारा भेजें<?= $wait > 0 ? ' (' . (int) $wait . ' सेकंड)' : '' ?></button>
 </form>
-<p class="auth-alt"><a href="<?= e(route($rp . 'login')) ?>"><i class="fa-solid fa-arrow-left me-1"></i>दूसरे खाते से लॉगिन करें</a></p>
+<div class="auth-alt"><a href="<?= e(route($rp . 'login')) ?>"><i class="fa-solid fa-arrow-left me-1"></i>दूसरे खाते से लॉगिन करें</a></div>
 <script>
 (function () {
   var inp = document.getElementById('f_otp'), f = document.querySelector('[data-otp-form]');

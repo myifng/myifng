@@ -126,8 +126,9 @@ final class AccountController extends FrontController
     private function sendVerify(int $id, string $email, string $name): void
     {
         $link = route('account.verify', ['token' => ReaderAuth::token($id, 'verify', 60 * 24)]);
-        $this->mail($email, 'खाता सत्यापित करें', '<p>नमस्ते ' . e($name) . ',</p><p>' . e(setting('site_name')) . ' पर खाता चालू करने के लिए नीचे का बटन दबाएँ। लिंक 24 घंटे तक चलेगा।</p>'
-            . '<p><a href="' . e($link) . '" style="background:#d71920;color:#fff;padding:10px 18px;border-radius:4px;text-decoration:none;display:inline-block">खाता सत्यापित करें</a></p><p style="font-size:12px;color:#666">' . e($link) . '</p>');
+        $this->mail($email, 'खाता सत्यापित करें', \App\Services\MailTemplate::title('अपना खाता चालू करें', '👋') . \App\Services\MailTemplate::hello($name)
+            . \App\Services\MailTemplate::p('<b>' . e((string) setting('site_name')) . '</b> पर खाता बनाने के लिए धन्यवाद! खाता चालू करने के लिए नीचे का बटन दबाएँ।')
+            . \App\Services\MailTemplate::button($link, 'खाता सत्यापित करें') . \App\Services\MailTemplate::note('यह लिंक <b>24 घंटे</b> तक चलेगा। अगर आपने खाता नहीं बनाया, तो इस ईमेल को अनदेखा करें।'));
     }
 
     public function verify(Request $request, string $token): Response
@@ -179,7 +180,9 @@ final class AccountController extends FrontController
         $r = db()->first("SELECT id, name, email FROM {p}readers WHERE email = ? AND status = 'active'", [mb_strtolower((string) $v['email'])]);
         if ($r) {
             $link = route('account.reset', ['token' => ReaderAuth::token((int) $r['id'], 'reset', 60)]);
-            $this->mail($r['email'], 'पासवर्ड बदलें', '<p>नमस्ते ' . e($r['name']) . ',</p><p>नया पासवर्ड बनाने के लिए यह लिंक 60 मिनट तक चलेगा:</p><p><a href="' . e($link) . '">' . e($link) . '</a></p><p>अगर आपने यह नहीं माँगा तो इसे अनदेखा करें।</p>');
+            $this->mail($r['email'], 'पासवर्ड बदलें', \App\Services\MailTemplate::title('पासवर्ड रीसेट करें', '🔑') . \App\Services\MailTemplate::hello((string) $r['name'])
+                . \App\Services\MailTemplate::p('नीचे के बटन से अपने खाते का नया पासवर्ड बनाएँ।') . \App\Services\MailTemplate::button($link, 'नया पासवर्ड बनाएँ')
+                . \App\Services\MailTemplate::note('यह लिंक <b>60 मिनट</b> तक चलेगा। अगर आपने यह नहीं माँगा, तो इसे अनदेखा करें।', 'warn'));
         }
         return $this->redirect(route('account.login'))->with('success', 'अगर यह ईमेल किसी खाते से जुड़ा है तो पासवर्ड बदलने का लिंक भेज दिया गया है।');
     }

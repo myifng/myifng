@@ -117,7 +117,11 @@ final class ReporterJoinController extends FrontController
         $appNo = ReporterService::appNo($id);
         ReporterApplication::update($id, ['app_no' => $appNo]);
         app('mailer')->send(mb_strtolower($v['email']), 'आवेदन मिल गया: ' . $appNo,
-            '<p>नमस्ते ' . e($v['full_name']) . ',</p><p>' . e(setting('site_name')) . ' में रिपोर्टर के लिए आपका आवेदन मिल गया है।</p><p><b>आवेदन संख्या: ' . e($appNo) . '</b></p><p>स्थिति देखें: ' . e(route('application.status')) . '</p>');
+            \App\Services\MailTemplate::title('आवेदन मिल गया', '📨') . \App\Services\MailTemplate::hello((string) $v['full_name'])
+            . \App\Services\MailTemplate::p('<b>' . e((string) setting('site_name')) . '</b> में रिपोर्टर के लिए आपका आवेदन मिल गया है। हमारी टीम जाँच करके जल्द आपसे संपर्क करेगी।')
+            . \App\Services\MailTemplate::info([['आवेदन संख्या', $appNo], ['तारीख़', date('d-m-Y')]])
+            . \App\Services\MailTemplate::button(route('application.status'), 'आवेदन की स्थिति देखें')
+            . \App\Services\MailTemplate::note('आवेदन संख्या संभालकर रखें; स्थिति देखने में यही काम आएगी।'));
         app('session')->flash('joined_app', $appNo);
         return $this->toRoute('join.done');
     }
@@ -176,7 +180,9 @@ final class ReporterJoinController extends FrontController
         if (!$otp['ok']) {
             return $this->toRoute('application.status')->with('danger', $otp['error']);
         }
-        $sent = app('mailer')->send($app['email'], 'सत्यापन कोड: ' . $otp['code'], '<p>आपके आवेदन ' . e($appNo) . ' की स्थिति देखने का कोड: <b style="font-size:22px">' . $otp['code'] . '</b></p><p>यह 10 मिनट तक मान्य है। किसी से साझा न करें।</p>');
+        $sent = app('mailer')->send($app['email'], 'सत्यापन कोड: ' . $otp['code'], \App\Services\MailTemplate::title('सत्यापन कोड', '🔐')
+            . \App\Services\MailTemplate::p('आवेदन <b>' . e($appNo) . '</b> की स्थिति देखने के लिए यह कोड डालें:') . \App\Services\MailTemplate::code((string) $otp['code'])
+            . \App\Services\MailTemplate::note('यह कोड <b>10 मिनट</b> तक मान्य है। किसी से साझा न करें।', 'warn'));
         $s = app('session');
         $s->set('app_otp', ['id' => (int) $app['id'], 'app_no' => $appNo, 'until' => time() + OtpService::TTL, 'masked' => OtpService::maskEmail($app['email'])]);
         if (config('app.debug')) {

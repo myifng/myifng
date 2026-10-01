@@ -38,6 +38,11 @@ final class Mailer
     {
         $this->error = '';
         $this->transcript = [];
+        // पूरा HTML दस्तावेज़ न हो तो साइट के ब्रांड टेम्पलेट में लपेटें (लोगो, फ़ुटर)
+        if (stripos($html, '<html') === false) {
+            $pre = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags((string) preg_replace('~<h1\b.*?</h1>~is', '', $html)), ENT_QUOTES, 'UTF-8')));
+            $html = \App\Services\MailTemplate::wrap($html, ['preheader' => mb_substr($pre, 0, 120)]);
+        }
         $extra = array_values(array_filter($extra, static fn($h) => is_string($h) && !preg_match('/[\r\n]/', $h)));
         $ok = false;
         if (!filter_var($to, FILTER_VALIDATE_EMAIL)) {

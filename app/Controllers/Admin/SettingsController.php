@@ -42,7 +42,10 @@ final class SettingsController extends Controller
         }
         $mailer = app('mailer');
         $site = (string) setting('site_name');
-        $ok = $mailer->send($to, 'टेस्ट मेल: ' . $site, '<div style="font-family:sans-serif;font-size:15px;line-height:1.6"><h2 style="margin:0 0 8px">✅ ईमेल सेटिंग ठीक है</h2><p>यह <b>' . e($site) . '</b> से भेजा गया टेस्ट मेल है। अब OTP, पासवर्ड रीसेट और सूचनाएँ इसी तरीके से जाएँगी।</p><p style="color:#666;font-size:13px">तरीका: ' . e(\App\Core\Mailer::driver() === 'smtp' ? 'SMTP (' . setting('smtp_host') . ')' : 'PHP mail()') . ' · समय: ' . date('d-m-Y H:i:s') . '</p></div>');
+        $ok = $mailer->send($to, 'टेस्ट मेल: ' . $site, \App\Services\MailTemplate::title('ईमेल सेटिंग ठीक है', '✅')
+            . \App\Services\MailTemplate::p('यह <b>' . e($site) . '</b> से भेजा गया टेस्ट मेल है। अब OTP, पासवर्ड रीसेट और सूचनाएँ इसी तरीके से जाएँगी।')
+            . \App\Services\MailTemplate::info([['तरीका', \App\Core\Mailer::driver() === 'smtp' ? 'SMTP (' . setting('smtp_host') . ':' . setting('smtp_port') . ')' : 'PHP mail()'], ['भेजने वाला', (string) setting('mail_from_email')], ['समय', date('d-m-Y H:i:s')]])
+            . \App\Services\MailTemplate::note('मेल स्पैम में मिला हो तो उसे "Not spam" करें, और डोमेन पर SPF/DKIM रिकॉर्ड जोड़ें (hosting के Email Deliverability में)।', 'ok'));
         AuditService::log('mail_test', 'settings', 'mail', 'टेस्ट मेल ' . ($ok ? 'भेजा' : 'नहीं गया') . ': ' . $to);
         if ($mailer->transcript()) {
             app('session')->flash('mail_transcript', implode("\n", $mailer->transcript()));

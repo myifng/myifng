@@ -208,9 +208,11 @@ final class FormService
             $email = isset($data['email']) ? (string) $data['email'][1] : '';
             if ($email !== '') {
                 $track = $form['type'] === 'complaint' && setting('complaint_tracking', '1') === '1'
-                    ? '<p>स्थिति देखें: <a href="' . e(route('complaint.track')) . '?ref=' . e($ref) . '">' . e(route('complaint.track')) . '</a></p>' : '';
-                NotificationService::mail($email, $form['title'] . ': ' . $ref, '<p>नमस्ते ' . e((string) ($data['name'][1] ?? '')) . ',</p><p>' . e((string) ($form['success_message'] ?: 'आपका फ़ॉर्म मिल गया।')) . '</p>'
-                    . '<p>संदर्भ नंबर: <b style="font-size:18px">' . e($ref) . '</b></p>' . $track . '<p style="font-size:12px;color:#777">यह ईमेल अपने आप भेजा गया है।</p>');
+                    ? \App\Services\MailTemplate::button(route('complaint.track') . '?ref=' . rawurlencode($ref), 'स्थिति देखें') : '';
+                NotificationService::mail($email, $form['title'] . ': ' . $ref, \App\Services\MailTemplate::title((string) $form['title'], '✅')
+                    . (($nm = (string) ($data['name'][1] ?? '')) !== '' ? \App\Services\MailTemplate::hello($nm) : '')
+                    . \App\Services\MailTemplate::p(e((string) ($form['success_message'] ?: 'आपका फ़ॉर्म मिल गया।')))
+                    . \App\Services\MailTemplate::info([['संदर्भ नंबर', $ref], ['तारीख़', date('d-m-Y H:i')]]) . $track);
             }
             $t = self::type((string) $form['type']);
             $who = $data['name'][1] ?? ($data['email'][1] ?? 'अनजान');

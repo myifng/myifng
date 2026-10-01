@@ -53,6 +53,28 @@
     if (btn) setTimeout(function () { btn.disabled = true; btn.insertAdjacentHTML('afterbegin', '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>'); }, 0);
   });
 
+  /* ---------- पासवर्ड दिखाएँ (आँख वाला बटन) ---------- */
+  $$('[data-toggle-password]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var i = $(b.dataset.togglePassword); if (!i) return;
+      var show = i.type === 'password'; i.type = show ? 'text' : 'password';
+      b.setAttribute('aria-pressed', show ? 'true' : 'false'); b.setAttribute('aria-label', show ? 'पासवर्ड छिपाएँ' : 'पासवर्ड दिखाएँ');
+      b.innerHTML = '<i class="fa-regular fa-eye' + (show ? '-slash' : '') + '" aria-hidden="true"></i>'; i.focus();
+    });
+  });
+  /* पासवर्ड की ताक़त (नया पासवर्ड बनाते समय) */
+  $$('[data-pw-meter]').forEach(function (m) {
+    var i = $(m.dataset.pwMeter), bar = m.querySelector('span'), txt = m.nextElementSibling;
+    if (!i) return;
+    i.addEventListener('input', function () {
+      var v = i.value, s = 0;
+      if (v.length >= 8) s++; if (v.length >= 12) s++; if (/[a-z]/i.test(v) && /\d/.test(v)) s++; if (/[^a-z0-9]/i.test(v)) s++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+      var lv = v ? Math.min(4, Math.max(1, s - (v.length < 8 ? 1 : 0))) : 0;
+      m.dataset.level = lv; bar.style.width = (lv * 25) + '%';
+      if (txt) txt.textContent = ['', 'कमज़ोर', 'ठीक-ठाक', 'अच्छा', 'मज़बूत'][lv];
+    });
+  });
+
   /* ---------- पासवर्ड दिखाएँ ---------- */
   $$('[data-show-password]').forEach(function (c) {
     c.addEventListener('change', function () { var i = $(c.dataset.showPassword); if (i) i.type = c.checked ? 'text' : 'password'; });

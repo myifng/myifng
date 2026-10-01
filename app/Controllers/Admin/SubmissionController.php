@@ -146,10 +146,11 @@ final class SubmissionController extends Controller
         // शिकायत: स्थिति/जवाब बदलने पर शिकायतकर्ता को ईमेल
         if ($s['type'] === 'complaint' && $s['email'] && (isset($data['status']) || isset($data['response']) || isset($data['resolution'])) && $request->bool('notify_applicant')) {
             $st = $t[3][$data['status'] ?? $s['status']][0];
-            $sent = NotificationService::mail((string) $s['email'], 'शिकायत ' . $s['ref_no'] . ': ' . $st, '<p>आपकी शिकायत <b>' . e($s['ref_no']) . '</b> की स्थिति: <b>' . e($st) . '</b></p>'
-                . (($r = $data['response'] ?? $s['response']) ? '<p><b>जवाब:</b><br>' . nl2br(e((string) $r)) . '</p>' : '')
-                . (($r = $data['resolution'] ?? $s['resolution']) ? '<p><b>निपटारा:</b><br>' . nl2br(e((string) $r)) . '</p>' : '')
-                . (setting('complaint_tracking', '1') === '1' ? '<p><a href="' . e(route('complaint.track')) . '?ref=' . e($s['ref_no']) . '">स्थिति देखें</a></p>' : ''));
+            $sent = NotificationService::mail((string) $s['email'], 'शिकायत ' . $s['ref_no'] . ': ' . $st, \App\Services\MailTemplate::title('शिकायत की स्थिति: ' . $st, '📋')
+                . \App\Services\MailTemplate::info([['संदर्भ नंबर', (string) $s['ref_no']], ['स्थिति', (string) $st]])
+                . (($r = $data['response'] ?? $s['response']) ? \App\Services\MailTemplate::note('<b>जवाब:</b><br>' . nl2br(e((string) $r))) : '')
+                . (($r = $data['resolution'] ?? $s['resolution']) ? \App\Services\MailTemplate::note('<b>निपटारा:</b><br>' . nl2br(e((string) $r)), 'ok') : '')
+                . (setting('complaint_tracking', '1') === '1' ? \App\Services\MailTemplate::button(route('complaint.track') . '?ref=' . rawurlencode((string) $s['ref_no']), 'शिकायत की स्थिति देखें') : ''));
             FormService::note($id, 'system', $sent ? 'शिकायतकर्ता को ईमेल भेजा' : 'शिकायतकर्ता को ईमेल नहीं जा सका (mail())');
         }
         AuditService::log('update', FormService::TYPES[$s['type']][1], $id, $s['ref_no'] . ': ' . implode(' · ', $log));
@@ -175,7 +176,7 @@ final class SubmissionController extends Controller
         }
         $v = $this->validate($request, ['subject' => 'required|max:190', 'body' => 'required|min:2|max:10000'], ['subject' => 'विषय', 'body' => 'जवाब']);
         $body = trim(strip_tags((string) $v['body']));
-        $ok = NotificationService::mail((string) $s['email'], strip_tags((string) $v['subject']), '<p>' . nl2br(e($body)) . '</p><p style="font-size:12px;color:#777">संदर्भ: ' . e($s['ref_no']) . '</p>');
+        $ok = NotificationService::mail((string) $s['email'], strip_tags((string) $v['subject']), \App\Services\MailTemplate::p(nl2br(e($body))) . \App\Services\MailTemplate::p('संदर्भ: <b>' . e((string) $s['ref_no']) . '</b>', 'font-size:13px;color:#6b6770'));
         FormService::note($id, 'reply', "विषय: {$v['subject']}\n\n" . $body . ($ok ? '' : "\n\n(ईमेल नहीं जा सका)"));
         $next = isset(FormService::TYPES[$s['type']][3]['replied']) ? 'replied' : null;
         if ($ok && $next && in_array($s['status'], ['new', 'in_progress'], true)) {

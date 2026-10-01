@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Admin;
 
+use App\Services\MailTemplate;
 use App\Core\Controller;
 use App\Core\HttpException;
 use App\Core\Paginator;
@@ -143,7 +144,10 @@ final class ApplicationController extends Controller
         }
         if (in_array($to, ['document_pending', 'rejected'], true)) {
             app('mailer')->send($a['email'], 'आवेदन ' . $a['app_no'] . ': ' . ReporterApplication::STATUSES[$to][0],
-                '<p>नमस्ते ' . e($a['full_name']) . ',</p><p>' . e(ReporterApplication::PUBLIC_TEXT[$to]) . '</p><p>' . nl2br(e($msg)) . '</p><p>स्थिति: ' . e(route('application.status')) . '</p>');
+                MailTemplate::title('आवेदन की स्थिति: ' . ReporterApplication::STATUSES[$to][0]) . MailTemplate::hello((string) $a['full_name'])
+                . MailTemplate::p(e(ReporterApplication::PUBLIC_TEXT[$to])) . ($msg !== '' ? MailTemplate::note(nl2br(e($msg)), $to === 'rejected' ? 'warn' : 'info') : '')
+                . MailTemplate::info([['आवेदन संख्या', (string) $a['app_no']], ['स्थिति', ReporterApplication::STATUSES[$to][0]]])
+                . MailTemplate::button(route('application.status'), 'आवेदन की स्थिति देखें'));
         }
         AuditService::log('status', 'applications', $id, $a['app_no'] . ': ' . ReporterApplication::STATUSES[$a['status']][0] . ' → ' . ReporterApplication::STATUSES[$to][0]);
         return $this->back()->with('success', 'स्थिति: ' . ReporterApplication::STATUSES[$to][0]);
@@ -198,8 +202,11 @@ final class ApplicationController extends Controller
         ]);
         $r = Reporter::find($res['reporter_id']);
         $sent = app('mailer')->send($a['email'], 'बधाई! आप ' . setting('site_name') . ' के रिपोर्टर बने',
-            '<p>नमस्ते ' . e($a['full_name']) . ',</p><p>आपका आवेदन मंज़ूर हो गया है। आपकी रिपोर्टर ID: <b>' . e($r['reporter_code']) . '</b></p>'
-            . '<p>अपना पासवर्ड बनाने के लिए यह लिंक खोलें (72 घंटे तक मान्य):<br><a href="' . e($res['link']) . '">' . e($res['link']) . '</a></p><p>लॉगिन ईमेल: ' . e($a['email']) . '</p>');
+            MailTemplate::title('बधाई! आवेदन मंज़ूर हुआ', '🎉') . MailTemplate::hello((string) $a['full_name'])
+            . MailTemplate::p('आप अब <b>' . e((string) setting('site_name')) . '</b> के रिपोर्टर हैं। अपना पासवर्ड बनाकर रिपोर्टर पोर्टल में लॉगिन करें।')
+            . MailTemplate::info([['रिपोर्टर ID', (string) $r['reporter_code']], ['लॉगिन ईमेल', (string) $a['email']]])
+            . MailTemplate::button($res['link'], 'पासवर्ड बनाएँ')
+            . MailTemplate::note('पासवर्ड बनाने का लिंक <b>72 घंटे</b> तक मान्य है।'));
         AuditService::log('approve', 'applications', $id, $a['app_no'] . ' मंज़ूर → ' . $r['reporter_code']);
         \App\Services\NotifyEvents::reporterApproved((string) $a['full_name'], $a['mobile'] ?? null, (string) $r['reporter_code']);
         app('session')->flash('password_link', $res['link']);

@@ -42,8 +42,10 @@ function field(string $type, string $name, string $label, mixed $value = null, a
         $html = $labelHtml . '<select class="' . $cls . '" id="' . $id . '" name="' . e($name) . '"' . $attrs . $describedBy . '>' . $opts . '</select>';
     } else {
         $input = '<input type="' . e($type) . '" class="' . $cls . '" id="' . $id . '" name="' . e($name) . '"' . ($type !== 'file' ? ' value="' . e($val) . '"' : '') . $attrs . $describedBy . '>';
-        if (!empty($o['prefix'])) {
-            $input = '<div class="input-group has-validation"><span class="input-group-text">' . $o['prefix'] . '</span>' . $input . ($err ? '<div class="invalid-feedback">' . e($err) . '</div>' : '') . '</div>';
+        if (!empty($o['prefix']) || !empty($o['suffix'])) {
+            // suffix: भरोसेमंद HTML (जैसे पासवर्ड दिखाने का बटन)
+            $input = '<div class="input-group has-validation">' . (!empty($o['prefix']) ? '<span class="input-group-text">' . $o['prefix'] . '</span>' : '') . $input . ($o['suffix'] ?? '')
+                . ($err ? '<div class="invalid-feedback">' . e($err) . '</div>' : '') . '</div>';
             $err = null;
         }
         $html = $labelHtml . $input;
@@ -54,6 +56,12 @@ function field(string $type, string $name, string $label, mixed $value = null, a
         $html .= '<div class="form-text" id="' . $id . '_help">' . e($o['help']) . '</div>';
     }
     return '<div class="' . e($o['wrap'] ?? 'mb-3') . '">' . $html . '</div>';
+}
+
+/** पासवर्ड दिखाने/छिपाने का बटन (field() के 'suffix' में) */
+function password_eye(string $inputId): string
+{
+    return '<button class="btn pw-eye" type="button" data-toggle-password="#' . e($inputId) . '" aria-label="पासवर्ड दिखाएँ" aria-pressed="false"><i class="fa-regular fa-eye" aria-hidden="true"></i></button>';
 }
 
 /** स्थिति का रंगीन बैज */

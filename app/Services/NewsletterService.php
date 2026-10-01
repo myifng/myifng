@@ -43,9 +43,10 @@ final class NewsletterService
         }
         if ($status === 'pending' && (!$s || $s['status'] !== 'subscribed')) {
             $link = route('newsletter.confirm', ['token' => $token]);
-            NotificationService::mail($email, 'न्यूज़लेटर की पुष्टि करें', '<p>' . e((string) setting('site_name')) . ' का न्यूज़लेटर पाने के लिए पुष्टि करें:</p>'
-                . '<p><a href="' . e($link) . '" style="background:#d71920;color:#fff;padding:10px 18px;border-radius:4px;text-decoration:none;display:inline-block">हाँ, मुझे न्यूज़लेटर भेजें</a></p>'
-                . '<p style="font-size:12px;color:#666">अगर आपने यह नहीं माँगा तो इस ईमेल को अनदेखा करें; आपको कुछ नहीं भेजा जाएगा।</p>');
+            NotificationService::mail($email, 'न्यूज़लेटर की पुष्टि करें', MailTemplate::title('न्यूज़लेटर की पुष्टि करें', '📰')
+                . MailTemplate::p('<b>' . e((string) setting('site_name')) . '</b> की सबसे बड़ी ख़बरें सीधे आपके इनबॉक्स में पाने के लिए पुष्टि करें।')
+                . MailTemplate::button($link, 'हाँ, मुझे न्यूज़लेटर भेजें')
+                . MailTemplate::note('अगर आपने यह नहीं माँगा, तो इस ईमेल को अनदेखा करें; आपको कुछ नहीं भेजा जाएगा।'));
         }
         return $status;
     }
