@@ -144,6 +144,7 @@ final class NewsController extends Controller
     /** सेव के बाद "सेव करके भेजें/प्रकाशित करें" */
     private function afterSave(Request $request, int $id, string $msg): Response
     {
+        \App\Services\ListenService::queue($id); // प्रकाशित हो तो ऑडियो (Google TTS) जवाब के बाद बने
         $then = $request->str('then');
         if ($then !== '' && isset(NewsWorkflow::ACTIONS[$then]) && !NewsWorkflow::needsRemark($then)) {
             $err = NewsService::transition(News::find($id), $then, '', $request->str('scheduled_at') ?: null);
@@ -217,6 +218,7 @@ final class NewsController extends Controller
             'og_image' => $request->str('og_image') ?: null,
             'faq' => self::faq($request),
             'allow_comments' => $request->bool('allow_comments') ? 1 : 0,
+            'allow_listen' => $request->bool('allow_listen') ? 1 : 0,
         ];
         // फ़्लैग सिर्फ़ डेस्क
         if (can('news.approve')) {
@@ -271,6 +273,29 @@ final class NewsController extends Controller
         return $out ? json_encode($out, JSON_UNESCAPED_UNICODE) : null;
     }
 
+    /** ख़बर सुनें: Google TTS से ऑडियो अभी बनाएँ (फ़ॉर्म के बाकी बदलाव सेव नहीं होते) */
+    public function listen(Request $request, int $id): Response
+    {
+        $news = self::findVisible($id);
+        $back = $this->toRoute('admin.news.edit', ['id' => $id]);
+        if (!\App\Services\ListenService::google()) {
+            return $back->with('warning', 'सेटिंग → ख़बर सुनें में Google आवाज़ और API key सेट नहीं है; पाठक के ब्राउज़र की आवाज़ इस्तेमाल होगी।');
+        }
+        if ($news['status'] !== 'published' || !(int) $news['allow_listen']) {
+            return $back->with('warning', 'ऑडियो सिर्फ़ प्रकाशित और "ख़बर सुनें" चालू ख़बर का बनता है।');
+        }
+        cache()->forget('tts.fail.' . $id);
+        db()->update('news', ['tts_hash' => null], 'id = ?', [$id]); // ज़बरदस्ती नया
+        $news['tts_hash'] = null;
+        try {
+            \App\Services\ListenService::ensure($news);
+        } catch (\Throwable $e) {
+            return $back->with('danger', 'ऑडियो नहीं बना: ' . $e->getMessage());
+        }
+        AuditService::log('update', 'news', $id, 'ख़बर का ऑडियो (TTS) बनाया');
+        return $back->with('success', 'ऑडियो बन गया। पाठक अब "ख़बर सुनें" से इंसानी आवाज़ में सुनेंगे।');
+    }
+
     /** प्रीव्यू: वेबसाइट के लेआउट में, noindex */
     public function preview(Request $request, int $id): Response
     {
@@ -282,7 +307,7 @@ final class NewsController extends Controller
     {
         $news = self::findVisible($id);
         $copy = array_intersect_key($news, array_flip(['subtitle', 'summary', 'content', 'featured_image', 'image_caption', 'image_credit', 'video_url', 'audio_file',
-            'category_id', 'location_id', 'source', 'news_credit', 'meta_description', 'meta_keywords', 'robots', 'language_id', 'focus_keyword', 'og_title', 'og_description', 'og_image', 'faq', 'allow_comments']));
+            'category_id', 'location_id', 'source', 'news_credit', 'meta_description', 'meta_keywords', 'robots', 'language_id', 'focus_keyword', 'og_title', 'og_description', 'og_image', 'faq', 'allow_comments', 'allow_listen']));
         $copy['title'] = $news['title'] . ' (कॉपी)';
         $copy['slug'] = NewsService::uniqueSlug($news['slug'] . '-copy');
         $copy['reporter_id'] = auth()->id();

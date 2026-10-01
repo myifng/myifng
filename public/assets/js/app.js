@@ -932,3 +932,163 @@
     });
   }
 })();
+
+/* ==========================================================
+   ख़बर सुनें: अपलोड/Google का MP3 (audio) या ब्राउज़र की आवाज़ (Web Speech)
+   ========================================================== */
+(function () {
+  'use strict';
+  var box = document.querySelector('[data-listen]');
+  if (!box) return;
+  var q = function (s) { return box.querySelector(s); };
+  var bar = q('[data-listen-bar]'), startBtn = q('[data-listen-start]'), playBtn = q('[data-listen-play]'), fill = q('[data-listen-fill]');
+  var timeEl = q('[data-listen-time]'), statusEl = q('[data-listen-status]'), rateBtn = q('[data-listen-rate]'), track = q('[data-listen-track]');
+  var mode = box.dataset.mode, lang = box.dataset.lang || 'hi-IN', base = parseFloat(box.dataset.rate) || 1;
+  var synth = window.speechSynthesis, voice = null;
+  var rates = [1, 1.25, 1.5, 0.75], ri = 0, playing = false;
+  try { ri = Math.max(0, rates.indexOf(parseFloat(localStorage.getItem('np_listen_rate')))); } catch (e) {}
+  var fmt = function (s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2); };
+  var status = function (t) { statusEl.textContent = t; };
+  var showRate = function () { rateBtn.textContent = String(rates[ri]).replace('0.', '.') + 'x'; };
+  showRate();
+
+  function setPlaying(on) {
+    playing = on;
+    box.classList.toggle('is-playing', on);
+    playBtn.innerHTML = '<i class="fa-solid fa-' + (on ? 'pause' : 'play') + '" aria-hidden="true"></i>';
+    playBtn.setAttribute('aria-label', on ? 'रोकें' : 'चलाएँ');
+    startBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = on ? 'playing' : 'paused';
+  }
+  function progress(p) { fill.style.width = Math.max(0, Math.min(100, p * 100)) + '%'; }
+
+  /* ---------- ब्राउज़र की आवाज़ ---------- */
+  var segs = [], idx = 0, cur = null, lastEl = null;
+  function pickVoice() {
+    if (!synth) return null;
+    var l = lang.slice(0, 2).toLowerCase();
+    var list = synth.getVoices().filter(function (v) { return (v.lang || '').replace('_', '-').toLowerCase().indexOf(l) === 0; });
+    var score = function (v) { return (/natural|neural|online|enhanced|premium/i.test(v.name) ? 4 : 0) + (/google/i.test(v.name) ? 2 : 0) + ((v.lang || '').replace('_', '-').toLowerCase() === lang.toLowerCase() ? 1 : 0); };
+    list.sort(function (a, b) { return score(b) - score(a); });
+    return list[0] || null;
+  }
+  function sentences(t) {
+    var out = [];
+    (t.replace(/\s+/g, ' ').trim().match(/[^।.!?]+[।.!?]*["”’']?\s*/g) || []).forEach(function (s) {
+      s = s.trim();
+      while (s.length > 220) { // लंबे वाक्य: अल्पविराम/शब्द पर काटें (कुछ ब्राउज़र लंबा वाक्य बीच में छोड़ देते हैं)
+        var cut = s.lastIndexOf(',', 220); if (cut < 80) cut = s.lastIndexOf(' ', 220); if (cut < 40) cut = 220;
+        out.push(s.slice(0, cut + 1)); s = s.slice(cut + 1).trim();
+      }
+      if (s) out.push(s);
+    });
+    return out;
+  }
+  function buildSegs() {
+    var art = box.closest('article') || document;
+    var blocks = [art.querySelector('.page-title'), art.querySelector('.dek'), art.querySelector('.summary')];
+    var prose = art.querySelector('.prose');
+    if (prose) blocks = blocks.concat(Array.prototype.slice.call(prose.querySelectorAll('p, h2, h3, h4, li, blockquote')));
+    segs = [];
+    blocks.forEach(function (el) {
+      if (!el || el.closest('.ad, figure, table, aside, [data-ad-id]') || (el.tagName === 'P' && el.closest('li, blockquote'))) return;
+      sentences(el.textContent || '').forEach(function (t) { segs.push({ el: el, t: t }); });
+    });
+  }
+  function mark(el) {
+    if (lastEl && lastEl !== el) lastEl.classList.remove('listen-reading');
+    if (el) el.classList.add('listen-reading');
+    lastEl = el;
+  }
+  function speakNext() {
+    if (idx >= segs.length) { finished(); return; }
+    var s = segs[idx], u = new SpeechSynthesisUtterance(s.t);
+    u.lang = voice ? voice.lang : lang; if (voice) u.voice = voice;
+    u.rate = Math.min(2, base * rates[ri]);
+    u.onend = function () { if (cur !== u) return; idx++; progress(idx / segs.length); speakNext(); };
+    u.onerror = function (e) { if (cur !== u || e.error === 'interrupted' || e.error === 'canceled') return; idx++; speakNext(); };
+    cur = u; mark(s.el);
+    timeEl.textContent = Math.round(idx / segs.length * 100) + '%';
+    synth.speak(u);
+  }
+  function speechPlay() {
+    if (!segs.length) buildSegs();
+    if (!segs.length) { status('सुनाने लायक टेक्स्ट नहीं मिला'); return; }
+    synth.cancel(); setPlaying(true); status('सुनाई जा रही है…'); speakNext();
+  }
+  function speechPause() { cur = null; synth.cancel(); setPlaying(false); status('रुकी हुई है'); } // pause() कई फ़ोन पर ठीक नहीं चलता; वाक्य से दोबारा शुरू
+
+  /* ---------- MP3 (अपलोड या Google) ---------- */
+  var audio = null;
+  function getAudio() {
+    if (audio) return audio;
+    audio = new Audio();
+    audio.preload = 'none';
+    audio.src = box.dataset.src;
+    audio.addEventListener('timeupdate', function () {
+      if (audio.duration) { progress(audio.currentTime / audio.duration); timeEl.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration); }
+    });
+    audio.addEventListener('waiting', function () { status(mode === 'tts' && !audio.duration ? 'ऑडियो तैयार हो रहा है…' : 'लोड हो रहा है…'); });
+    audio.addEventListener('playing', function () { status('सुनाई जा रही है…'); setPlaying(true); });
+    audio.addEventListener('pause', function () { if (!audio.ended) { setPlaying(false); status('रुकी हुई है'); } });
+    audio.addEventListener('ended', finished);
+    audio.addEventListener('error', function () {
+      if (voice) { mode = 'speech'; audio = null; status('दूसरी आवाज़ में सुना रहे हैं…'); speechPlay(); } // MP3 न चले तो ब्राउज़र की आवाज़
+      else { setPlaying(false); status('ऑडियो अभी नहीं चल सका। थोड़ी देर बाद कोशिश करें।'); }
+    });
+    return audio;
+  }
+  function audioPlay() {
+    var a = getAudio();
+    a.playbackRate = rates[ri];
+    if (!a.duration) status(mode === 'tts' ? 'ऑडियो तैयार हो रहा है…' : 'लोड हो रहा है…');
+    var pr = a.play(); if (pr && pr.catch) pr.catch(function () { setPlaying(false); });
+  }
+
+  /* ---------- साझा नियंत्रण ---------- */
+  function play() { if (mode === 'speech') speechPlay(); else audioPlay(); }
+  function pause() { if (mode === 'speech') speechPause(); else if (audio) audio.pause(); }
+  function stop() {
+    if (synth) { cur = null; synth.cancel(); }
+    if (audio) { audio.pause(); try { audio.currentTime = 0; } catch (e) {} }
+    idx = 0; mark(null); progress(0); setPlaying(false);
+  }
+  function finished() { setPlaying(false); idx = 0; mark(null); progress(1); status('पूरी ख़बर सुना दी'); }
+  function open() {
+    bar.hidden = false; box.classList.add('open');
+    if ('mediaSession' in navigator && window.MediaMetadata) {
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: box.dataset.title, artist: box.dataset.site, artwork: box.dataset.art ? [{ src: box.dataset.art, sizes: '512x288' }] : [] });
+        navigator.mediaSession.setActionHandler('play', play);
+        navigator.mediaSession.setActionHandler('pause', pause);
+      } catch (e) {}
+    }
+    if (window.gtag) window.gtag('event', 'listen_start', { mode: mode });
+  }
+
+  startBtn.addEventListener('click', function () {
+    if (playing) { pause(); return; }
+    open(); play();
+  });
+  playBtn.addEventListener('click', function () { playing ? pause() : play(); });
+  q('[data-listen-close]').addEventListener('click', function () { stop(); bar.hidden = true; box.classList.remove('open'); startBtn.focus(); });
+  rateBtn.addEventListener('click', function () {
+    ri = (ri + 1) % rates.length; showRate();
+    try { localStorage.setItem('np_listen_rate', String(rates[ri])); } catch (e) {}
+    if (mode !== 'speech') { if (audio) audio.playbackRate = rates[ri]; }
+    else if (playing) { synth.cancel(); cur = null; speakNext(); }
+  });
+  track.addEventListener('click', function (e) {
+    var r = track.getBoundingClientRect(), p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    if (mode !== 'speech') { if (audio && audio.duration) audio.currentTime = p * audio.duration; }
+    else if (segs.length) { idx = Math.min(segs.length - 1, Math.floor(p * segs.length)); progress(idx / segs.length); if (playing) { synth.cancel(); cur = null; speakNext(); } }
+  });
+  window.addEventListener('pagehide', function () { if (synth) synth.cancel(); });
+
+  // ब्राउज़र की आवाज़: हिंदी आवाज़ मिले तभी बटन दिखे (आवाज़ें देर से लोड होती हैं)
+  if (synth && window.SpeechSynthesisUtterance) {
+    var found = function () { voice = pickVoice(); if (voice && mode === 'speech') box.hidden = false; };
+    found();
+    if (!voice && synth.addEventListener) synth.addEventListener('voiceschanged', found);
+  }
+})();

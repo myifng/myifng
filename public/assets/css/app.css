@@ -1266,3 +1266,34 @@ body.has-pi .brk-mobile { display: none !important; }
   :root:not([data-theme="light"]) [style*="--cat:"] { --cat-text: color-mix(in srgb, var(--cat) 45%, #fff); }
   :root:not([data-theme="light"]) [class*="fc-"] { --fc-text: color-mix(in srgb, var(--fc) 45%, #fff); }
 }
+
+/* ख़बर सुनें */
+.listen { margin: 4px 0 12px; }
+.listen[hidden] { display: none; }
+.listen-btn { display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px; border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line)); border-radius: 999px; background: color-mix(in srgb, var(--brand) 7%, var(--surface)); color: var(--ink); font-family: var(--head); cursor: pointer; min-height: 44px; }
+.listen-btn:hover { background: color-mix(in srgb, var(--brand) 13%, var(--surface)); }
+.lb-ico { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: #fff; font-size: 15px; flex: none; }
+.lb-txt { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+.lb-txt b { font-size: 16px; } .lb-txt small { color: var(--muted); font-size: 12px; }
+.listen.is-playing .lb-ico { animation: lpulse 1.6s ease-in-out infinite; }
+@keyframes lpulse { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent); } 50% { box-shadow: 0 0 0 7px transparent; } }
+.listen-bar { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: 0 6px 18px rgba(0,0,0,.08); font-family: var(--head); }
+.listen-bar[hidden] { display: none; }
+.lp-play { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--brand); color: #fff; font-size: 16px; flex: none; cursor: pointer; }
+.lp-mid { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.lp-status { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lp-track { height: 6px; border-radius: 99px; background: var(--chip); overflow: hidden; cursor: pointer; position: relative; }
+.lp-track::before { content: ""; position: absolute; inset: -9px 0; } /* उँगली के लिए बड़ा निशाना */
+.lp-track span { display: block; height: 100%; width: 0; background: var(--brand); border-radius: inherit; transition: width .25s linear; }
+.lp-time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lp-rate, .lp-close { min-width: 40px; height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font-weight: 700; font-size: 13px; cursor: pointer; flex: none; }
+.lp-close { border: 0; color: var(--muted); font-size: 17px; }
+.listen-reading { background: color-mix(in srgb, var(--brand) 9%, transparent); box-shadow: -10px 0 0 color-mix(in srgb, var(--brand) 9%, transparent), 10px 0 0 color-mix(in srgb, var(--brand) 9%, transparent); border-radius: 4px; transition: background .2s; }
+@media (max-width: 760px) {
+  /* मोबाइल: सुनते समय प्लेयर नीचे चिपका रहे (पढ़ते-स्क्रॉल करते हुए भी रोक सकें) */
+  .listen.open .listen-bar { position: fixed; left: 8px; right: 8px; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); z-index: 86; margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+  body:has(.ad-sticky:not(.closed)) .listen.open .listen-bar { bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
+  body:has(.listen.open) .to-top { display: none; }
+  .lp-time { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .listen.is-playing .lb-ico { animation: none; } .lp-track span { transition: none; } }

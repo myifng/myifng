@@ -37,6 +37,7 @@ $router->group(['middleware' => ['maintenance', 'uptodate']], function ($r) {
 
     // Phase 5: ख़बरें और सूची वाले पेज
     $r->get('/news/{slug:[a-z0-9-]+}', [NewsController::class, 'show'])->name('news.show');
+    $r->get('/news/{slug:[a-z0-9-]+}/listen', [NewsController::class, 'listen'])->name('news.listen');
     $r->get('/category/{slug:[a-z0-9-]+}', [CategoryController::class, 'show'])->name('category');
     $r->get('/topic/{slug:[a-z0-9-]+}', [TopicController::class, 'topic'])->name('topic');
     $r->get('/tag/{slug:[a-z0-9-]+}', [TopicController::class, 'tag'])->name('tag');

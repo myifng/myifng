@@ -95,6 +95,12 @@ final class App
         if ($request->method() === 'GET' && $response->status() === 200) {
             \App\Services\AnalyticsService::record($request, $response);
         }
+        // ख़बर सुनें: प्रकाशित ख़बर का ऑडियो (Google TTS) जवाब के बाद बने
+        try {
+            \App\Services\ListenService::flush();
+        } catch (\Throwable $e) {
+            logger()->warning('TTS: ' . $e->getMessage());
+        }
         // Phase 15: धीमे अनुरोध का लॉग; घंटे में एक बार शेड्यूल बैकअप और रोज़ की सफ़ाई (जवाब के बाद)
         try {
             \App\Services\SystemService::slow($elapsed, $request->method(), $request->path());

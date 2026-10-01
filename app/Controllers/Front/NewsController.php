@@ -30,6 +30,23 @@ final class NewsController extends FrontController
         return $this->render($news, false);
     }
 
+    /** "ख़बर सुनें" (Google TTS): पहली बार सुनने पर MP3 बनता है, फिर सीधे फ़ाइल पर भेजते हैं */
+    public function listen(Request $request, string $slug): Response
+    {
+        $news = db()->first('SELECT n.* FROM {p}news n WHERE n.slug = ? AND ' . NewsQuery::PUBLISHED, [$slug]);
+        if (!$news || !\App\Services\ListenService::on($news) || !\App\Services\ListenService::google()) {
+            throw new HttpException(404);
+        }
+        \App\Services\AnalyticsService::skip();
+        try {
+            $file = \App\Services\ListenService::ensure($news);
+        } catch (\Throwable $e) {
+            logger()->warning('TTS ' . $news['id'] . ': ' . $e->getMessage());
+            throw new HttpException(503, 'ऑडियो अभी नहीं बन सका।');
+        }
+        return Response::redirect(upload_url($file))->header('Cache-Control', 'no-store');
+    }
+
     public function render(array $news, bool $isPreview): Response
     {
         $content = ContentRenderer::render($news['content']);

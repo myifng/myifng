@@ -220,6 +220,9 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/news/{id:\d+}/edit', [NewsController::class, 'edit'])->name('news.edit')->middleware('can:news.view');
         $r->put('/news/{id:\d+}', [NewsController::class, 'update'])->name('news.update')->middleware('can:news.edit');
         $r->get('/news/{id:\d+}/preview', [NewsController::class, 'preview'])->name('news.preview')->middleware('can:news.view');
+        // ख़बर सुनें: Google TTS ऑडियो अभी बनाएँ (फ़ॉर्म के अंदर के बटन से, इसलिए PUT भी)
+        $r->post('/news/{id:\d+}/listen', [NewsController::class, 'listen'])->name('news.listen')->middleware('can:news.edit', 'throttle:20,10');
+        $r->put('/news/{id:\d+}/listen', [NewsController::class, 'listen'])->middleware('can:news.edit', 'throttle:20,10');
         $r->post('/news/{id:\d+}/duplicate', [NewsController::class, 'duplicate'])->name('news.duplicate')->middleware('can:news.create');
         $r->post('/news/{id:\d+}/trash', [NewsController::class, 'trash'])->name('news.trash')->middleware('can:news.delete');
         $r->post('/news/{id:\d+}/restore', [NewsController::class, 'restore'])->name('news.restore')->middleware('can:news.delete');

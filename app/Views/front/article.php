@@ -24,6 +24,24 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
     </div>
     <h1 class="page-title"><?= e($news['title']) ?></h1>
     <?php if ($news['subtitle']): ?><p class="dek"><?= e($news['subtitle']) ?></p><?php endif; ?>
+    <?php if (\App\Services\ListenService::on($news)): $ls = \App\Services\ListenService::source($news); if ($isPreview && $ls['mode'] === 'tts') { $ls = ['mode' => 'speech', 'src' => null]; } ?>
+      <div class="listen" data-listen data-mode="<?= e($ls['mode']) ?>"<?= $ls['src'] ? ' data-src="' . e($ls['src']) . '"' : '' ?> data-rate="<?= e((string) \App\Services\ListenService::rate()) ?>" data-lang="<?= e(setting('language', 'hi') === 'en' ? 'en-IN' : 'hi-IN') ?>" data-title="<?= e($news['title']) ?>" data-site="<?= e(setting('site_name')) ?>"<?= $news['featured_image'] ? ' data-art="' . e(media_url($news['featured_image'], 'medium')) . '"' : '' ?><?= $ls['mode'] === 'speech' ? ' hidden' : '' ?>>
+        <button type="button" class="listen-btn" data-listen-start aria-controls="listenBar">
+          <span class="lb-ico" aria-hidden="true"><i class="fa-solid fa-headphones"></i></span>
+          <span class="lb-txt"><b>ख़बर सुनें</b><small>लगभग <?= num(\App\Services\ListenService::minutes($news)) ?> मिनट</small></span>
+        </button>
+        <div class="listen-bar" id="listenBar" data-listen-bar role="region" aria-label="ख़बर का ऑडियो" hidden>
+          <button type="button" class="lp-play" data-listen-play aria-label="रोकें"><i class="fa-solid fa-pause" aria-hidden="true"></i></button>
+          <div class="lp-mid">
+            <span class="lp-status" data-listen-status aria-live="polite">सुनाई जा रही है…</span>
+            <div class="lp-track" data-listen-track><span data-listen-fill></span></div>
+          </div>
+          <span class="lp-time" data-listen-time>0:00</span>
+          <button type="button" class="lp-rate" data-listen-rate aria-label="गति बदलें">1x</button>
+          <button type="button" class="lp-close" data-listen-close aria-label="ऑडियो बंद करें"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        </div>
+      </div>
+    <?php endif; ?>
     <div class="byline">
       <div class="by-meta">
         <?php if ($reporter): ?><b><?= e($reporter['name']) ?></b><?php endif; ?>

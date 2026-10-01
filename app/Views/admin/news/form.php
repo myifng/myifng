@@ -139,6 +139,19 @@ $thenLabels = ['submit' => 'सेव करके डेस्क को भे
           <?php if ($reporters): ?>
             <?= field('select', 'reporter_id', 'रिपोर्टर', $news['reporter_id'] ?? auth()->id(), ['options' => array_column($reporters, 'name', 'id')]) ?>
           <?php endif; ?>
+          <?php $listenVal = (int) old('allow_listen', $news['allow_listen'] ?? (setting('listen_default', '1') === '1' ? 1 : 0)); ?>
+          <?php if (setting('listen_enabled', '1') === '1'): ?>
+            <div class="listen-admin mb-2">
+              <?= field('switch', 'allow_listen', '🎧 "ख़बर सुनें" चालू: पाठक यह ख़बर ऑडियो में सुन सकें', $listenVal) ?>
+              <?php if (!$isNew && \App\Services\ListenService::google() && empty($news['audio_file'])): $fresh = \App\Services\ListenService::fresh($news); ?>
+                <div class="small d-flex flex-wrap align-items-center gap-2 mt-n1">
+                  <?php if ($fresh): ?><span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>ऑडियो तैयार</span><a href="<?= e(upload_url($news['tts_file'])) ?>" target="_blank" rel="noopener">सुनें</a>
+                  <?php else: ?><span class="text-body-secondary"><i class="fa-regular fa-clock me-1"></i>ऑडियो प्रकाशन के बाद अपने-आप बनेगा</span><?php endif; ?>
+                  <?php if ($published && $listenVal): ?><button class="btn btn-link btn-sm p-0" type="submit" formaction="<?= e(route('admin.news.listen', ['id' => $news['id']])) ?>" formnovalidate><?= $fresh ? 'दोबारा बनाएँ' : 'अभी बनाएँ' ?></button><?php endif; ?>
+                </div>
+              <?php elseif (!empty($news['audio_file'])): ?><p class="small text-body-secondary mb-0">इस ख़बर के साथ अपलोड किया ऑडियो सुनाया जाएगा।</p><?php endif; ?>
+            </div>
+          <?php else: ?><input type="hidden" name="allow_listen" value="<?= $listenVal ?>"><?php endif; ?>
           <?php if ($published): ?>
             <?= field('textarea', 'change_reason', 'बदलाव का कारण (ज़रूरी)', '', ['rows' => 2, 'required' => true, 'placeholder' => 'जैसे: मृतकों की संख्या अपडेट की', 'help' => 'हिस्ट्री में दर्ज होगा']) ?>
             <?= field('switch', 'is_correction', 'वेबसाइट पर “सुधार/अपडेट” सूचना दिखाएँ (कारण ही सूचना होगा)', 0) ?>

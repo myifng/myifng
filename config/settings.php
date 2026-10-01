@@ -293,6 +293,23 @@ return [
             'pwa_install_prompt' => ['label' => 'मोबाइल पर "ऐप इंस्टॉल करें" पट्टी दिखाएँ', 'type' => 'switch', 'default' => '1', 'help' => 'दूसरी बार आने पर दिखती है; "अभी नहीं" दबाने पर 14 दिन तक नहीं।'],
         ],
     ],
+    // ख़बर सुनें (Text to Speech)
+    'listen' => [
+        'label' => 'ख़बर सुनें (ऑडियो)', 'icon' => 'fa-headphones', 'permission' => 'manage',
+        'fields' => [
+            'listen_enabled' => ['label' => 'ख़बर पेज पर "ख़बर सुनें" बटन दिखाएँ', 'type' => 'switch', 'default' => '1', 'help' => 'बंद = किसी ख़बर पर नहीं। चालू होने पर हर ख़बर में अलग से चालू/बंद कर सकते हैं।'],
+            'listen_default' => ['label' => 'नई ख़बर में "ख़बर सुनें" पहले से चालू रहे', 'type' => 'switch', 'default' => '1'],
+            'listen_engine' => ['label' => 'आवाज़ कहाँ से', 'type' => 'select', 'options' => ['browser' => 'पाठक के फ़ोन/ब्राउज़र की आवाज़ (मुफ़्त, कोई सेटअप नहीं)', 'google' => 'Google Cloud Neural आवाज़ (सबसे इंसानी, API key ज़रूरी)'],
+                'default' => 'browser', 'rules' => 'required|in:browser,google', 'width' => 6,
+                'help' => 'Google: हर महीने 10 लाख अक्षर (लगभग 400-500 ख़बरें) मुफ़्त। ऑडियो एक बार बनकर सेव होता है; ख़बर बदलने पर अपने-आप नया बनता है। key न चले तो ब्राउज़र की आवाज़।'],
+            'listen_rate' => ['label' => 'बोलने की गति', 'type' => 'select', 'options' => ['0.9' => 'धीमी (0.9x)', '1' => 'सामान्य (1x)', '1.1' => 'थोड़ी तेज़ (1.1x)'], 'default' => '1', 'rules' => 'required|in:0.9,1,1.1', 'width' => 6],
+            'google_tts_key' => ['label' => 'Google Cloud API key (Text-to-Speech)', 'type' => 'text', 'rules' => 'nullable|max:100|regex:/^[A-Za-z0-9_\-]+$/', 'width' => 6,
+                'help' => 'console.cloud.google.com → "Cloud Text-to-Speech API" चालू करें → Credentials → API key बनाएँ (उसे सिर्फ़ इसी API तक सीमित करें)।'],
+            'google_tts_voice' => ['label' => 'Google आवाज़', 'type' => 'select', 'width' => 6, 'default' => 'hi-IN-Neural2-A', 'rules' => 'required|in:hi-IN-Neural2-A,hi-IN-Neural2-D,hi-IN-Neural2-B,hi-IN-Neural2-C,hi-IN-Wavenet-A,hi-IN-Wavenet-B,hi-IN-Wavenet-C,hi-IN-Wavenet-D',
+                'options' => ['hi-IN-Neural2-A' => 'Neural2-A · महिला', 'hi-IN-Neural2-D' => 'Neural2-D · महिला', 'hi-IN-Neural2-B' => 'Neural2-B · पुरुष', 'hi-IN-Neural2-C' => 'Neural2-C · पुरुष',
+                    'hi-IN-Wavenet-A' => 'WaveNet-A · महिला', 'hi-IN-Wavenet-D' => 'WaveNet-D · महिला', 'hi-IN-Wavenet-B' => 'WaveNet-B · पुरुष', 'hi-IN-Wavenet-C' => 'WaveNet-C · पुरुष']],
+        ],
+    ],
     'maintenance' => [
         'label' => 'मेंटेनेंस', 'icon' => 'fa-screwdriver-wrench', 'permission' => 'manage',
         'fields' => [
