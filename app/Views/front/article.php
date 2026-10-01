@@ -73,7 +73,7 @@ $locName = $locationChain ? end($locationChain)['name'] : null;
     <?php elseif ($news['video_url']): ?><video class="art-video" src="<?= e(upload_url($news['video_url'])) ?>" controls preload="metadata"></video><?php endif; ?>
     <?php if ($news['audio_file']): ?><audio class="art-audio" src="<?= e(upload_url($news['audio_file'])) ?>" controls preload="none"></audio><?php endif; ?>
     <?php if (!empty($live)): ?><?= $this->insert('partials/front/live-blog', ['live' => $live, 'liveUpdates' => $liveUpdates, 'isPreview' => $isPreview]) ?><?php endif; ?>
-    <div class="prose"><?= $content /* सेव करते समय sanitize */ ?></div>
+    <div class="prose<?= prose_align_class() ?>"><?= $content /* सेव करते समय sanitize */ ?></div>
     <?php if ($rel['gallery']): ?>
       <div class="art-gallery"><?php foreach ($rel['gallery'] as $g): ?><figure><a href="<?= e(media_url($g, 'large')) ?>" target="_blank" rel="noopener"><?= media_img($g, 'medium') ?></a><?php if ($g['caption']): ?><figcaption><?= e($g['caption']) ?></figcaption><?php endif; ?></figure><?php endforeach; ?></div>
     <?php endif; ?>

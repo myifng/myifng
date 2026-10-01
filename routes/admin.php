@@ -278,6 +278,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/reporters/{id:\d+}/kyc/{key:[a-z_]+}', [ReporterController::class, 'kyc'])->name('reporters.kyc')->middleware('can:reporters.view');
         $r->post('/reporters/{id:\d+}/documents', [ReporterController::class, 'issue'])->name('reporters.issue')->middleware('can:reporters.approve');
         $r->get('/reporters/{id:\d+}/documents/{doc:\d+}', [ReporterController::class, 'document'])->name('reporters.document')->middleware('can:reporters.view');
+        $r->post('/reporters/{id:\d+}/documents/{doc:\d+}/refresh', [ReporterController::class, 'refreshDocument'])->name('reporters.document.refresh')->middleware('can:reporters.approve');
         $r->post('/reporters/{id:\d+}/documents/{doc:\d+}/revoke', [ReporterController::class, 'revoke'])->name('reporters.revoke')->middleware('can:reporters.approve');
 
         // रिपोर्टर पोर्टल (अपना प्रोफ़ाइल)

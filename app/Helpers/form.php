@@ -124,7 +124,8 @@ function setting_field(string $name, array $f, bool $disabled = false): string
         case 'textarea':
         case 'code':
             $cls = $f['type'] === 'code' ? ' font-monospace code-area' : '';
-            return '<div class="' . $col . ' mb-3"><label class="form-label" for="' . $id . '">' . $label . '</label><textarea class="form-control' . $cls . $invalid . '" id="' . $id . '" name="' . e($name) . '" rows="' . ($f['type'] === 'code' ? 6 : 3) . '"' . $dis . ' spellcheck="' . ($f['type'] === 'code' ? 'false' : 'true') . '">' . e($val) . '</textarea>' . $help . $errHtml . '</div>';
+            $cls .= !empty($f['mono']) ? ' tpl-area' : '';
+            return '<div class="' . $col . ' mb-3"><label class="form-label" for="' . $id . '">' . $label . '</label><textarea class="form-control' . $cls . $invalid . '" id="' . $id . '" name="' . e($name) . '" rows="' . (int) ($f['rows'] ?? ($f['type'] === 'code' ? 6 : 3)) . '"' . $dis . ' spellcheck="' . ($f['type'] === 'code' ? 'false' : 'true') . '">' . e($val) . '</textarea>' . $help . $errHtml . '</div>';
         case 'select':
         case 'font':
         case 'timezone':

@@ -11,7 +11,7 @@ $side = $tpl === 'default' || $tpl === 'contact';
       <?php if ($page['excerpt']): ?><p class="dek"><?= e($page['excerpt']) ?></p><?php endif; ?>
     <?php endif; ?>
     <?php if ($page['featured_image']): ?><figure class="feature"><img src="<?= e(upload_url($page['featured_image'])) ?>" alt="<?= e($page['title']) ?>"></figure><?php endif; ?>
-    <div class="prose"><?= $content /* सेव करते समय sanitize, दिखाते समय shortcode */ ?></div>
+    <div class="prose<?= prose_align_class() ?>"><?= $content /* सेव करते समय sanitize, दिखाते समय shortcode */ ?></div>
     <?php if ($tpl !== 'landing'): ?><p class="updated">आख़िरी अपडेट: <?= hindi_date($page['updated_at']) ?></p><?php endif; ?>
   </article>
   <?php if ($side): ?>

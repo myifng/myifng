@@ -28,6 +28,19 @@ $section ??= ['साइट सेटिंग', route('admin.settings.index'), 
       <?php if (in_array($schema['permission'] ?? '', ['manage', 'seo.manage'], true)): ?>
         <div class="alert alert-warning small"><i class="fa-solid fa-triangle-exclamation me-1"></i> यह संवेदनशील सेटिंग है। हर बदलाव ऑडिट लॉग में दर्ज होता है।</div>
       <?php endif; ?>
+      <?php if ($active === 'doc_templates'): ?>
+        <div class="tpl-help border rounded p-3 mb-3">
+          <h3 class="h6 mb-2"><i class="fa-solid fa-wand-magic-sparkles me-1"></i> Variable (क्लिक करें: जहाँ कर्सर है वहाँ जुड़ जाएगा)</h3>
+          <div class="tpl-vars mb-2">
+            <?php foreach (\App\Services\DocumentTemplateService::VARS as $k => [$l, $ex]): ?><button type="button" class="tpl-var" data-insert="{<?= e($k) ?>}" title="<?= e($l . ': जैसे ' . $ex) ?>"><code>{<?= e($k) ?>}</code> <span><?= e($l) ?></span></button><?php endforeach; ?>
+          </div>
+          <ul class="small text-body-secondary mb-0 ps-3">
+            <li><code>**टेक्स्ट**</code> = गाढ़ा (bold) · ख़ाली लाइन = नया पैराग्राफ़ · <code>1. </code> या <code>- </code> से शुरू लाइनें = सूची</li>
+            <li><code>[[bureau| तथा ब्यूरो {bureau}]]</code> = यह हिस्सा सिर्फ़ तब दिखेगा जब ब्यूरो भरा हो (bureau की जगह कोई भी variable)</li>
+            <li>नाम, ID, पद, क्षेत्र, तारीख़ जैसे मान पत्र में अपने-आप गाढ़े दिखते हैं।</li>
+          </ul>
+        </div>
+      <?php endif; ?>
       <?php if ($active === 'layout'): ?>
         <div class="alert alert-light border small"><i class="fa-solid fa-circle-info me-1"></i> हेडर और फ़ुटर के लिंक <a href="<?= e(route('admin.menus.index')) ?>">मेनू बिल्डर</a> से बदलें: टॉप मेनू, मुख्य नेविगेशन, फ़ुटर के 4 कॉलम और लीगल मेनू।</div>
       <?php endif; ?>
@@ -46,6 +59,27 @@ $section ??= ['साइट सेटिंग', route('admin.settings.index'), 
           </div>
           <?php if ($log = app('session')->getFlash('mail_transcript')): ?><pre class="small bg-body-tertiary border rounded p-2 mt-2 mb-0" style="max-height:220px;overflow:auto;white-space:pre-wrap"><?= e($log) ?></pre><?php endif; ?>
         </div>
+      <?php endif; ?>
+      <?php if ($active === 'doc_templates'): $sample = \App\Services\DocumentTemplateService::sample(); ?>
+        <h3 class="h6 mt-2"><i class="fa-regular fa-eye me-1"></i> प्रीव्यू (सेव किए टेम्पलेट, नमूना मान के साथ)</h3>
+        <div class="tpl-previews">
+          <?php foreach (\App\Services\DocumentTemplateService::TYPES as $tt): $pv = \App\Services\DocumentTemplateService::render($tt, $sample); ?>
+            <article class="tpl-paper"><h4><?= e($pv['title']) ?></h4><div class="tpl-body"><?= $pv['body'] /* सर्विस में escape */ ?></div></article>
+          <?php endforeach; ?>
+        </div>
+        <script>
+        (function () {
+          var last = null;
+          document.querySelectorAll('.settings-form textarea, .settings-form input[type=text]').forEach(function (el) { el.addEventListener('focus', function () { last = el; }); });
+          document.querySelectorAll('[data-insert]').forEach(function (b) {
+            b.addEventListener('click', function () {
+              var el = last || document.querySelector('.settings-form textarea'); if (!el) return;
+              var t = b.dataset.insert, s = el.selectionStart || 0, e = el.selectionEnd || 0;
+              el.value = el.value.slice(0, s) + t + el.value.slice(e); el.focus(); el.selectionStart = el.selectionEnd = s + t.length;
+            });
+          });
+        })();
+        </script>
       <?php endif; ?>
       <?php if ($active === 'branding'): ?>
         <div class="brand-preview" aria-hidden="true">

@@ -85,6 +85,8 @@ return [
             'share_buttons' => ['label' => 'शेयर बटन', 'type' => 'checkboxes', 'options' => ['whatsapp' => 'WhatsApp', 'facebook' => 'Facebook', 'x' => 'X', 'telegram' => 'Telegram', 'linkedin' => 'LinkedIn', 'copy' => 'लिंक कॉपी', 'native' => 'मोबाइल शेयर'], 'default' => 'whatsapp,facebook,x,telegram,copy,native'],
             'author_box' => ['label' => 'ख़बर के नीचे लेखक बॉक्स', 'type' => 'switch', 'default' => '1'],
             'related_news' => ['label' => 'संबंधित ख़बरें', 'type' => 'switch', 'default' => '1'],
+            'article_text_align' => ['label' => 'ख़बर/पेज के टेक्स्ट का संरेखण (Alignment)', 'type' => 'select', 'options' => ['left' => 'बाएँ (सामान्य)', 'justify' => 'Justify: दोनों तरफ़ सीधा (सभी स्क्रीन)', 'justify_lg' => 'Justify सिर्फ़ टैबलेट/डेस्कटॉप पर (मोबाइल पर बाएँ)'],
+                'default' => 'left', 'rules' => 'required|in:left,justify,justify_lg', 'width' => 6, 'help' => 'Justify में हर लाइन दाएँ-बाएँ दोनों तरफ़ सीधी रहती है। छोटी स्क्रीन पर शब्दों के बीच ज़्यादा जगह बन सकती है, इसलिए तीसरा विकल्प भी है।'],
             'reading_time' => ['label' => 'पढ़ने का समय दिखाएँ', 'type' => 'switch', 'default' => '1'],
             'show_views' => ['label' => 'व्यूज़ की गिनती दिखाएँ', 'type' => 'switch', 'default' => '0'],
             'posts_per_page' => ['label' => 'एक पेज पर ख़बरें', 'type' => 'number', 'default' => '12', 'rules' => 'required|integer|min:5|max:60', 'width' => 6],
@@ -148,6 +150,20 @@ return [
             'id_card_show_address' => ['label' => 'ID कार्ड के आगे रिपोर्टर का पता दिखाएँ', 'type' => 'switch', 'default' => '1', 'width' => 6],
             'id_card_note' => ['label' => 'ID कार्ड के पीछे का नोट', 'type' => 'textarea', 'rules' => 'nullable|max:300', 'default' => 'यह कार्ड संस्थान की संपत्ति है। मिलने पर ऊपर दिए पते पर लौटाएँ। सत्यापन के लिए QR स्कैन करें।'],
         ],
+    ],
+    // रिपोर्टर के पत्र/प्रमाणपत्र: शीर्षक और सामग्री (variable के साथ)
+    'doc_templates' => [
+        'label' => 'पत्र और प्रमाणपत्र', 'icon' => 'fa-file-signature', 'permission' => 'edit',
+        'fields' => (static function (): array {
+            $f = [];
+            foreach (\App\Services\DocumentTemplateService::defaults() as $type => [$title, $body]) {
+                $name = \App\Models\ReporterDocument::TYPES[$type][0];
+                $f['doc_tpl_' . $type . '_title'] = ['label' => $name . ': शीर्षक', 'type' => 'text', 'default' => $title, 'rules' => 'nullable|max:120', 'width' => 12, 'section' => $type];
+                $f['doc_tpl_' . $type . '_body'] = ['label' => $name . ': सामग्री', 'type' => 'textarea', 'rows' => 11, 'default' => $body, 'rules' => 'nullable|max:8000', 'mono' => true,
+                    'help' => 'ख़ाली छोड़कर सेव करें = डिफ़ॉल्ट टेक्स्ट वापस। नए जारी पत्र पर लागू; पुराने पत्र के प्रिंट पेज पर "नए टेम्पलेट से अपडेट करें" दबाएँ।'];
+            }
+            return $f;
+        })(),
     ],
     'analytics' => [
         'label' => 'एनालिटिक्स और कोड', 'icon' => 'fa-code', 'permission' => 'manage',

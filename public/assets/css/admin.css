@@ -1007,3 +1007,16 @@ tr.is-off td > *:not(.text-end) { opacity: .6; }
 /* दो-चरण लॉगिन: OTP */
 .otp-input { text-align: center; font-size: 28px; font-weight: 700; letter-spacing: .45em; font-variant-numeric: tabular-nums; padding-left: .45em; }
 .otp-input::placeholder { letter-spacing: .3em; opacity: .35; }
+
+/* पत्र/प्रमाणपत्र टेम्पलेट */
+.tpl-help { background: color-mix(in srgb, var(--brand) 4%, var(--panel-bg)); }
+.tpl-vars { display: flex; flex-wrap: wrap; gap: 6px; }
+.tpl-var { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel-bg); border-radius: 99px; padding: 3px 10px 3px 4px; font-size: 13px; color: var(--ink); }
+.tpl-var code { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand); border-radius: 99px; padding: 1px 7px; font-size: 12px; }
+.tpl-var:hover { border-color: var(--brand); }
+.tpl-area { font-family: var(--font-body); font-size: 15px; line-height: 1.7; }
+.tpl-previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.tpl-paper { background: #fff; color: #1b1b1b; border: 1px solid var(--line); border-top: 4px solid var(--brand); border-radius: 8px; padding: 16px 18px; font-family: var(--font-body); font-size: 14px; line-height: 1.75; text-align: justify; box-shadow: 0 6px 18px -10px rgba(0,0,0,.2); }
+.tpl-paper h4 { text-align: center; font-weight: 800; font-size: 17px; text-decoration: underline; text-underline-offset: 4px; margin: 0 0 10px; }
+.tpl-paper ol, .tpl-paper ul { padding-left: 20px; margin: 0 0 10px; }
+.tpl-paper p { margin: 0 0 10px; }

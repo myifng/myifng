@@ -256,17 +256,15 @@ final class ReporterController extends Controller
     }
 
     /** दस्तावेज़ का प्रिंट पेज (एडमिन और ख़ुद रिपोर्टर, दोनों के लिए) */
-    public static function renderDocument(array $r, array $doc): Response
+    public static function renderDocument(array $r, array $doc, bool $refresh = false): Response
     {
-        $user = db()->first('SELECT name, email FROM {p}users WHERE id = ?', [$r['user_id']]);
-        $loc = fn($id) => $id ? db()->value('SELECT name FROM {p}locations WHERE id = ?', [$id]) : null;
         $kyc = (array) json_decode((string) $r['kyc'], true);
-        return new Response(app('view')->render('print/reporter-document', [
-            'r' => $r, 'doc' => $doc, 'name' => $user['name'], 'district' => $loc($r['district_id']), 'state' => $loc($r['state_id']), 'area' => $loc($r['area_location_id']),
-            'bureau' => $r['bureau_id'] ? db()->value('SELECT name FROM {p}bureaus WHERE id = ?', [$r['bureau_id']]) : null,
-            'beat' => $r['beat_category_id'] ? db()->value('SELECT name FROM {p}categories WHERE id = ?', [$r['beat_category_id']]) : null,
+        $ctx = ['r' => $r, 'doc' => $doc] + self::docContext($r);
+        // पत्र/प्रमाणपत्र: एडमिन के टेम्पलेट से (पहली बार बनकर सुरक्षित; $refresh = नए टेम्पलेट से दोबारा)
+        $content = $doc['type'] !== 'id_card' ? \App\Services\DocumentTemplateService::forDocument($doc, $ctx, $refresh) : null;
+        return new Response(app('view')->render('print/reporter-document', $ctx + [
+            'content' => $content, 'canRefresh' => $doc['type'] !== 'id_card' && can('reporters.approve') && auth()->user()['role_slug'] !== 'reporter',
             'signature' => PrivateFileService::dataUri($kyc['signature'] ?? null), 'verifyUrl' => ReporterService::verifyUrl($r),
-            'gender' => $r['application_id'] ? db()->value('SELECT gender FROM {p}reporter_applications WHERE id = ?', [$r['application_id']]) : null,
         ]));
     }
 
@@ -275,6 +273,29 @@ final class ReporterController extends Controller
         $r = $this->find($id);
         $d = db()->first('SELECT * FROM {p}reporter_documents WHERE id = ? AND reporter_id = ?', [$doc, $id]) ?? throw new HttpException(404);
         return self::renderDocument($r, $d);
+    }
+
+    /** जारी पत्र को अभी के टेम्पलेट से दोबारा बनाएँ */
+    public function refreshDocument(Request $request, int $id, int $doc): Response
+    {
+        $r = $this->find($id);
+        $d = db()->first('SELECT * FROM {p}reporter_documents WHERE id = ? AND reporter_id = ?', [$doc, $id]) ?? throw new HttpException(404);
+        if ($d['type'] === 'id_card') {
+            throw new HttpException(404);
+        }
+        \App\Services\DocumentTemplateService::forDocument($d, ['r' => $r, 'doc' => $d] + self::docContext($r), true);
+        AuditService::log('update', 'reporters', $id, $d['doc_no'] . ': नए टेम्पलेट से दोबारा बनाया');
+        return $this->redirect(route('admin.reporters.document', ['id' => $id, 'doc' => $doc]));
+    }
+
+    private static function docContext(array $r): array
+    {
+        $user = db()->first('SELECT name, email FROM {p}users WHERE id = ?', [$r['user_id']]);
+        $loc = fn($id) => $id ? db()->value('SELECT name FROM {p}locations WHERE id = ?', [$id]) : null;
+        return ['name' => $user['name'], 'email' => $user['email'], 'district' => $loc($r['district_id']), 'state' => $loc($r['state_id']), 'area' => $loc($r['area_location_id']),
+            'bureau' => $r['bureau_id'] ? db()->value('SELECT name FROM {p}bureaus WHERE id = ?', [$r['bureau_id']]) : null,
+            'beat' => $r['beat_category_id'] ? db()->value('SELECT name FROM {p}categories WHERE id = ?', [$r['beat_category_id']]) : null,
+            'gender' => $r['application_id'] ? db()->value('SELECT gender FROM {p}reporter_applications WHERE id = ?', [$r['application_id']]) : null];
     }
 
     public function export(Request $request): Response

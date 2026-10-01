@@ -9,32 +9,13 @@ $type = $doc['type'];
 $site = (string) setting('site_name');
 $brand = preg_match('/^#[0-9a-f]{6}$/i', (string) setting('primary_color')) ? setting('primary_color') : '#d71920';
 $logo = setting('logo') ? upload_url(setting('logo')) : null;
-$hon = ['male' => 'श्री', 'female' => 'सुश्री'][$gender ?? ''] ?? 'श्री/सुश्री';
-$rel = ['male' => 'पुत्र', 'female' => 'पुत्री/पत्नी'][$gender ?? ''] ?? 'पुत्र/पुत्री/पत्नी';
-$areaText = implode(', ', array_filter([$area && $area !== $district ? $area : null, $district, $state])) ?: 'संस्थान द्वारा तय क्षेत्र';
 $revoked = $doc['status'] !== 'active';
 $sig = setting('signature_image') ? upload_url(setting('signature_image')) : null;
 $stamp = setting('stamp_image') ? upload_url(setting('stamp_image')) : null;
-$endDate = $r['status'] === 'resigned' ? date('Y-m-d', strtotime((string) $r['updated_at'])) : date('Y-m-d');
 $docName = ReporterDocument::TYPES[$type][0];
 // ID कार्ड का आकार: सेटिंग से; प्रीव्यू के लिए ?orient= से बदल सकते हैं
 $orient = in_array($_GET['orient'] ?? '', ['landscape', 'portrait'], true) ? $_GET['orient'] : (setting('id_card_orientation', 'landscape') === 'portrait' ? 'portrait' : 'landscape');
-$bodies = [
-    'authorization' => "प्रमाणित किया जाता है कि $hon <b>" . e($name) . '</b>, ' . $rel . ' ' . e($r['guardian_name'] ?: '—') . ', रिपोर्टर ID <b>' . e($r['reporter_code']) . '</b>, '
-        . e($site) . ' में <b>' . e($r['designation']) . '</b> के रूप में <b>' . e($areaText) . '</b> क्षेत्र में समाचार संकलन, फ़ोटो/वीडियो कवरेज और संबंधित पत्रकारिता कार्यों के लिए अधिकृत हैं।'
-        . '<br><br>संबंधित विभागों और अधिकारियों से अनुरोध है कि इन्हें समाचार संकलन में आवश्यक सहयोग प्रदान करें। यह अधिकार पत्र <b>' . hindi_date($doc['valid_until'] ?: $r['valid_until']) . '</b> तक मान्य है। '
-        . 'इस पत्र का उपयोग किसी भी प्रकार की वसूली, दबाव या निजी लाभ के लिए वर्जित है।',
-    'appointment' => "$hon <b>" . e($name) . '</b>,<br><br>आपके आवेदन और साक्षात्कार/सत्यापन के आधार पर आपको दिनांक <b>' . hindi_date($r['joining_date']) . '</b> से ' . e($site) . ' में <b>' . e($r['designation']) . '</b> ('
-        . e(Reporter::TYPES[$r['reporter_type']] ?? $r['reporter_type']) . ') के पद पर नियुक्त किया जाता है। आपका कार्यक्षेत्र <b>' . e($areaText) . '</b>' . ($bureau ? ' तथा ब्यूरो <b>' . e($bureau) . '</b>' : '') . ($beat ? '; बीट: <b>' . e($beat) . '</b>' : '') . ' रहेगा।'
-        . '<br><br>शर्तें:<ol><li>आप संस्थान की संपादकीय नीति, आचार संहिता और रिपोर्टर नीति का पालन करेंगे।</li><li>हर ख़बर तथ्यों की जाँच के बाद ही भेजेंगे; किसी भी ख़बर के प्रकाशन का अंतिम निर्णय संपादक का होगा।</li>'
-        . '<li>संस्थान के नाम, ID कार्ड या पत्र का दुरुपयोग करने पर नियुक्ति तुरंत समाप्त की जा सकती है।</li><li>यह नियुक्ति <b>' . hindi_date($r['valid_until']) . '</b> तक मान्य है और नवीनीकरण संस्थान के निर्णय पर होगा।</li></ol>'
-        . 'हम आपके उज्ज्वल भविष्य की कामना करते हैं।',
-    'press_certificate' => "प्रमाणित किया जाता है कि $hon <b>" . e($name) . '</b>, रिपोर्टर ID <b>' . e($r['reporter_code']) . '</b>, ' . e($site) . ' के मान्य प्रतिनिधि (<b>' . e($r['designation']) . '</b>) हैं '
-        . 'और <b>' . e($areaText) . '</b> क्षेत्र में पत्रकारिता कार्य करते हैं।<br><br>यह प्रमाणपत्र <b>' . hindi_date($doc['valid_until'] ?: $r['valid_until']) . '</b> तक मान्य है। इसकी सत्यता नीचे दिए QR या '
-        . e(route('verify')) . ' पर जाँची जा सकती है।',
-    'experience' => "प्रमाणित किया जाता है कि $hon <b>" . e($name) . '</b>, ' . $rel . ' ' . e($r['guardian_name'] ?: '—') . ', ने ' . e($site) . ' में दिनांक <b>' . hindi_date($r['joining_date']) . '</b> से <b>'
-        . hindi_date($endDate) . '</b> तक <b>' . e($r['designation']) . '</b> के रूप में <b>' . e($areaText) . '</b> क्षेत्र में कार्य किया।<br><br>इस अवधि में इनका कार्य और आचरण संतोषजनक रहा। हम इनके भविष्य के लिए शुभकामनाएँ देते हैं।',
-];
+// पत्र/प्रमाणपत्र की सामग्री: एडमिन के टेम्पलेट (सेटिंग → पत्र और प्रमाणपत्र) से, कंट्रोलर में बनी ($content)
 ?><!doctype html>
 <html lang="hi">
 <head>
@@ -147,6 +128,7 @@ body { margin: 0; background: #e9e9ec; font-family: "Noto Sans Devanagari", "Muk
 .ref { display: flex; justify-content: space-between; font-size: 3.4mm; margin: 6mm 0; }
 .title { text-align: center; font: 800 6.5mm Mukta, sans-serif; margin: 6mm 0; text-decoration: underline; text-underline-offset: 2mm; }
 .body-text { font-size: 4mm; line-height: 1.9; text-align: justify; }
+.body-text p { margin: 0 0 4mm; } .body-text ol, .body-text ul { margin: 0 0 4mm; padding-left: 7mm; } .body-text li { margin-bottom: 1mm; }
 .sign { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 18mm; }
 .sign .who { text-align: center; font-size: 3.6mm; }
 .sign .who img { max-height: 16mm; max-width: 50mm; display: block; margin: 0 auto -2mm; }
@@ -168,6 +150,7 @@ body { margin: 0; background: #e9e9ec; font-family: "Noto Sans Devanagari", "Muk
 </head>
 <body>
 <div class="toolbar"><button type="button" onclick="window.print()">प्रिंट / PDF में सेव</button><span><?= e($docName) ?> · <?= e($doc['doc_no']) ?><?= $revoked ? ' · रद्द' : '' ?></span>
+  <?php if (!empty($canRefresh)): ?><form method="post" action="<?= e(route('admin.reporters.document.refresh', ['id' => $r['id'], 'doc' => $doc['id']])) ?>" style="margin-left:auto" onsubmit="return confirm('इस पत्र की सामग्री अभी के टेम्पलेट (सेटिंग → पत्र और प्रमाणपत्र) से दोबारा बनेगी। आगे बढ़ें?')"><?= csrf_field() ?><button type="submit" style="background:#3a3a42">नए टेम्पलेट से अपडेट करें</button></form><?php endif; ?>
   <?php if ($type === 'id_card'): ?><nav class="orient-switch" aria-label="कार्ड का आकार"><?php foreach (['landscape' => 'आड़ा', 'portrait' => 'खड़ा'] as $o => $l): ?><a href="?orient=<?= $o ?>" class="<?= $orient === $o ? 'on' : '' ?>"<?= $orient === $o ? ' aria-current="true"' : '' ?>><?= $l ?></a><?php endforeach; ?></nav><?php endif; ?></div>
 
 <?php if ($type === 'id_card'):
@@ -245,9 +228,9 @@ body { margin: 0; background: #e9e9ec; font-family: "Noto Sans Devanagari", "Muk
     <div><h1><?= e($site) ?></h1><p><?= e(implode(' · ', array_filter([setting('address'), setting('contact_phone'), setting('contact_email')]))) ?></p><?php if (setting('registration_no')): ?><p>पंजीकरण: <?= e(setting('registration_no')) ?></p><?php endif; ?></div>
   </div>
   <div class="ref"><span>पत्र संख्या: <b><?= e($doc['doc_no']) ?></b></span><span>दिनांक: <b><?= hindi_date($doc['issued_at']) ?></b></span></div>
-  <div class="title"><?= e($docName) ?></div>
+  <div class="title"><?= e($content['title'] ?? $docName) ?></div>
   <?php if (in_array($type, ['authorization', 'press_certificate'], true) && $r['photo']): ?><img class="photo-letter" src="<?= e(upload_url($r['photo'])) ?>" alt=""><?php endif; ?>
-  <div class="body-text"><?= $bodies[$type] /* ऊपर हर मान e() से */ ?></div>
+  <div class="body-text"><?= $content['body'] ?? '' /* DocumentTemplateService में हर मान e() से */ ?></div>
   <div class="sign">
     <div class="qrbox"><div data-qr="<?= e($verifyUrl) ?>"></div>सत्यापन के लिए स्कैन करें</div>
     <?php if ($stamp): ?><img class="stamp" src="<?= e($stamp) ?>" alt=""><?php endif; ?>

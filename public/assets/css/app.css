@@ -1297,3 +1297,8 @@ body.has-pi .brk-mobile { display: none !important; }
   .lp-time { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .listen.is-playing .lb-ico { animation: none; } .lp-track span { transition: none; } }
+
+/* ख़बर का टेक्स्ट Justify (सेटिंग → फ़ीचर); एडिटर में दिया गया अलग संरेखण (जैसे बीच में) बना रहता है */
+.prose.al-justify { text-align: justify; text-justify: inter-word; hyphens: auto; }
+@media (min-width: 761px) { .prose.al-justify-lg { text-align: justify; text-justify: inter-word; hyphens: auto; } }
+.prose:is(.al-justify, .al-justify-lg) :is(h1, h2, h3, h4, h5, h6, figure, figcaption, table, th, td, pre, .ad, .video-embed) { text-align: start; }

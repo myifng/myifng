@@ -168,3 +168,9 @@ function follow_button(string $type, int $id, string $label, array $follows = []
     return '<form method="post" action="' . e(route('account.follow')) . '" class="follow-form">' . csrf_field() . '<input type="hidden" name="type" value="' . e($type) . '"><input type="hidden" name="id" value="' . $id . '">'
         . '<button type="submit" class="follow-chip' . ($on ? ' on' : '') . '" data-follow="' . e($type) . ':' . $id . '" aria-pressed="' . ($on ? 'true' : 'false') . '"><i class="fa-solid ' . ($on ? 'fa-check' : 'fa-plus') . '"></i> ' . e($label) . '</button></form>';
 }
+
+/** ख़बर/पेज के टेक्स्ट का संरेखण (सेटिंग → फ़ीचर): prose पर लगने वाली class */
+function prose_align_class(): string
+{
+    return match (setting('article_text_align', 'left')) { 'justify' => ' al-justify', 'justify_lg' => ' al-justify-lg', default => '' };
+}
