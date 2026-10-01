@@ -108,6 +108,7 @@ function requirements(): array
         ],
         'सर्वर' => [
             ['अपलोड सीमा', $upload >= 8 * 1048576 ? 'pass' : 'warn', 'अभी: ' . ini_get('upload_max_filesize') . ' (post: ' . ini_get('post_max_size') . '), ई-पेपर के लिए 32M+ सलाह'],
+            ['अधिकतम चलने का समय', ((int) ini_get('max_execution_time') === 0 || (int) ini_get('max_execution_time') >= 30) ? 'pass' : 'warn', 'अभी: ' . ini_get('max_execution_time') . ' सेकंड, 30+ सलाह (बैकअप/ई-पेपर)'],
             ['मेमोरी सीमा', ($memory === '-1' || bytes($memory) >= 128 * 1048576) ? 'pass' : 'warn', 'अभी: ' . $memory . ', 128M+ सलाह'],
             ['फ़ाइल अपलोड चालू', ini_get('file_uploads') ? 'pass' : 'fail', ''],
             ['mod_rewrite (सुंदर URL)', $rewrite === false ? 'warn' : 'pass', $rewrite === null ? 'जाँचा नहीं जा सका (ज़्यादातर होस्टिंग पर चालू रहता है)' : ''],
@@ -345,6 +346,7 @@ if ($step === 6 && $post) {
         $demo = !empty($_POST['demo']);
         $demoPass = 'Demo@' . random_int(10000, 99999);
         if ($demo) {
+            @set_time_limit(300); // नमूना तस्वीरें बनने में कुछ सेकंड लगते हैं
             $seeder = require BASE_PATH . '/database/seeds/DemoSeeder.php';
             $seeder->run($db, ['demo_password' => $demoPass, 'admin_id' => st('admin_id')]);
         }
@@ -369,7 +371,7 @@ if ($step === 6 && $post) {
             throw new RuntimeException('config/env.php नहीं लिखी जा सकी। config फ़ोल्डर की अनुमति 755 करें।');
         }
         @chmod(BASE_PATH . '/config/env.php', 0640);
-        file_put_contents(BASE_PATH . '/storage/installed.lock', json_encode(['installed_at' => date('c'), 'version' => '1.0.0']));
+        file_put_contents(BASE_PATH . '/storage/installed.lock', json_encode(['installed_at' => date('c'), 'version' => (string) ((require BASE_PATH . '/config/app.php')['version'] ?? '')]));
         $db->insert('audit_logs', ['user_id' => st('admin_id'), 'user_name' => st('admin_form')['name'] ?? null, 'role' => 'Super Admin', 'action' => 'install', 'module' => 'system', 'description' => 'सॉफ़्टवेयर इंस्टॉल हुआ' . ($demo ? ' (डेमो डेटा के साथ)' : ''), 'ip' => substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45), 'user_agent' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255)]);
 
         $_SESSION['install_done'] = [

@@ -7,7 +7,7 @@ $rows[] = [];
 ?>
 <div class="page-head">
   <div>
-    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="<?= e(route('admin.sports.teams')) ?>">टीमें</a></li><li class="breadcrumb-item active" aria-current="page"><?= e($t['short_name']) ?></li></ol></nav>
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><?php if (can('sports.manage')): ?><a href="<?= e(route('admin.sports.teams')) ?>">टीमें</a><?php else: ?>टीमें<?php endif; ?></li><li class="breadcrumb-item active" aria-current="page"><?= e($t['short_name']) ?></li></ol></nav>
     <h1><span class="party-dot" style="background:<?= e($t['color']) ?>"></span> <?= e($t['name']) ?>: खिलाड़ी</h1>
   </div>
 </div>

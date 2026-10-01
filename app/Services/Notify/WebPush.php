@@ -74,7 +74,7 @@ final class WebPush
             throw new \InvalidArgumentException('ग़लत सब्सक्रिप्शन कुंजी');
         }
         [$asPem, $asPub] = self::newKey();
-        $shared = openssl_pkey_derive(openssl_pkey_get_public(self::pubPem($uaPub)), openssl_pkey_get_private($asPem), 32);
+        $shared = openssl_pkey_derive(openssl_pkey_get_public(self::pubPem($uaPub)), openssl_pkey_get_private($asPem));
         if ($shared === false) {
             throw new \RuntimeException('ECDH विफल');
         }

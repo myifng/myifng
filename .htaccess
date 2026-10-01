@@ -33,7 +33,7 @@ AddDefaultCharset UTF-8
   RewriteRule ^ index.php [L,QSA]
 </IfModule>
 
-<FilesMatch "\.(sql|md|log|lock|ini|json|dist|sh|bak)$">
+<FilesMatch "\.(sql|md|log|lock|ini|json|dist|sh|bak|example)$">
   Require all denied
 </FilesMatch>
 

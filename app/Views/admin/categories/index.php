@@ -37,7 +37,7 @@ $row = function (array $c, bool $child, int $i, int $n) use ($canEdit): string {
   <div>
     <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="<?= e(route('admin.dashboard')) ?>">डैशबोर्ड</a></li><li class="breadcrumb-item active" aria-current="page">श्रेणियाँ</li></ol></nav>
     <h1>श्रेणियाँ</h1>
-    <p>मुख्य श्रेणी और उसके नीचे उप-श्रेणी (दो स्तर)। क्रम यहीं से बदलें; मेनू में जोड़ने के लिए <a href="<?= e(route('admin.menus.index')) ?>">मेनू बिल्डर</a>।</p>
+    <p>मुख्य श्रेणी और उसके नीचे उप-श्रेणी (दो स्तर)। क्रम यहीं से बदलें<?php if (can('menus.view')): ?>; मेनू में जोड़ने के लिए <a href="<?= e(route('admin.menus.index')) ?>">मेनू बिल्डर</a><?php endif; ?>।</p>
   </div>
   <?php if (can('categories.create')): ?><a class="btn btn-brand" href="<?= e(route('admin.categories.create')) ?>"><i class="fa-solid fa-plus me-1"></i> नई श्रेणी</a><?php endif; ?>
 </div>

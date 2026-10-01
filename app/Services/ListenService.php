@@ -177,7 +177,6 @@ final class ListenService
                 CURLOPT_TIMEOUT => 40, CURLOPT_CONNECTTIMEOUT => 8]);
             $resp = curl_exec($ch);
             $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-            curl_close($ch);
             return [$code, is_string($resp) ? $resp : ''];
         }
         $ctx = stream_context_create(['http' => ['method' => 'POST', 'header' => implode("\r\n", $headers), 'content' => $body, 'timeout' => 40, 'ignore_errors' => true]]);

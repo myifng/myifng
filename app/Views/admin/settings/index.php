@@ -42,7 +42,7 @@ $section ??= ['साइट सेटिंग', route('admin.settings.index'), 
         </div>
       <?php endif; ?>
       <?php if ($active === 'layout'): ?>
-        <div class="alert alert-light border small"><i class="fa-solid fa-circle-info me-1"></i> हेडर और फ़ुटर के लिंक <a href="<?= e(route('admin.menus.index')) ?>">मेनू बिल्डर</a> से बदलें: टॉप मेनू, मुख्य नेविगेशन, फ़ुटर के 4 कॉलम और लीगल मेनू।</div>
+        <div class="alert alert-light border small"><i class="fa-solid fa-circle-info me-1"></i> हेडर और फ़ुटर के लिंक <?= can('menus.view') ? '<a href="' . e(route('admin.menus.index')) . '">मेनू बिल्डर</a>' : 'मेनू बिल्डर' ?> से बदलें: टॉप मेनू, मुख्य नेविगेशन, फ़ुटर के 4 कॉलम और लीगल मेनू।</div>
       <?php endif; ?>
       <div class="row">
         <?php foreach ($schema['fields'] as $name => $f): ?>

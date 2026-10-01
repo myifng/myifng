@@ -20,7 +20,6 @@ final class Http
             $resp = curl_exec($ch);
             $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             $err = $resp === false ? curl_error($ch) : ($code >= 400 ? mb_substr((string) $resp, 0, 150) : '');
-            curl_close($ch);
             return [$code, $err];
         }
         $ctx = stream_context_create(['http' => ['method' => $method, 'header' => implode("\r\n", $headers), 'content' => (string) $body, 'timeout' => $timeout, 'ignore_errors' => true]]);

@@ -134,7 +134,7 @@ final class EpaperService
             }
             $jpgTmp = tempnam(sys_get_temp_dir(), 'ep');
             imagejpeg($tmp, $jpgTmp, 90);
-            imagedestroy($tmp);
+            unset($tmp);
             $src = $jpgTmp;
             $srcMime = 'image/jpeg';
         } else {

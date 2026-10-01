@@ -7,6 +7,12 @@
     <form method="post" action="<?= e(route('admin.system.migrate')) ?>" data-confirm="डेटाबेस अपडेट चलेगा। क्या आपने बैकअप ले लिया है?"><?= csrf_field() ?><button class="btn btn-sm btn-primary" type="submit">अभी अपडेट करें</button></form>
   </div>
 <?php endif; ?>
+<?php if (can('system.manage') && ($demoCount = \App\Services\DemoService::count(db())) > 0): ?>
+  <div class="alert alert-warning d-flex flex-wrap gap-2 align-items-center justify-content-between">
+    <span><i class="fa-solid fa-flask me-1"></i> साइट पर <b>डेमो (नमूना) डेटा</b> है (<?= num($demoCount) ?> चीज़ें)। लाइव करने से पहले इसे हटा दें।</span>
+    <a class="btn btn-sm btn-outline-dark" href="<?= e(route('admin.system.index')) ?>">सिस्टम पेज पर हटाएँ</a>
+  </div>
+<?php endif; ?>
 
 <div class="page-head">
   <div>

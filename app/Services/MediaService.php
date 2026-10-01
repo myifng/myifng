@@ -247,7 +247,7 @@ final class MediaService
             }
             $file = "$base-$name.$ext";
             if (!self::save($v, self::dir() . '/' . $file, $mime, $quality)) {
-                imagedestroy($v);
+                unset($v);
                 continue;
             }
             $row = ['file' => $file, 'w' => imagesx($v), 'h' => imagesy($v)];
@@ -259,12 +259,12 @@ final class MediaService
                     @unlink(self::dir() . "/$base-$name.webp");
                 }
             }
-            imagedestroy($v);
+            unset($v);
             $out[$name] = $row;
         }
-        imagedestroy($img);
+        unset($img);
         if ($wm) {
-            imagedestroy($wm['img']);
+            unset($wm['img']);
         }
         return [$out, null];
     }
@@ -406,7 +406,7 @@ final class MediaService
         };
         imagealphablending($dst, true);
         imagecopy($dst, $mark, $x, $y, 0, 0, $w, $h);
-        imagedestroy($mark);
+        unset($mark);
     }
 
     /** फ़ाइल नाम से ख़तरनाक अक्षर हटाएँ (सिर्फ़ दिखाने के लिए; डिस्क पर रैंडम नाम) */

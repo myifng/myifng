@@ -13,7 +13,7 @@ foreach ($teams as $t) { $teamOpts[$t['id']] = $t['name'] . ' (' . $t['short_nam
   </div>
   <?php if (!$isNew): ?><a class="btn btn-outline-primary" href="<?= e(route('admin.sports.console', ['id' => $m['id']])) ?>"><i class="fa-solid fa-tower-broadcast me-1"></i> लाइव कंसोल</a><?php endif; ?>
 </div>
-<?php if (!$teams): ?><div class="alert alert-warning">पहले <a href="<?= e(route('admin.sports.teams')) ?>">टीमें</a> जोड़ें।</div><?php endif; ?>
+<?php if (!$teams): ?><div class="alert alert-warning">पहले <?= can('sports.manage') ? '<a href="' . e(route('admin.sports.teams')) . '">टीमें</a>' : 'टीमें' ?> जोड़ें।</div><?php endif; ?>
 <form method="post" action="<?= e($isNew ? route('admin.sports.matches.store') : route('admin.sports.matches.update', ['id' => $m['id']])) ?>" novalidate data-unsaved>
   <?= csrf_field() ?><?= $isNew ? '' : method_field('PUT') ?>
   <section class="panel"><div class="panel-body">

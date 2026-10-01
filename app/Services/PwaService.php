@@ -156,13 +156,13 @@ final class PwaService
             $nw = max(1, (int) round($w * $k));
             $nh = max(1, (int) round($h * $k));
             imagecopyresampled($im, $logo, intdiv($size - $nw, 2), intdiv($size - $nh, 2), 0, 0, $nw, $nh, $w, $h);
-            imagedestroy($logo);
+            unset($logo);
         } else {
             self::generated($im, $size, $full);
         }
         ob_start();
         imagepng($im, null, 9);
-        imagedestroy($im);
+        unset($im);
         return (string) ob_get_clean() ?: null;
     }
 

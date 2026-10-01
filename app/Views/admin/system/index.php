@@ -16,6 +16,14 @@ $canManage = can('system.manage');
 </div>
 <?= $this->insert('admin/system/_nav', ['active' => 'system']) ?>
 
+<?php if ($demo > 0): ?>
+<div class="alert alert-warning d-flex flex-wrap align-items-center gap-3" role="status">
+  <i class="fa-solid fa-flask fa-lg"></i>
+  <div class="flex-grow-1"><b>डेमो डेटा मौजूद है</b> (<?= num($demo) ?> चीज़ें: नमूना ख़बरें, रिपोर्टर, वीडियो, गैलरी, ई-पेपर, विज्ञापन आदि)।<br><span class="small">असली ख़बरें डालने से पहले इसे हटा दें। आपकी अपनी जोड़ी सामग्री, सेटिंग, कैटेगरी और मेनू पर असर नहीं पड़ेगा।</span></div>
+  <?php if ($canManage): ?><form method="post" action="<?= e(route('admin.system.demo')) ?>" data-confirm="सारा डेमो डेटा और उसकी तस्वीरें हमेशा के लिए हट जाएँगी। जारी रखें?"><?= csrf_field() ?><button class="btn btn-danger btn-sm" type="submit"><i class="fa-solid fa-trash-can me-1"></i>डेमो डेटा हटाएँ</button></form><?php endif; ?>
+</div>
+<?php endif; ?>
+
 <div class="row g-3 mb-3">
   <?php foreach ($health as $group => $rows): ?>
     <div class="col-md-6"><section class="panel h-100"><div class="panel-head"><h2><?= e($group) ?></h2></div>

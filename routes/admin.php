@@ -593,6 +593,7 @@ $router->group(['prefix' => '/' . config('app.admin_path', 'admin'), 'as' => 'ad
         $r->get('/system', [SystemController::class, 'index'])->name('system.index')->middleware('can:system.view');
         $r->post('/system/cache', [SystemController::class, 'clearCache'])->name('system.cache')->middleware('can:system.manage');
         $r->post('/system/cleanup', [SystemController::class, 'cleanup'])->name('system.cleanup')->middleware('can:system.manage');
+        $r->post('/system/demo', [SystemController::class, 'removeDemo'])->name('system.demo')->middleware('can:system.manage');
         $r->get('/system/security', [SystemController::class, 'security'])->name('system.security')->middleware('can:system.view');
         $r->post('/system/security/unblock', [SystemController::class, 'unblock'])->name('system.unblock')->middleware('can:system.manage');
         $bk = \App\Controllers\Admin\BackupController::class;

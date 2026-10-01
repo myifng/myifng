@@ -15,7 +15,7 @@
 <div class="install-wrap">
   <div class="install-top">
     <div class="brand-mark"><span class="bm-a">न्यूज़</span><span class="bm-b">रूम</span></div>
-    <span class="text-body-secondary small"><i class="fa-solid fa-screwdriver-wrench me-1"></i>इंस्टॉल विज़ार्ड · v1.0</span>
+    <span class="text-body-secondary small"><i class="fa-solid fa-screwdriver-wrench me-1"></i>इंस्टॉल विज़ार्ड · v<?= h((require BASE_PATH . '/config/app.php')['version'] ?? '') ?></span>
   </div>
 
   <?php if ($view !== 'installed'): ?>

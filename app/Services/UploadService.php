@@ -104,7 +104,7 @@ final class UploadService
             imagealphablending($dst, false);
             imagesavealpha($dst, true);
             imagecopyresampled($dst, $img, 0, 0, 0, 0, $max, $nh, $w, $h);
-            imagedestroy($img);
+            unset($img);
             $img = $dst;
         }
         $ok = match ($mime) {
@@ -112,7 +112,7 @@ final class UploadService
             'image/png' => imagepng($img, $dest, 7),
             'image/webp' => imagewebp($img, $dest, 82),
         };
-        imagedestroy($img);
+        unset($img);
         return $ok;
     }
 }

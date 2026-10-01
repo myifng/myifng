@@ -1,0 +1,26 @@
+; ---------------------------------------------------------------
+;  Shared hosting (cPanel/DirectAdmin, PHP-FPM) के लिए PHP सेटिंग
+;  इस्तेमाल: इस फ़ाइल का नाम बदलकर ".user.ini" करें (उसी फ़ोल्डर में जहाँ index.php है)।
+;  बदलाव 5 मिनट तक में लागू होते हैं। cPanel में "MultiPHP INI Editor" से भी यही मान सेट कर सकते हैं।
+;  Apache mod_php वाले सर्वर पर .user.ini नहीं चलती; वहाँ होस्टिंग सपोर्ट से कहें।
+; ---------------------------------------------------------------
+
+; ई-पेपर PDF और वीडियो/ऑडियो अपलोड के लिए
+upload_max_filesize = 64M
+post_max_size = 72M
+
+; इमेज रीसाइज़, बैकअप, ई-पेपर पेज बनाना
+memory_limit = 256M
+max_execution_time = 120
+max_input_time = 120
+max_input_vars = 3000
+
+; सुरक्षा
+expose_php = Off
+display_errors = Off
+log_errors = On
+session.cookie_httponly = 1
+session.use_strict_mode = 1
+
+date.timezone = Asia/Kolkata
+default_charset = "UTF-8"

@@ -9,6 +9,7 @@ use App\Core\Migrator;
 use App\Core\Request;
 use App\Core\Response;
 use App\Services\AuditService;
+use App\Services\DemoService;
 use App\Services\PermissionService;
 use App\Services\SecurityService;
 use App\Services\SystemService;
@@ -25,6 +26,12 @@ final class SystemController extends Controller
             $ran = (new Migrator(db(), BASE_PATH . '/database/migrations'))->migrate();
             $added = PermissionService::sync(db(), config('modules.modules'));
             cache()->flush();
+            // installed.lock में नया वर्ज़न (इंस्टॉल की तारीख़ वही रहे)
+            $lock = BASE_PATH . '/storage/installed.lock';
+            $info = (array) (json_decode((string) @file_get_contents($lock), true) ?: []);
+            if (($info['version'] ?? '') !== config('app.version')) {
+                @file_put_contents($lock, json_encode(['version' => config('app.version'), 'updated_at' => date('c')] + $info + ['installed_at' => null]), LOCK_EX);
+            }
         } catch (\Throwable $e) {
             logger()->error('अपडेट विफल: ' . $e->getMessage());
             return new Response(app('view')->render('admin/system/update', ['pending' => ['त्रुटि: ' . $e->getMessage()]]), 500);
@@ -37,7 +44,21 @@ final class SystemController extends Controller
     public function index(Request $request): Response
     {
         return $this->view('admin/system/index', ['health' => SystemService::health(), 'cache' => SystemService::cacheStats(), 'opcache' => SystemService::opcache(),
-            'slow' => SystemService::slowLog(20)]);
+            'slow' => SystemService::slowLog(20), 'demo' => DemoService::count(db())]);
+    }
+
+    /** इंस्टॉलर का नमूना (डेमो) डेटा एक क्लिक में हटाना */
+    public function removeDemo(Request $request): Response
+    {
+        if (DemoService::count(db()) === 0) {
+            return $this->toRoute('admin.system.index')->with('info', 'कोई डेमो डेटा नहीं बचा है।');
+        }
+        @set_time_limit(300);
+        $done = DemoService::remove(db());
+        cache()->flush();
+        $rows = array_sum(array_diff_key($done, ['files' => 1]));
+        AuditService::log('demo_remove', 'system', null, "डेमो डेटा हटाया: $rows पंक्तियाँ, {$done['files']} फ़ाइलें", null, $done);
+        return $this->toRoute('admin.system.index')->with('success', "डेमो डेटा हट गया: $rows पंक्तियाँ और {$done['files']} फ़ाइलें।");
     }
 
     public function clearCache(Request $request): Response

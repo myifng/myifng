@@ -3,8 +3,8 @@
 $env = is_file(__DIR__ . '/env.php') ? require __DIR__ . '/env.php' : [];
 
 return [
-    'version'      => '1.15.5',
-    'phase'        => 16,                                  // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
+    'version'      => '2.0.0',
+    'phase'        => 17,                                  // अभी तक पूरे हुए phase; साइडबार इसी तक के मॉड्यूल दिखाता है
     'url'          => rtrim((string) ($env['APP_URL'] ?? ''), '/'),
     'key'          => (string) ($env['APP_KEY'] ?? ''),
     'debug'        => (bool) ($env['DEBUG'] ?? false),
